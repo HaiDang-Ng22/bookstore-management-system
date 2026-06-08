@@ -1,4 +1,4 @@
-﻿using System; 
+using System; 
 using System.IdentityModel.Tokens.Jwt; 
 using System.Linq; 
 using System.Security.Claims; 
@@ -35,11 +35,11 @@ public class UserController : Controller
         {
             Subject = new ClaimsIdentity(new[] 
             {
-                new Claim(ClaimTypes.Name, user.Ten), 
-                new Claim(ClaimTypes.Email, user.Email), 
+                new Claim(ClaimTypes.Name, user.Ten ?? ""), 
+                new Claim(ClaimTypes.Email, user.Email ?? ""), 
                 new Claim("TrangThai", user.TrangThai.ToString()), 
-                new Claim("NgayTao", user.NgayTao?.ToString("yyyy-MM-dd HH:mm:ss")) 
-
+                new Claim("NgayTao", user.NgayTao?.ToString("yyyy-MM-dd HH:mm:ss") ?? "") 
+ 
             }),
             Expires = DateTime.UtcNow.AddHours(1), // set access_token for 1 hour 
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature) 
@@ -161,56 +161,60 @@ public class UserController : Controller
         return View();
     }
     [HttpPost]
-    public ActionResult Login(KHACHHANG taikhoan)
+    public ActionResult Login(string email, string matkhau)
     {
-        if (ModelState.IsValid)
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(matkhau))
         {
-            var taikhoanAdmin = db.NHANVIENs.FirstOrDefault(k => k.Email == taikhoan.Email && k.MatKhau == taikhoan.MatKhau);
-            if (taikhoanAdmin != null)
-            {
-                if (!taikhoanAdmin.TrangThai)
-                {
-                    ViewBag.ThongBao = "Tài khoản đã bị khóa";
-                    return View();
-                }
+            ViewBag.ThongBao = "Vui lòng nhập đầy đủ email và mật khẩu";
+            return View();
+        }
 
-                Session["TaiKhoan"] = taikhoanAdmin;
-                return RedirectToAction("Index", "Home_Page", new { area = "Admin" });
+        var taikhoanAdmin = db.NHANVIENs.FirstOrDefault(k => k.Email == email && k.MatKhau == matkhau);
+        if (taikhoanAdmin != null)
+        {
+            if (!taikhoanAdmin.TrangThai)
+            {
+                ViewBag.ThongBao = "Tài khoản đã bị khóa";
+                return View();
             }
 
-            var hashedPassword = HashPassword(taikhoan.MatKhau);
-            var account = db.KHACHHANGs.FirstOrDefault(k => k.Email == taikhoan.Email && k.MatKhau == hashedPassword);
+            Session["TaiKhoan"] = taikhoanAdmin;
+            return RedirectToAction("Index", "Home_Page", new { area = "Admin" });
+        }
 
-            if (account != null)
+        var hashedPassword = HashPassword(matkhau);
+        var account = db.KHACHHANGs.FirstOrDefault(k => k.Email == email && k.MatKhau == hashedPassword);
+
+        if (account != null)
+        {
+            if (!account.TrangThai)
             {
-                if (!account.TrangThai)
-                {
-                    ViewBag.ThongBao = "Tài khoản đã bị khóa";
-                    return View();
-                }
-
-                // Tạo token mới
-                var accessToken = GenerateAccessToken(account);
-                var refreshToken = GenerateRefreshToken();
-
-                // Lưu access_token vào cơ sở dữ liệu
-                account.AccessToken = accessToken;
-                account.TokenExpiration = DateTime.UtcNow.AddDays(7);
-                db.SaveChanges();
-
-                // Lưu access token vào cookie
-                SetAccessTokenCookie(accessToken);
-
-                // Lưu refresh token vào cookie
-                SetRefreshTokenCookie(refreshToken);
-
-                Session["TaiKhoan"] = account;
-                return RedirectToAction("Index", "Home");
+                ViewBag.ThongBao = "Tài khoản đã bị khóa";
+                return View();
             }
-            else
-            {
-                ViewBag.ThongBao = "Email hoặc mật khẩu không chính xác";
-            }
+
+            // Tạo token mới
+            var accessToken = GenerateAccessToken(account);
+            var refreshToken = GenerateRefreshToken();
+
+            // Lưu access_token và refresh_token vào cơ sở dữ liệu
+            account.AccessToken = accessToken;
+            account.RefreshToken = refreshToken;
+            account.TokenExpiration = DateTime.UtcNow.AddDays(7);
+            db.SaveChanges();
+
+            // Lưu access token vào cookie
+            SetAccessTokenCookie(accessToken);
+
+            // Lưu refresh token vào cookie
+            SetRefreshTokenCookie(refreshToken);
+
+            Session["TaiKhoan"] = account;
+            return RedirectToAction("Index", "Home");
+        }
+        else
+        {
+            ViewBag.ThongBao = "Email hoặc mật khẩu không chính xác";
         }
         return View();
     }
