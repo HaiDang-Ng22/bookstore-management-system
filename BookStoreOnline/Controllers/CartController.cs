@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Web;
 using System.Web.Mvc;
 using PayPal.Api;
 using BookStoreOnline.Models;
@@ -14,6 +15,69 @@ namespace BookStoreOnline.Controllers
     public class CartController : Controller
     {
         private readonly NhaSachEntities3 db = new NhaSachEntities3();
+
+        private class DbCartItem
+        {
+            public int MaSanPham { get; set; }
+            public int SoLuong { get; set; }
+        }
+
+        public static void SyncCartOnLogin(int customerId, HttpContextBase context)
+        {
+            using (var dbContext = new NhaSachEntities3())
+            {
+                // 1. Get cart items currently in session
+                var sessionCart = context.Session["GioHang"] as List<CartItem> ?? new List<CartItem>();
+
+                // 2. Get cart items from database
+                var dbCartItems = dbContext.Database.SqlQuery<DbCartItem>(
+                    "SELECT MaSanPham, SoLuong FROM GIOHANG WHERE MaKH = @p0", customerId).ToList();
+
+                // 3. Merge session cart into database
+                foreach (var item in sessionCart)
+                {
+                    var existingDbItem = dbCartItems.FirstOrDefault(d => d.MaSanPham == item.ProductID);
+                    if (existingDbItem != null)
+                    {
+                        var productInDb = dbContext.SANPHAMs.Find(item.ProductID);
+                        int maxQty = productInDb?.SoLuong ?? 999;
+                        int newQty = Math.Min(existingDbItem.SoLuong + item.Number, maxQty);
+                        
+                        dbContext.Database.ExecuteSqlCommand(
+                            "UPDATE GIOHANG SET SoLuong = @p0 WHERE MaKH = @p1 AND MaSanPham = @p2",
+                            newQty, customerId, item.ProductID);
+                    }
+                    else
+                    {
+                        dbContext.Database.ExecuteSqlCommand(
+                            "INSERT INTO GIOHANG (MaKH, MaSanPham, SoLuong) VALUES (@p0, @p1, @p2)",
+                            customerId, item.ProductID, item.Number);
+                    }
+                }
+
+                // 4. Reload combined cart from database to session
+                var finalDbCartItems = dbContext.Database.SqlQuery<DbCartItem>(
+                    "SELECT MaSanPham, SoLuong FROM GIOHANG WHERE MaKH = @p0", customerId).ToList();
+
+                var newSessionCart = new List<CartItem>();
+                foreach (var dbItem in finalDbCartItems)
+                {
+                    try
+                    {
+                        var cartItem = new CartItem(dbItem.MaSanPham)
+                        {
+                            Number = dbItem.SoLuong
+                        };
+                        newSessionCart.Add(cartItem);
+                    }
+                    catch
+                    {
+                        // Ignore if product was deleted
+                    }
+                }
+                context.Session["GioHang"] = newSessionCart;
+            }
+        }
 
         // GET: Cart
         public ActionResult Index()
@@ -83,6 +147,19 @@ namespace BookStoreOnline.Controllers
                 cartItem.Number += quantity;
             }
             SaveCart(cart);
+
+            // Sync to DB
+            var customer = Session["TaiKhoan"] as KHACHHANG;
+            if (customer != null)
+            {
+                db.Database.ExecuteSqlCommand(@"
+                    IF EXISTS (SELECT 1 FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1)
+                        UPDATE GIOHANG SET SoLuong = @p2 WHERE MaKH = @p0 AND MaSanPham = @p1
+                    ELSE
+                        INSERT INTO GIOHANG (MaKH, MaSanPham, SoLuong) VALUES (@p0, @p1, @p2)",
+                    customer.MaKH, productId, cartItem.Number);
+            }
+
             return RedirectToAction("GetCartInfo");
         }
 
@@ -95,6 +172,10 @@ namespace BookStoreOnline.Controllers
             var productInDb = db.SANPHAMs.Find(id);
             if (productInDb == null)
             {
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = "Sản phẩm không tồn tại." }, JsonRequestBehavior.AllowGet);
+                }
                 return HttpNotFound("Product not found");
             }
 
@@ -103,6 +184,10 @@ namespace BookStoreOnline.Controllers
             {
                 if (quantity > productInDb.SoLuong)
                 {
+                    if (Request.IsAjaxRequest())
+                    {
+                        return Json(new { success = false, message = "Quá số lượng tồn trong kho." }, JsonRequestBehavior.AllowGet);
+                    }
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Quá số lượng tồn trong kho.");
                 }
 
@@ -116,12 +201,33 @@ namespace BookStoreOnline.Controllers
             {
                 if (cartItem.Number + quantity > productInDb.SoLuong)
                 {
-                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "                .");
+                    if (Request.IsAjaxRequest())
+                    {
+                        return Json(new { success = false, message = "Quá số lượng tồn trong kho." }, JsonRequestBehavior.AllowGet);
+                    }
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Quá số lượng tồn trong kho.");
                 }
 
                 cartItem.Number += quantity;
             }
             SaveCart(cart);
+
+            // Sync to DB
+            var customer = Session["TaiKhoan"] as KHACHHANG;
+            if (customer != null)
+            {
+                db.Database.ExecuteSqlCommand(@"
+                    IF EXISTS (SELECT 1 FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1)
+                        UPDATE GIOHANG SET SoLuong = @p2 WHERE MaKH = @p0 AND MaSanPham = @p1
+                    ELSE
+                        INSERT INTO GIOHANG (MaKH, MaSanPham, SoLuong) VALUES (@p0, @p1, @p2)",
+                    customer.MaKH, id, cartItem.Number);
+            }
+
+            if (Request.IsAjaxRequest())
+            {
+                return Json(new { success = true, totalNumber = GetTotalNumber() }, JsonRequestBehavior.AllowGet);
+            }
             return RedirectToAction("GetCartInfo");
         }
 
@@ -134,6 +240,15 @@ namespace BookStoreOnline.Controllers
             {
                 cart.Remove(cartItem);
                 SaveCart(cart);
+
+                // Sync to DB
+                var customer = Session["TaiKhoan"] as KHACHHANG;
+                if (customer != null)
+                {
+                    db.Database.ExecuteSqlCommand(
+                        "DELETE FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1",
+                        customer.MaKH, id);
+                }
             }
             return RedirectToAction("GetCartInfo");
         }
@@ -199,6 +314,15 @@ namespace BookStoreOnline.Controllers
                 // Cập nhật số lượng của sản phẩm trong giỏ hàng
                 cartItem.Number = quantity;
                 SaveCart(cart); // Lưu giỏ hàng vào session hoặc cơ sở dữ liệu
+
+                // Sync to DB
+                var customer = Session["TaiKhoan"] as KHACHHANG;
+                if (customer != null)
+                {
+                    db.Database.ExecuteSqlCommand(
+                        "UPDATE GIOHANG SET SoLuong = @p0 WHERE MaKH = @p1 AND MaSanPham = @p2",
+                        quantity, customer.MaKH, productId);
+                }
 
                 return Json(new { success = true }, JsonRequestBehavior.AllowGet);
             }
@@ -315,6 +439,13 @@ namespace BookStoreOnline.Controllers
                     }
 
                     db.SaveChanges();
+                    
+                    // Clear database cart
+                    if (customer != null)
+                    {
+                        db.Database.ExecuteSqlCommand("DELETE FROM GIOHANG WHERE MaKH = @p0", customer.MaKH);
+                    }
+
                     Session["GioHang"] = null;
                     Session["DiscountAmount"] = null;
                     Session["FinalPrice"] = null;
@@ -411,6 +542,12 @@ namespace BookStoreOnline.Controllers
 
                     db.SaveChanges();
                     // Do not clear cart until PayPal payment is confirmed
+                    // Clear database cart
+                    if (customer != null)
+                    {
+                        db.Database.ExecuteSqlCommand("DELETE FROM GIOHANG WHERE MaKH = @p0", customer.MaKH);
+                    }
+
                     Session["GioHang"] = null;
                     Session["DiscountAmount"] = null;
                     Session["FinalPrice"] = null;

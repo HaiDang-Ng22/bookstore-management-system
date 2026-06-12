@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -9,8 +9,12 @@ using System.Web.Mvc;
 using BookStoreOnline.Models;
 using BookStoreOnline.Singleton;
 
+using BookStoreOnline.Core;
+using static BookStoreOnline.Areas.Admin.Constants.Constants;
+
 namespace BookStoreOnline.Areas.Admin.Controllers
 {
+    [AdminAuthorize(AdminRole.Administrator, AdminRole.Manager)]
     public class CategoriesController : ControllerTemplateMethod
     {
         private readonly CategorySingleton _categorySingleton; //  Dùng Singleton cho GetAllCategories

@@ -1,30 +1,90 @@
-﻿@model BookStoreOnline.Models.LOAI
+@model BookStoreOnline.Models.LOAI
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Thêm Thể Loại";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<div class="card-body">
-    <h2>Thêm thể loại sách mới</h2>
+
+<style>
+    .form-page-header { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+    .form-page-header .back-btn {
+        width:36px; height:36px; border-radius:10px; background:#f1f5f9;
+        display:flex; align-items:center; justify-content:center;
+        text-decoration:none; color:#475569; transition:all 0.2s; font-size:16px;
+    }
+    .form-page-header .back-btn:hover { background:#e2e8f0; color:#0f172a; }
+    .form-page-title { font-size:20px; font-weight:800; color:#0f172a; }
+    .form-page-title span { color:#e8392a; }
+    .form-card {
+        background:#fff; border-radius:16px;
+        border:1px solid #f1f5f9;
+        box-shadow:0 2px 12px rgba(0,0,0,0.04);
+        overflow:hidden; max-width:560px;
+    }
+    .form-card-header {
+        padding:20px 28px; border-bottom:1px solid #f1f5f9;
+    }
+    .form-card-header h2 { font-size:16px; font-weight:700; color:#0f172a; margin:0; }
+    .form-card-header p { font-size:13px; color:#64748b; margin:4px 0 0; }
+    .form-card-body { padding:28px; }
+    .admin-label { font-size:13px; font-weight:600; color:#374151; display:block; margin-bottom:6px; }
+    .admin-input {
+        width:100%; padding:11px 14px; border:1.5px solid #e2e8f0;
+        border-radius:10px; font-size:14px; color:#0f172a;
+        background:#f8fafc; transition:all 0.2s; outline:none;
+        font-family:'Inter',sans-serif;
+    }
+    .admin-input:focus { border-color:#e8392a; background:#fff; box-shadow:0 0 0 3px rgba(232,57,42,0.08); }
+    .form-group { margin-bottom:20px; }
+    .field-error { font-size:12px; color:#dc2626; margin-top:5px; display:block; }
+    .form-actions { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+    .btn-cancel {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#f1f5f9; color:#475569; border:none; border-radius:10px;
+        padding:11px 20px; font-size:14px; font-weight:600;
+        text-decoration:none; transition:all 0.2s; cursor:pointer;
+    }
+    .btn-cancel:hover { background:#e2e8f0; color:#0f172a; text-decoration:none; }
+    .btn-save {
+        display:inline-flex; align-items:center; gap:6px;
+        background:linear-gradient(135deg,#e8392a,#ff6b5b); color:#fff;
+        border:none; border-radius:10px; padding:11px 24px;
+        font-size:14px; font-weight:600; cursor:pointer;
+        transition:all 0.2s; box-shadow:0 4px 12px rgba(232,57,42,0.3);
+    }
+    .btn-save:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(232,57,42,0.4); }
+    .validation-error { background:#fee2e2; border:1px solid #fca5a5; border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; color:#991b1b; }
+</style>
+
+<div class="form-page-header">
+    <a href="/Admin/Categories" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <div class="form-page-title">Thêm <span>Thể Loại Mới</span></div>
 </div>
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
 
-    <div>
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
-        <div class="mb-3">
-            <label for="CategoryName" class="form-label">Thể loại</label>
-            @Html.EditorFor(model => model.Tenloai, new { htmlAttributes = new { @class = "form-control", @id = "CategoryName" } })
-            @Html.ValidationMessageFor(model => model.Tenloai, "", new { @class = "text-danger" })
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center">
-            @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary", style = "color: white !important;" })
-            <button type="submit" class="btn btn-primary" style="color: white !important; background-color:black;">Thêm</button>
-        </div>
+<div class="form-card">
+    <div class="form-card-header">
+        <h2><i class="bi bi-tags-fill me-2" style="color:#e8392a"></i>Thông Tin Thể Loại</h2>
+        <p>Điền thông tin để thêm thể loại sách mới vào hệ thống</p>
     </div>
-}
+    <div class="form-card-body">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
 
+            @Html.ValidationSummary(true, "", new { @class = "validation-error" })
 
+            <div class="form-group">
+                <label class="admin-label" for="CategoryName">Tên Thể Loại <span style="color:#e8392a">*</span></label>
+                @Html.EditorFor(model => model.Tenloai, new { htmlAttributes = new { @class = "admin-input", @id = "CategoryName", @placeholder = "Nhập tên thể loại..." } })
+                @Html.ValidationMessageFor(model => model.Tenloai, "", new { @class = "field-error" })
+            </div>
+
+            <div class="form-actions">
+                @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn-cancel" })
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-check-lg"></i> Thêm Thể Loại
+                </button>
+            </div>
+        }
+    </div>
+</div>

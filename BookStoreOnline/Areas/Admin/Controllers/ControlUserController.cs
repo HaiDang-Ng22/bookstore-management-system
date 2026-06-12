@@ -1,4 +1,4 @@
-﻿using BookStoreOnline.Core;
+using BookStoreOnline.Core;
 using BookStoreOnline.Models;
 using System;
 using System.Collections.Generic;
@@ -7,8 +7,11 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 
+using static BookStoreOnline.Areas.Admin.Constants.Constants;
+
 namespace BookStoreOnline.Areas.Admin.Controllers
 {
+    [AdminAuthorize(AdminRole.Administrator, AdminRole.Manager)]
     public class ControlUserController : Controller
     {
         private NhaSachEntities3 db = new NhaSachEntities3();

@@ -104,7 +104,16 @@ public class UserController : Controller
     [HttpPost]
     public ActionResult SignUp(KHACHHANG cus, string rePass)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            var exceptionErrors = ModelState.Values.SelectMany(v => v.Errors).Where(e => e.Exception != null).Select(e => e.Exception.Message).ToList();
+            errors.AddRange(exceptionErrors);
+            ViewBag.ThongBao = "Lỗi đăng ký (Dữ liệu không hợp lệ): " + string.Join("; ", errors);
+            return View();
+        }
+
+        try
         {
             var checkEmail = db.KHACHHANGs.FirstOrDefault(c => c.Email == cus.Email);
             if (checkEmail != null)
@@ -126,7 +135,6 @@ public class UserController : Controller
 
                 db.KHACHHANGs.Add(cus);
                 db.SaveChanges();
-                ViewBag.ThongBao = "Đăng ký thành công";
 
                 // Tạo token
                 var accessToken = GenerateAccessToken(cus);
@@ -150,6 +158,18 @@ public class UserController : Controller
             {
                 ViewBag.ThongBao = "Mật khẩu xác nhận không chính xác";
             }
+        }
+        catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+        {
+            var errorMessages = ex.EntityValidationErrors
+                    .SelectMany(x => x.ValidationErrors)
+                    .Select(x => x.ErrorMessage);
+            var fullErrorMessage = string.Join("; ", errorMessages);
+            ViewBag.ThongBao = "Lỗi xác thực cơ sở dữ liệu: " + fullErrorMessage;
+        }
+        catch (Exception ex)
+        {
+            ViewBag.ThongBao = "Lỗi đăng ký hệ thống: " + ex.Message + (ex.InnerException != null ? " -> " + ex.InnerException.Message : "");
         }
         return View();
     }
@@ -210,6 +230,10 @@ public class UserController : Controller
             SetRefreshTokenCookie(refreshToken);
 
             Session["TaiKhoan"] = account;
+            
+            // Sync cart from database
+            BookStoreOnline.Controllers.CartController.SyncCartOnLogin(account.MaKH, HttpContext);
+
             return RedirectToAction("Index", "Home");
         }
         else

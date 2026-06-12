@@ -1,32 +1,128 @@
-﻿@model BookStoreOnline.Models.DANHGIA
+@model BookStoreOnline.Models.DANHGIA
 
 @{
     ViewBag.Title = "Đánh giá sản phẩm";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Đánh giá sản phẩm</h2>
-
-@if (ViewBag.ErrorMessage != null)
-{
-    <div class="alert alert-danger">
-        @ViewBag.ErrorMessage
-    </div>
+<style>
+.review-wrap {
+    min-height: calc(100vh - 280px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    background: linear-gradient(135deg, #fef2f2 0%, #f5f6fa 50%, #eff6ff 100%);
 }
-
-@using (Html.BeginForm("Create", "Reviews", FormMethod.Post, new { @class = "form-horizontal" }))
-{
-    @Html.AntiForgeryToken()
-
-    <div class="form-group">
-        @Html.LabelFor(m => m.SoSao)
-        @Html.DropDownListFor(m => m.SoSao, new SelectList(new[] { 1, 2, 3, 4, 5 }), "Chọn số sao", new { @class = "form-control" })
-    </div>
-
-    <div class="form-group">
-        @Html.LabelFor(m => m.NoiDung)
-        @Html.TextAreaFor(m => m.NoiDung, new { @class = "form-control", rows = 4 })
-    </div>
-
-    <button type="submit" class="btn btn-primary">Đánh giá</button>
+.review-card {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 24px;
+    padding: 44px 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.10);
+    border: 1px solid #f1f5f9;
 }
+.review-header { text-align: center; margin-bottom: 24px; }
+.review-icon-badge {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg,#e8392a,#ff6b5b);
+    border-radius: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 28px; color: #fff; margin: 0 auto 12px;
+    box-shadow: 0 8px 20px rgba(232,57,42,.3);
+    align-items: center;
+    justify-content: center;
+}
+.review-card h2 {
+    font-size: 24px; font-weight: 800; color: #111827;
+    margin-bottom: 4px;
+}
+.review-subtitle { color: #9ca3af; font-size: 14px; }
+.form-field { margin-bottom: 18px; }
+.form-field label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: #374151; margin-bottom: 8px;
+}
+.form-field .field-input {
+    width: 100%; height: 48px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0 16px;
+    font-size: 14px; font-family: 'Inter',sans-serif;
+    color: #374151; background: #f9fafb;
+    outline: none; transition: .25s;
+    display: block;
+}
+.form-field .field-input:focus {
+    border-color: #e8392a;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(232,57,42,.1);
+}
+.form-field textarea.field-input {
+    height: auto;
+    padding: 12px 16px;
+    resize: vertical;
+}
+.btn-review-submit {
+    width: 100%; height: 50px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg,#e8392a,#ff6b5b);
+    color: #fff; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: .25s;
+    box-shadow: 0 6px 20px rgba(232,57,42,.25);
+    margin-top: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-review-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,57,42,.35); }
+.alert-custom-danger {
+    border-radius: 10px; border: none; font-size: 13px;
+    padding: 12px 14px; margin-bottom: 18px;
+    background: #fee2e2; color: #991b1b;
+    display: flex; align-items: center; gap: 8px;
+}
+</style>
+
+<div class="review-wrap">
+    <div class="review-card">
+        <div class="review-header">
+            <div class="review-icon-badge"><i class="bi bi-star-half"></i></div>
+            <h2>Đánh Giá Sản Phẩm</h2>
+            <p class="review-subtitle">Chia sẻ cảm nhận của bạn về cuốn sách này</p>
+        </div>
+
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert-custom-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                @ViewBag.ErrorMessage
+            </div>
+        }
+
+        @using (Html.BeginForm("Create", "Reviews", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-field">
+                <label for="SoSao">Số sao đánh giá</label>
+                @Html.DropDownListFor(m => m.SoSao, new SelectList(new[] { 
+                    new { Value = 5, Text = "5 Sao (Tuyệt vời)" },
+                    new { Value = 4, Text = "4 Sao (Rất tốt)" },
+                    new { Value = 3, Text = "3 Sao (Bình thường)" },
+                    new { Value = 2, Text = "2 Sao (Tệ)" },
+                    new { Value = 1, Text = "1 Sao (Rất tệ)" }
+                }, "Value", "Text"), "Chọn số sao", new { @class = "field-input", id = "SoSao", required = "required" })
+            </div>
+
+            <div class="form-field">
+                <label for="NoiDung">Nội dung đánh giá</label>
+                @Html.TextAreaFor(m => m.NoiDung, new { @class = "field-input", rows = 4, placeholder = "Nhập nội dung chia sẻ về sản phẩm...", id = "NoiDung", required = "required" })
+            </div>
+
+            <button type="submit" class="btn-review-submit">
+                <i class="bi bi-send-fill"></i> Gửi Đánh Giá
+            </button>
+        }
+    </div>
+</div>

@@ -1,294 +1,300 @@
-﻿
+
 @model List<BookStoreOnline.Models.SANPHAM>
 
 @{
     ViewBag.Title = "Giới Thiệu";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title</title>
-    <style>
-        /* Reset and base styles */
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f4f4f4;
-        }
 
-        .container {
-            width: 1200px;
-        }
+<style>
+    .intro-section {
+        padding: 40px 15px;
+    }
+    .intro-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+    .intro-header h1 {
+        font-size: 32px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 12px;
+    }
+    .intro-header p {
+        font-size: 16px;
+        color: #6b7280;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+    .intro-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        border: 1px solid #e5e7eb;
+        padding: 32px;
+        margin-bottom: 40px;
+    }
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        height: 0;
+        overflow: hidden;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        border: 1px solid #e2e8f0;
+    }
+    .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    .feature-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        border: 1px solid #e5e7eb;
+        height: 100%;
+        transition: transform 0.25s;
+    }
+    .feature-card:hover {
+        transform: translateY(-4px);
+    }
+    .feature-card h3 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .feature-card h3 i {
+        color: #e8392a;
+    }
+    .feature-card p {
+        font-size: 14px;
+        color: #6b7280;
+        line-height: 1.6;
+        margin: 0;
+    }
+    /* Top 5 selling books */
+    .top-books-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #111827;
+        text-align: center;
+        margin: 50px 0 32px 0;
+    }
+    .champion-book-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        border: 1px solid #e5e7eb;
+        padding: 30px;
+        max-width: 500px;
+        margin: 0 auto 40px auto;
+        text-align: center;
+        position: relative;
+    }
+    .champion-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: #fff;
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        padding: 6px 16px;
+        border-radius: 999px;
+        box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .champion-book-card img {
+        max-height: 220px;
+        object-fit: contain;
+        margin: 10px auto 20px auto;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+    .champion-book-card h3 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 6px;
+    }
+    .champion-book-card .author {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 10px;
+    }
+    .champion-book-card .price {
+        font-size: 18px;
+        font-weight: 800;
+        color: #e8392a;
+        margin-bottom: 0;
+    }
+    .sub-book-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        border: 1px solid #e5e7eb;
+        padding: 20px;
+        text-align: center;
+        height: 100%;
+        transition: transform 0.25s;
+    }
+    .sub-book-card:hover {
+        transform: translateY(-4px);
+    }
+    .sub-book-card img {
+        height: 140px;
+        object-fit: contain;
+        margin: 0 auto 16px auto;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        border-radius: 6px;
+    }
+    .sub-book-card h4 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1.4;
+        margin-bottom: 6px;
+        height: 38px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .sub-book-card .author {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 8px;
+    }
+    .sub-book-card .price {
+        font-size: 14.5px;
+        font-weight: 800;
+        color: #e8392a;
+        margin: 0;
+    }
+    .cta-container {
+        text-align: center;
+        margin-top: 50px;
+    }
+    .btn-explore {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 50px;
+        padding: 0 36px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #e8392a 0%, #ff6b5b 100%);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        box-shadow: 0 4px 14px rgba(232,57,42,0.22);
+        transition: all 0.25s;
+    }
+    .btn-explore:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(232,57,42,0.32);
+        color: #fff;
+        text-decoration: none;
+    }
+</style>
 
-        /* Heading styles */
-        h1, h2, h3 {
-            margin: 0;
-            padding: 10px;
-            font-weight: 600;
-            background: linear-gradient(135deg, #c92127, #a41c1e);
-            -webkit-background-clip: text;
-            color: transparent;
-            background-clip: text;
-            transition: color 0.3s ease;
-        }
+<div class="container intro-section">
+    <div class="intro-header">
+        <h1>Giới Thiệu Về Chúng Tôi</h1>
+        <p>Chào mừng bạn đến với Nhà Sách Online – không gian mua sắm sách trực tuyến hàng đầu, nơi hội tụ hàng ngàn tựa sách giá trị thuộc nhiều lĩnh vực.</p>
+    </div>
 
-            /* Hover effect for headings */
-            h1:hover, h2:hover, h3:hover {
-                background: linear-gradient(135deg, #a41c1e, #c92127);
-                -webkit-background-clip: text;
-                color: transparent;
-                background-clip: text;
-            }
-
-        /* Section styles */
-        .video-section, .intro, .feature-section, .featured-books, .cta-section {
-            margin-bottom: 40px;
-        }
-
-        /* Video section */
-        .video-section {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-            .video-section iframe {
-                width: 100%;
-                max-width: 800px;
-                height: 450px;
-                border: none;
-                border-radius: 12px;
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
-
-                .video-section iframe:hover {
-                    transform: scale(1.03);
-                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-                }
-
-        /* Intro section */
-        .intro {
-            text-align: center;
-            padding: 30px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease, transform 0.3s ease;
-        }
-
-            .intro:hover {
-                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-                transform: translateY(-2px);
-            }
-
-        /* Feature section */
-        .feature-section {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .feature {
-            flex: 1;
-            min-width: 280px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease, transform 0.3s ease;
-        }
-
-            .feature:hover {
-                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-                transform: translateY(-2px);
-            }
-
-        /* Featured books section */
-        .featured-books {
-            text-align: center;
-        }
-
-            .featured-books h2 {
-                font-size: 2.5rem;
-                margin-bottom: 20px;
-                background: linear-gradient(135deg, #c92127, #a41c1e);
-                -webkit-background-clip: text;
-                color: transparent;
-                background-clip: text;
-                transition: color 0.3s ease;
-            }
-
-                .featured-books h2:hover {
-                    background: linear-gradient(135deg, #a41c1e, #c92127);
-                    -webkit-background-clip: text;
-                    color: transparent;
-                    background-clip: text;
-                }
-
-        .book-list {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .book-top {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 350px;
-            margin: 0 auto;
-            transition: box-shadow 0.3s ease, transform 0.3s ease;
-        }
-
-            .book-top img {
-                cursor: pointer;
-                max-width: 100%;
-                height: auto;
-                border-radius: 12px;
-                margin-bottom: 10px;
-                transition: transform 0.3s ease;
-            }
-
-                .book-top img:hover {
-                    cursor: pointer;
-                    transform: scale(1.1);
-                }
-
-            .book-top h3, .book-top p {
-                cursor: pointer;
-                margin: 5px 0;
-                color: #555;
-            }
-
-        /* Book row section */
-        .book-row {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .book {
-            cursor: pointer;
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 220px;
-            flex: 1;
-            transition: box-shadow 0.3s ease, transform 0.3s ease;
-        }
-
-            .book img {
-                cursor: pointer;
-                max-width: 100%;
-                height: auto;
-                border-radius: 12px;
-                margin-bottom: 10px;
-                transition: transform 0.3s ease;
-            }
-
-                .book img:hover {
-                    cursor: pointer;
-                    transform: scale(1.1);
-                }
-
-            .book h3, .book p {
-                cursor: pointer;
-                margin: 5px 0;
-                color: #555;
-            }
-
-        /* Call to action section */
-        .cta-section {
-            text-align: center;
-        }
-
-        .cta-button {
-            display: inline-block;
-            padding: 12px 24px;
-            font-size: 1.2rem;
-            color: #fff;
-            background: linear-gradient(135deg, #c92127, #a41c1e);
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-
-            .cta-button:hover {
-                text-decoration: none;
-                color: #fff;
-                background: linear-gradient(135deg, #a41c1e, #c92127);
-                transform: scale(1.05);
-            }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <section class="video-section">
-            <h2>Review Book của Nhà Hội Yêu Sách</h2>
-            <iframe src="https://www.youtube.com/embed/W4WzXp-wo74?si=odgEMlAIwvYZGH8Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-        </section>
-
-        <section class="intro">
-            <h1>Khám Phá Thế Giới Sách</h1>
-            <p>Chào mừng bạn đến với cửa hàng sách của chúng tôi, nơi mang đến một bộ sưu tập sách phong phú và đa dạng từ nhiều thể loại khác nhau. Dù bạn yêu thích văn học, khoa học, hay các tác phẩm giải trí, chúng tôi có tất cả những gì bạn cần. Hãy khám phá và tìm cho mình những cuốn sách yêu thích nhất!</p>
-        </section>
-
-        <section class="feature-section">
-            <div class="feature">
-                <h2>Sách Mới Nhất</h2>
-                <p>Khám phá những cuốn sách mới nhất vừa ra mắt, được cập nhật liên tục để bạn không bỏ lỡ bất kỳ tác phẩm nào.</p>
-            </div>
-            <div class="feature">
-                <h2>Sách Bán Chạy</h2>
-                <p>Danh sách những cuốn sách được yêu thích và bán chạy nhất hiện nay, đảm bảo sẽ mang đến cho bạn những trải nghiệm tuyệt vời.</p>
-            </div>
-            <div class="feature">
-                <h2>Giảm Giá Đặc Biệt</h2>
-                <p>Cơ hội sở hữu những cuốn sách hay với mức giá ưu đãi, đừng bỏ lỡ những chương trình khuyến mãi hấp dẫn của chúng tôi.</p>
-            </div>
-        </section>
-
-        <section class="featured-books">
-            <h2 class="champion-effect">Top 5 Sách Bán Chạy Nhất</h2>
-            <div class="book-list">
-                @if (Model != null && Model.Count > 0)
-                {
-                    <div class="book-top">
-                        <img src="@Url.Content( Model[0].Anh)" alt="@Model[0].TenSanPham" />
-                        <h3>@Model[0].TenSanPham</h3>
-                        <p>@Model[0].TacGia</p>
-                        <p>@String.Format("{0:0,0}đ", Model[0].Gia)</p>
-                    </div>
-                }
-
-                <div class="book-row">
-                    @for (int i = 1; i < 5 && i < Model.Count; i++)
-                    {
-                        <div class="book">
-                            <img src="@Url.Content( Model[i].Anh)" alt="@Model[i].TenSanPham" />
-                            <h3>@Model[i].TenSanPham</h3>
-                            <p>@Model[i].TacGia</p>
-                            <p>@String.Format("{0:0,0}đ", Model[i].Gia)</p>
-                        </div>
-                    }
+    <!-- Video Review Section -->
+    <div class="row mb-5 justify-content-center">
+        <div class="col-lg-9">
+            <div class="intro-card">
+                <h3 class="mb-3 text-center font-weight-bold" style="font-size: 20px; color:#111827;">Review Book từ Nhà Hội Yêu Sách</h3>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/W4WzXp-wo74?si=odgEMlAIwvYZGH8Q" title="YouTube video player" allowfullscreen></iframe>
                 </div>
             </div>
-        </section>
-
-        <section class="cta-section">
-            <a href="@Url.Action("GetAllBook", "Category")" class="cta-button">Khám Phá Ngay</a>
-        </section>
+        </div>
     </div>
-</body>
-</html>
+
+    <!-- Intro Text Section -->
+    <div class="intro-card text-center mb-5">
+        <h3 class="font-weight-bold mb-3" style="color: #111827;">Khám Phá Thế Giới Sách Cùng Chúng Tôi</h3>
+        <p class="text-muted leading-relaxed" style="font-size: 15px; max-width: 850px; margin: 0 auto;">
+            Chúng tôi tự hào mang đến cho quý độc giả một thư viện sách trực tuyến đa dạng và phong phú. Dù bạn đang tìm kiếm những tác phẩm văn học kinh điển, sách khoa học kỹ thuật chuyên ngành, hay những cuốn tiểu thuyết giải trí nhẹ nhàng, chúng tôi đều sẵn sàng đáp ứng. Hãy khởi đầu hành trình khám phá tri thức của bạn ngay hôm nay!
+        </p>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4 mb-md-0">
+            <div class="feature-card">
+                <h3><i class="bi bi-journal-bookmark-fill"></i> Tựa Sách Đa Dạng</h3>
+                <p>Chúng tôi liên tục cập nhật những đầu sách mới ra mắt và thịnh hành trên thị trường, mang đến sự lựa chọn vô cùng phong phú cho bạn.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 mb-md-0">
+            <div class="feature-card">
+                <h3><i class="bi bi-star-fill"></i> Chất Lượng Đảm Bảo</h3>
+                <p>Tất cả sản phẩm tại nhà sách đều là sách bản quyền chất lượng cao từ các nhà xuất bản uy tín, trang in sắc nét và đóng gói cẩn thận.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <h3><i class="bi bi-percent"></i> Ưu Đãi Hấp Dẫn</h3>
+                <p>Nhiều chương trình khuyến mãi đặc biệt, mã giảm giá và dịch vụ giao hàng nhanh chóng, mang lại trải nghiệm mua sắm hoàn hảo và tiết kiệm.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Selling Books -->
+    @if (Model != null && Model.Count > 0)
+    {
+        <h2 class="top-books-title"><i class="bi bi-trophy-fill text-warning mr-2"></i> Top 5 Sách Bán Chạy Nhất</h2>
+
+        <div class="champion-book-card">
+            <span class="champion-badge"><i class="bi bi-award-fill"></i> Quán quân bán chạy</span>
+            <a href="@Url.Action("Index", "ProductDetail", new { id = Model[0].MaSanPham })">
+                <img src="@Model[0].Anh" alt="@Model[0].TenSanPham" />
+            </a>
+            <h3><a href="@Url.Action("Index", "ProductDetail", new { id = Model[0].MaSanPham })" class="text-dark">@Model[0].TenSanPham</a></h3>
+            <p class="author">Tác giả: <strong>@Model[0].TacGia</strong></p>
+            <p class="price">@String.Format("{0:0,0} đ", Model[0].Gia)</p>
+        </div>
+
+        <div class="row">
+            @for (int i = 1; i < 5 && i < Model.Count; i++)
+            {
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                    <div class="sub-book-card">
+                        <a href="@Url.Action("Index", "ProductDetail", new { id = Model[i].MaSanPham })">
+                            <img src="@Model[i].Anh" alt="@Model[i].TenSanPham" />
+                        </a>
+                        <h4><a href="@Url.Action("Index", "ProductDetail", new { id = Model[i].MaSanPham })" class="text-dark">@Model[i].TenSanPham</a></h4>
+                        <p class="author">Tác giả: @Model[i].TacGia</p>
+                        <p class="price">@String.Format("{0:0,0} đ", Model[i].Gia)</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- CTA Section -->
+    <div class="cta-container">
+        <a href="@Url.Action("GetAllBook", "Category")" class="btn-explore">
+            <i class="bi bi-book-half"></i> Khám Phá Cửa Hàng Ngay
+        </a>
+    </div>
+</div>

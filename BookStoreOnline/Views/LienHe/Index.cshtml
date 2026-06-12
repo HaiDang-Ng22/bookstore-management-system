@@ -1,87 +1,155 @@
-﻿
 @{
     ViewBag.Title = "Liên Hệ";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    .contact-section {
+        padding: 60px 15px;
+        min-height: calc(100vh - 280px);
+    }
+    .contact-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+    .contact-header h1 {
+        font-size: 32px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 12px;
+    }
+    .contact-header p {
+        font-size: 16px;
+        color: #6b7280;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .contact-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        border: 1px solid #e5e7eb;
+        padding: 32px;
+        margin-bottom: 30px;
+        height: 100%;
+    }
+    .contact-card-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .contact-card-title i {
+        color: #e8392a;
+        font-size: 20px;
+    }
+    .contact-card p {
+        font-size: 14.5px;
+        color: #4b5563;
+        line-height: 1.6;
+        margin-bottom: 8px;
+    }
+    .contact-map-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        border: 1px solid #e5e7eb;
+        padding: 24px;
+        margin-bottom: 40px;
+        overflow: hidden;
+    }
+    .contact-map-card iframe,
+    .contact-map-card img {
+        border-radius: 12px;
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+    }
+    .team-section {
+        margin-top: 50px;
+        text-align: center;
+    }
+    .team-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 32px;
+    }
+    .team-grid {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+    .team-member {
+        background: #fff;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        border: 1px solid #e5e7eb;
+        width: 180px;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    .team-member:hover {
+        transform: translateY(-4px);
+    }
+    .team-member img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin: 0 auto 16px auto;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        border: 3px solid #fff;
+        background: #f1f5f9;
+    }
+    .team-member h5 {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 4px;
+    }
+    .team-member p {
+        font-size: 12.5px;
+        color: #6b7280;
+        margin: 0;
+    }
+</style>
 
-<div class="contact-container">
-    <h1>Liên hệ với chúng tôi</h1>
-    <div class="contact-details">
-        <h2>Địa chỉ</h2>
-        <p>Trường Đại học Ngoại ngữ - Tin học TP. Hồ Chí Minh (HUFLIT)</p>
-        <p>828 Sư Vạn Hạnh, Phường 13, Quận 10, TP. Hồ Chí Minh</p>
+<div class="container contact-section">
+    <div class="contact-header">
+        <h1>Liên Hệ Với Chúng Tôi</h1>
+        <p>Chúng tôi luôn sẵn sàng lắng nghe mọi ý kiến đóng góp và giải đáp thắc mắc của bạn 24/7.</p>
     </div>
-    <div class="contact-details">
-        <h2>Hotline</h2>
-        <p>0868005667<p>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4 mb-md-0">
+            <div class="contact-card">
+                <h3 class="contact-card-title"><i class="bi bi-geo-alt-fill"></i> Địa chỉ trụ sở</h3>
+                <p><strong>Trường Đại học Ngoại ngữ - Tin học TP. Hồ Chí Minh (HUFLIT)</strong></p>
+                <p>828 Sư Vạn Hạnh, Phường 13, Quận 10, TP. Hồ Chí Minh, Việt Nam</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="contact-card">
+                <h3 class="contact-card-title"><i class="bi bi-telephone-outbound-fill"></i> Hotline & Hỗ trợ</h3>
+                <p><strong>Điện thoại:</strong> 0868 005 667</p>
+                <p><strong>Email:</strong> support@nhasachonline.vn</p>
+                <p><strong>Thời gian hoạt động:</strong> 8:00 - 21:00 (Kể cả T7, CN)</p>
+            </div>
+        </div>
     </div>
-    <div class="map-container">
-        <h2>Bản đồ</h2>
-        <img src="~/Images/map.png"
-             width="800"
-             height="450"
-             style="border:0;"
-             allowfullscreen=""
-             loading="lazy"></img>
+
+    <div class="contact-map-card">
+        <h3 class="contact-card-title mb-3"><i class="bi bi-map-fill"></i> Bản đồ đường đi</h3>
+        <img src="~/Images/map.png" alt="Bản đồ chỉ đường HUFLIT" />
     </div>
-    <div class="books-container">
-        <h2>Hình ảnh về chúng tôi</h2>
-        <div>
-            <img src="~/Images/ba.jpg" alt="Sách" class="book-image" />
-            <img src="~/Images/an2.jpg" alt="Sách" class="book-image" />
-            <img src="~/Images/huy1.jpg" alt="Sách" class="book-image" />
-            <img src="~/Images/emhoang.jpg" alt="Sách" class="book-image" />
-            <img src="~/Images/manh.jpg" alt="Sách" class="book-image" />
+
+
         </div>
     </div>
 </div>
-
-<style>
-    .contact-container {
-        text-align: center;
-        margin: 20px auto;
-        max-width: 900px;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: #333;
-        background: #f9f9f9;
-        padding: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
-    }
-
-    h1 {
-        font-size: 2.5em;
-        margin-bottom: 20px;
-        color: #ff0000; /* Màu đỏ */
-    }
-
-    h2 {
-        font-size: 1.75em;
-        margin-bottom: 10px;
-        color: #ff0000; /* Màu đỏ */
-    }
-
-    .contact-details p {
-        font-size: 1.1em;
-        margin: 5px 0;
-    }
-
-    .map-container iframe {
-        width: 100%;
-        height: 450px;
-        border: 0;
-        border-radius: 10px;
-    }
-
-    .books-container {
-        margin-bottom: 30px;
-    }
-
-    .book-image {
-        width: 150px;
-        height: 200px;
-        padding: 10px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }

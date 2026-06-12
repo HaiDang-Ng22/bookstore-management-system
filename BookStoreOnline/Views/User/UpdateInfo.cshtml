@@ -1,83 +1,138 @@
-﻿﻿@model BookStoreOnline.Models.KHACHHANG
+@model BookStoreOnline.Models.KHACHHANG
 
 @{
-    ViewBag.Title = "UpdateInfo";
+    ViewBag.Title = "Cập Nhật Thông Tin";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
-
-@if (ViewBag.ThongBao != null)
-{
-    <div class="alert alert-info">
-        @ViewBag.ThongBao
-    </div>
-}
-
-@using (Html.BeginForm("UpdateInfo", "User", FormMethod.Post, new { @class = "form-update-info" }))
-{
-    @Html.AntiForgeryToken()
-
-    <div class="ml-lg-auto ml-0 col-12 col-lg-12 UpdateInfo_Container">
-        <div class="form-group">
-            @Html.LabelFor(m => m.Ten)
-            @Html.TextBoxFor(m => m.Ten, new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.Ten)
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(m => m.Email)
-            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "validation-error" })
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(m => m.DiaChi)
-            @Html.TextBoxFor(m => m.DiaChi, new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.DiaChi)
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(m => m.SoDienThoai)
-            @Html.TextBoxFor(m => m.SoDienThoai, new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.SoDienThoai)
-        </div>
-        <button type="submit" class="btn btn-primary btn__update-profile">Cập nhật thông tin</button>
-    </div>
-}
 <style>
-    .validation-error {
-        color: red; /* Đặt màu chữ là đỏ */
-        font-weight: bold;
-    }
-
-    .btn__update-profile {
-        background-color: #c92127;
-        text-align: center;
-        margin: 30px auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        border: 2px solid #C92127;
-        font-size: 18px;
-        font-weight: 700;
-        width: 210px;
-        height: 40px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.5s;
-    }
-
-    #Email {
-        margin-left: 0;
-    }
-
-    .UpdateInfo_Container {
-        border-radius: 10px;
-        padding: 20px 20px;
-        background: #fff;
-        margin: 32px 500px;
-        width: 500px;
-    }
+.profile-wrap {
+    min-height: calc(100vh - 280px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    background: linear-gradient(135deg, #fef2f2 0%, #f5f6fa 50%, #eff6ff 100%);
+}
+.profile-card {
+    width: 100%;
+    max-width: 500px;
+    background: #fff;
+    border-radius: 24px;
+    padding: 44px 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.10);
+    border: 1px solid #f1f5f9;
+}
+.profile-header { text-align: center; margin-bottom: 28px; }
+.profile-icon-badge {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg,#e8392a,#ff6b5b);
+    border-radius: 18px;
+    display: inline-flex align-items: center; justify-content: center;
+    font-size: 28px; color: #fff; margin: 0 auto 12px;
+    box-shadow: 0 8px 20px rgba(232,57,42,.3);
+    align-items: center;
+    justify-content: center;
+}
+.profile-card h2 {
+    font-size: 24px; font-weight: 800; color: #111827;
+    margin-bottom: 4px;
+}
+.profile-subtitle { color: #9ca3af; font-size: 14px; }
+.form-field { margin-bottom: 18px; }
+.form-field label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: #374151; margin-bottom: 8px;
+}
+.form-field .field-input {
+    width: 100%; height: 48px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0 16px;
+    font-size: 14px; font-family: 'Inter',sans-serif;
+    color: #374151; background: #f9fafb;
+    outline: none; transition: .25s;
+    display: block;
+}
+.form-field .field-input:focus {
+    border-color: #e8392a;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(232,57,42,.1);
+}
+.validation-error {
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: block;
+}
+.btn-profile {
+    width: 100%; height: 50px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg,#e8392a,#ff6b5b);
+    color: #fff; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: .25s;
+    box-shadow: 0 6px 20px rgba(232,57,42,.25);
+    margin-top: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-profile:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,57,42,.35); }
+.alert-custom-info {
+    border-radius: 10px; border: none; font-size: 13px;
+    padding: 12px 14px; margin-bottom: 20px;
+    background: #dbeafe; color: #1e40af;
+    display: flex; align-items: center; gap: 8px;
+}
 </style>
+
+<div class="profile-wrap">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-icon-badge"><i class="bi bi-person-fill-gear"></i></div>
+            <h2>Cập Nhật Thông Tin</h2>
+            <p class="profile-subtitle">Thay đổi thông tin cá nhân của tài khoản</p>
+        </div>
+
+        @if (ViewBag.ThongBao != null)
+        {
+            <div class="alert-custom-info">
+                <i class="bi bi-info-circle-fill"></i>
+                @ViewBag.ThongBao
+            </div>
+        }
+
+        @using (Html.BeginForm("UpdateInfo", "User", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-field">
+                <label for="Ten">Họ và Tên</label>
+                @Html.TextBoxFor(m => m.Ten, new { @class = "field-input", placeholder = "Nhập họ tên của bạn", id = "Ten" })
+                @Html.ValidationMessageFor(m => m.Ten, "", new { @class = "validation-error" })
+            </div>
+
+            <div class="form-field">
+                <label for="Email">Địa chỉ Email</label>
+                @Html.TextBoxFor(m => m.Email, new { @class = "field-input", placeholder = "ten@email.com", id = "Email" })
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "validation-error" })
+            </div>
+
+            <div class="form-field">
+                <label for="DiaChi">Địa chỉ</label>
+                @Html.TextBoxFor(m => m.DiaChi, new { @class = "field-input", placeholder = "Nhập địa chỉ nhận hàng", id = "DiaChi" })
+                @Html.ValidationMessageFor(m => m.DiaChi, "", new { @class = "validation-error" })
+            </div>
+
+            <div class="form-field">
+                <label for="SoDienThoai">Số điện thoại</label>
+                @Html.TextBoxFor(m => m.SoDienThoai, new { @class = "field-input", placeholder = "Nhập số điện thoại liên lạc", id = "SoDienThoai" })
+                @Html.ValidationMessageFor(m => m.SoDienThoai, "", new { @class = "validation-error" })
+            </div>
+
+            <button type="submit" class="btn-profile">
+                <i class="bi bi-save"></i> Lưu Thay Đổi
+            </button>
+        }
+    </div>
+</div>

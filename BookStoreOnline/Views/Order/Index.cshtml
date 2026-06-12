@@ -1,150 +1,346 @@
-﻿@model IEnumerable<BookStoreOnline.Models.DONHANG>
+@model IEnumerable<BookStoreOnline.Models.DONHANG>
 @using BookStoreOnline.Areas.Admin.Constants
 
-<div class="container body-page">
+@{
+    ViewBag.Title = "Đơn Hàng Của Tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .order-section {
+        padding: 40px 15px;
+        min-height: calc(100vh - 280px);
+    }
+    .order-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .order-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        border: 1px solid #e5e7eb;
+        padding: 24px;
+        margin-bottom: 30px;
+    }
+    .order-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .order-table th {
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        color: #4b5563;
+        letter-spacing: 0.5px;
+        padding: 16px;
+        border-bottom: 1.5px solid #e5e7eb;
+        background: #f8fafc;
+    }
+    .order-table td {
+        padding: 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14.5px;
+        color: #374151;
+    }
+    .order-table tr:last-child td {
+        border-bottom: none;
+    }
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 12.5px;
+        font-weight: 700;
+    }
+    .status-badge i {
+        font-size: 10px;
+    }
+    .status-pending { background: #fee2e2; color: #991b1b; }
+    .status-confirmed { background: #dbeafe; color: #1e40af; }
+    .status-shipping { background: #fef3c7; color: #92400e; }
+    .status-received { background: #dcfce7; color: #166534; }
+    .status-canceled { background: #f1f5f9; color: #475569; }
+    
+    .status-unpaid { background: #fee2e2; color: #991b1b; }
+    .status-paid { background: #dcfce7; color: #166534; }
+
+    .btn-action-view {
+        height: 34px;
+        padding: 0 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f1f5f9;
+        color: #374151;
+        border: 1px solid #d1d5db;
+        transition: all 0.2s;
+    }
+    .btn-action-view:hover {
+        background: #e2e8f0;
+        color: #111827;
+        text-decoration: none;
+    }
+    .btn-action-cancel {
+        height: 34px;
+        padding: 0 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff;
+        color: #dc2626;
+        border: 1.5px solid #fca5a5;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .btn-action-cancel:hover {
+        background: #fee2e2;
+        border-color: #fca5a5;
+    }
+
+    /* Modal Styling */
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        overflow: hidden;
+    }
+    .modal-header {
+        background: linear-gradient(135deg, #e8392a 0%, #ff6b5b 100%);
+        color: white;
+        padding: 20px 24px;
+        border: none;
+    }
+    .modal-title {
+        font-weight: 800;
+        font-size: 18px;
+    }
+    .modal-header .close {
+        color: white;
+        text-shadow: none;
+        opacity: 0.8;
+    }
+    .modal-header .close:hover {
+        opacity: 1;
+    }
+    .modal-body {
+        padding: 24px;
+    }
+    .modal-footer {
+        padding: 16px 24px;
+        background: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    .modal-footer button {
+        height: 40px;
+        padding: 0 20px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-modal-close {
+        background: #fff;
+        border: 1.5px solid #d1d5db;
+        color: #4b5563;
+    }
+    .btn-modal-close:hover {
+        background: #f1f5f9;
+        color: #1f2937;
+    }
+    .btn-modal-confirm {
+        background: #dc2626;
+        color: #fff;
+        border: none;
+    }
+    .btn-modal-confirm:hover {
+        background: #b91c1c;
+    }
+    .alert-custom-success {
+        border-radius: 12px; border: none; font-size: 14px;
+        padding: 14px 18px; margin-bottom: 20px;
+        background: #dcfce7; color: #166534;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .alert-custom-danger {
+        border-radius: 12px; border: none; font-size: 14px;
+        padding: 14px 18px; margin-bottom: 20px;
+        background: #fee2e2; color: #991b1b;
+        display: flex; align-items: center; gap: 8px;
+    }
+</style>
+
+<div class="container order-section">
+    <h2 class="order-title"><i class="bi bi-clock-history"></i> Lịch Sử Đơn Hàng Của Bạn</h2>
+
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success">
+        <div class="alert-custom-success">
+            <i class="bi bi-check-circle-fill"></i>
             @TempData["SuccessMessage"]
         </div>
     }
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger">
+        <div class="alert-custom-danger">
+            <i class="bi bi-exclamation-circle-fill"></i>
             @TempData["ErrorMessage"]
         </div>
     }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Tên khách hàng</th>
-            <th>Ngày đặt</th>
-            <th>Địa chỉ giao hàng</th>
-            <th>Trạng thái đơn hàng</th>
-            <th>Trạng thái thanh toán</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
-        {
-            foreach (var item in Model)
-            {
-                <tr>
-                    <td>@Html.DisplayFor(modelItem => item.KHACHHANG.Ten)</td>
-                    <td>@String.Format("{0:dd/MM/yyyy}", item.NgayDat)</td>
-                    <td>@Html.DisplayFor(modelItem => item.DiaChi)</td>
-
-
-                    <td>
-                        @switch (item.TrangThai)
+    <div class="order-card">
+        <div class="table-responsive">
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Mã đơn hàng</th>
+                        <th>Ngày đặt</th>
+                        <th>Địa chỉ giao hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Đơn hàng</th>
+                        <th>Thanh toán</th>
+                        <th style="width: 200px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
                         {
-                            case (int)Constants.StatusOrder.NoInform:
-                                <span style="color:red">Chưa xác nhận</span>;
-                                break;
-                            case (int)Constants.StatusOrder.Informed:
-                                <span style="color:blue">Đã xác nhận</span>;
-                                break;
-                            case (int)Constants.StatusOrder.Shipping:
-                                <span style="color:orange">Đang giao hàng</span>;
-                                break;
-                            case (int)Constants.StatusOrder.Received:
-                                <span style="color:green">Đã nhận hàng</span>;
-                                break;
-                            case (int)Constants.StatusOrder.Canceled:
-                                <span style="color:black">Đã hủy</span>;
-                                break;
-                            default:
-                                <span>Không rõ trạng thái</span>;
-                                break;
+                            <tr>
+                                <td class="font-weight-bold text-muted">#@item.MaDonHang</td>
+                                <td>@String.Format("{0:dd/MM/yyyy}", item.NgayDat)</td>
+                                <td>@item.DiaChi</td>
+                                <td class="font-weight-bold text-danger">@String.Format("{0:N0} VNĐ", item.TongTien)</td>
+                                <td>
+                                    @switch (item.TrangThai)
+                                    {
+                                        case (int)Constants.StatusOrder.NoInform:
+                                            <span class="status-badge status-pending"><i class="bi bi-hourglass-split"></i> Chờ xác nhận</span>
+                                            break;
+                                        case (int)Constants.StatusOrder.Informed:
+                                            <span class="status-badge status-confirmed"><i class="bi bi-check2-circle"></i> Đã xác nhận</span>
+                                            break;
+                                        case (int)Constants.StatusOrder.Shipping:
+                                            <span class="status-badge status-shipping"><i class="bi bi-truck"></i> Đang giao</span>
+                                            break;
+                                        case (int)Constants.StatusOrder.Received:
+                                            <span class="status-badge status-received"><i class="bi bi-patch-check-fill"></i> Đã nhận</span>
+                                            break;
+                                        case (int)Constants.StatusOrder.Canceled:
+                                            <span class="status-badge status-canceled"><i class="bi bi-x-circle-fill"></i> Đã hủy</span>
+                                            break;
+                                        default:
+                                            <span class="status-badge status-canceled">Không rõ</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @switch (item.TrangThaiThanhToan)
+                                    {
+                                        case (int)Constants.StatusPayment.Unpaid:
+                                            <span class="status-badge status-unpaid"><i class="bi bi-credit-card"></i> Chưa thanh toán</span>
+                                            break;
+                                        case (int)Constants.StatusPayment.Paid:
+                                            <span class="status-badge status-paid"><i class="bi bi-credit-card-2-back-fill"></i> Đã thanh toán</span>
+                                            break;
+                                        default:
+                                            <span class="status-badge status-unpaid">Chờ cập nhật</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <a href="@Url.Action("Details", "Order", new { id = item.MaDonHang })" class="btn-action-view">
+                                            <i class="bi bi-eye"></i> Xem
+                                        </a>
+                                        @if (item.TrangThai == (int)Constants.StatusOrder.NoInform)
+                                        {
+                                            <button type="button" class="btn-action-cancel" data-toggle="modal" data-target="#cancelOrderModal" data-orderid="@item.MaDonHang">
+                                                <i class="bi bi-x-lg"></i> Hủy
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
                         }
-                    </td>
-                    <td>
-                        @switch (item.TrangThaiThanhToan)
-                        {
-                            case (int)Constants.StatusPayment.Unpaid:
-                                <span>Chưa Thanh Toán</span>;
-                                break;
-                        }
-                        @switch (item.TrangThaiThanhToan)
-                        {
-                            case (int)Constants.StatusPayment.Paid:
-                                <span>Đã Thanh Toán</span>;
-                                break;
-                        }
-                    </td>
-                    <td>
-                        @if (item.TrangThai == (int)Constants.StatusOrder.NoInform)
-                        {
-                            <button type="button" class="btn-danger" data-toggle="modal" data-target="#cancelOrderModal" data-orderid="@item.MaDonHang">
-                                Hủy
-                            </button>
-                        }
-                    </td>
-
-                </tr>
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="5">Không có đơn hàng nào để hiển thị.</td>
-            </tr>
-        }
-    </tbody>
-
-</table>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-bag-x" style="font-size: 48px; opacity: 0.5;"></i>
+                                <p class="mt-2 mb-0">Bạn chưa có đơn hàng nào.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
 <!-- Modal để xác nhận hủy đơn hàng -->
 <div class="modal fade" id="cancelOrderModal" tabindex="-1" role="dialog" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header text-center">
-                <h5 class="modal-title" id="cancelOrderModalLabel">Xác nhận hủy đơn hàng</h5>
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelOrderModalLabel"><i class="bi bi-exclamation-triangle-fill mr-1"></i> Xác nhận hủy đơn hàng</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body text-center">
+            <div class="modal-body">
                 <form id="cancelOrderForm" method="post" action="@Url.Action("Delete", "Order")">
                     @Html.AntiForgeryToken()
                     <input type="hidden" id="orderId" name="id" />
-                    <div class="form-group">
-                        <label for="reason">Chọn lý do hủy:</label>
-                        <select class="form-control" id="reason" name="reason">
-                            <option value="1">Không cần sản phẩm nữa</option>
-                            <option value="2">Bị vợ lấy tiền</option>
-                            <option value="3">Đặt nhầm</option>
-                            <option value="4">Có thằng chó bá</option>
-                            <option value="4">Khác</option>
+                    <div class="form-group mb-3">
+                        <label for="reason" class="font-weight-bold mb-2">Lý do hủy đơn hàng:</label>
+                        <select class="form-control" id="reason" name="reason" style="border: 1.5px solid #d1d5db; border-radius: 10px; height: 44px;">
+                            <option value="Không muốn mua nữa">Không muốn mua nữa</option>
+                            <option value="Thay đổi địa chỉ nhận hàng">Thay đổi địa chỉ nhận hàng</option>
+                            <option value="Đặt trùng sản phẩm">Đặt trùng sản phẩm</option>
+                            <option value="Tìm thấy giá rẻ hơn ở nơi khác">Tìm thấy giá rẻ hơn ở nơi khác</option>
+                            <option value="Khác">Lý do khác</option>
                         </select>
                     </div>
-                    <p>Bạn có chắc chắn muốn hủy đơn hàng này không?</p>
+                    <p class="text-muted mb-0">Lưu ý: Bạn chỉ có thể tự hủy đơn hàng khi đơn hàng đang ở trạng thái <strong>Chờ xác nhận</strong>.</p>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="danger" id="confirmCancel" style="margin-left: 10px;">Hủy</button>
+                <button type="button" class="btn-modal-close" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn-modal-confirm" id="confirmCancel">Hủy Đơn Hàng</button>
             </div>
         </div>
     </div>
 </div>
 
-
-
-
-<!-- Thêm jQuery và Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
 <script>
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function () {
+        // Since we already loaded jQuery in _Layout.cshtml or layout dependencies, we can use $ safely.
+        // If not using jQuery, we can rewrite in vanilla JS. Since bootstrap 4 modals need jQuery, we use jQuery.
+        
         $('#cancelOrderModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var orderId = button.data('orderid');
-
             var modal = $(this);
             modal.find('#orderId').val(orderId);
         });
@@ -154,105 +350,3 @@
         });
     });
 </script>
-<style>
-    /* Modal dialog styling */
-    .modal-dialog {
-        max-width: 500px; /* Adjust width to be more compact */
-        margin: 1.75rem auto;
-    }
-
-    /* Modal content styling */
-    .modal-content {
-        border-radius: 8px;
-        border: none;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow */
-        background-color: #f9f9f9; /* Soft background color */
-    }
-
-    /* Modal header styling */
-    .modal-header {
-        background-color: #C92127;
-        color: white;
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-        padding: 15px;
-        text-align: center;
-    }
-
-    .modal-title {
-        font-size: 1.25rem;
-        font-weight: bold;
-    }
-
-    .close {
-        color: white;
-        opacity: 0.8;
-    }
-
-        .close:hover {
-            opacity: 1;
-        }
-
-    /* Modal body styling */
-    .modal-body {
-        padding: 20px;
-    }
-
-    /* Form styling */
-    .form-group label {
-        font-weight: bold;
-    }
-
-    .form-control {
-        border-radius: 10px;
-        border: 0px solid #ddd;
-        padding: 8px;
-    }
-
-    /* Modal footer styling */
-    .modal-footer {
-        padding: 15px;
-        background-color: #f1f1f1;
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
-        justify-content: center;
-    }
-
-    /* Button styling */
-    button.secondary {
-        background-color: #6c757d;
-        color: white;
-        padding: 8px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-        button.secondary:hover {
-            background-color: #5a6268;
-        }
-
-    button.danger {
-        background-color: #dc3545;
-        color: white;
-        padding: 8px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-        button.danger:hover {
-            background-color: #c82333;
-        }
-
-    .btn-danger {
-        width: 70%;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-weight: 400;
-        cursor: pointer;
-        background-color: #dc3545;
-        color: #fff;
-    }
-
-</style>

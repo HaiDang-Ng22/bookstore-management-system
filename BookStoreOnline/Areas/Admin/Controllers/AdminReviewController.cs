@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -6,8 +6,12 @@ using System.Web.Mvc;
 using BookStoreOnline.Models;
 using BookStoreOnline.Factories; 
 
+using BookStoreOnline.Core;
+using static BookStoreOnline.Areas.Admin.Constants.Constants;
+
 namespace BookStoreOnline.Areas.Admin.Controllers
 {
+    [AdminAuthorize(AdminRole.Administrator, AdminRole.Manager)]
     public class AdminReviewController : Controller
     {
         private readonly NhaSachEntities3 db = new NhaSachEntities3();

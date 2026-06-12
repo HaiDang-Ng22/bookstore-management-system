@@ -1,28 +1,78 @@
-﻿@model BookStoreOnline.Models.LOAI
+@model BookStoreOnline.Models.LOAI
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Chi Tiết Thể Loại";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<div class="card-body">
-    <h2>Details</h2>
+
+<style>
+    .form-page-header { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+    .form-page-header .back-btn {
+        width:36px; height:36px; border-radius:10px; background:#f1f5f9;
+        display:flex; align-items:center; justify-content:center;
+        text-decoration:none; color:#475569; transition:all 0.2s; font-size:16px;
+    }
+    .form-page-header .back-btn:hover { background:#e2e8f0; color:#0f172a; }
+    .form-page-title { font-size:20px; font-weight:800; color:#0f172a; }
+    .form-page-title span { color:#e8392a; }
+    .form-card {
+        background:#fff; border-radius:16px;
+        border:1px solid #f1f5f9;
+        box-shadow:0 2px 12px rgba(0,0,0,0.04);
+        overflow:hidden; max-width:560px;
+    }
+    .form-card-header {
+        padding:20px 28px; border-bottom:1px solid #f1f5f9;
+    }
+    .form-card-header h2 { font-size:16px; font-weight:700; color:#0f172a; margin:0; }
+    .form-card-body { padding:28px; }
+    
+    .detail-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .detail-label { font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .detail-value { font-size: 16px; font-weight: 700; color: #0f172a; }
+
+    .form-actions { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+    .btn-cancel {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#f1f5f9; color:#475569; border:none; border-radius:10px;
+        padding:11px 20px; font-size:14px; font-weight:600;
+        text-decoration:none; transition:all 0.2s; cursor:pointer;
+    }
+    .btn-cancel:hover { background:#e2e8f0; color:#0f172a; text-decoration:none; }
+    .btn-edit {
+        display:inline-flex; align-items:center; gap:6px;
+        background:linear-gradient(135deg,#e8392a,#ff6b5b); color:#fff;
+        border:none; border-radius:10px; padding:11px 24px;
+        font-size:14px; font-weight:600; text-decoration:none;
+        transition:all 0.2s; box-shadow:0 4px 12px rgba(232,57,42,0.3);
+    }
+    .btn-edit:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(232,57,42,0.4); color:#fff; text-decoration:none; }
+</style>
+
+<div class="form-page-header">
+    <a href="/Admin/Categories" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <div class="form-page-title">Chi Tiết <span>Thể Loại</span></div>
 </div>
-<div>
-    <h4>Category</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Tenloai)
-        </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Tenloai)
-        </dd>
+<div class="form-card">
+    <div class="form-card-header">
+        <h2><i class="bi bi-tags-fill me-2" style="color:#e8392a"></i>Thông Tin Thể Loại</h2>
+    </div>
+    <div class="form-card-body">
+        <div class="detail-row">
+            <span class="detail-label">Mã Thể Loại</span>
+            <span class="detail-value">@Model.Maloai</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Tên Thể Loại</span>
+            <span class="detail-value">@Model.Tenloai</span>
+        </div>
 
-    </dl>
+        <div class="form-actions">
+            @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn-cancel" })
+            <a href="@Url.Action("Edit", new { id = Model.Maloai })" class="btn-edit">
+                <i class="bi bi-pencil-fill"></i> Chỉnh Sửa
+            </a>
+        </div>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Maloai }) |
-    @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary", style = "color: white !important;" })
-
-</p>

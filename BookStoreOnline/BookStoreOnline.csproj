@@ -267,6 +267,7 @@
     <Compile Include="Controllers\ProductDetailController.cs" />
     <Compile Include="Controllers\ReviewsController.cs" />
     <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Core\AdminAuthorizeAttribute.cs" />
     <Compile Include="Core\Extension.cs" />
     <Compile Include="Core\Iterator.cs" />
     <Compile Include="Global.asax.cs">

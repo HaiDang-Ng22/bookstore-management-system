@@ -21,6 +21,22 @@ namespace BookStoreOnline.Models
         {
             using (var db = new NhaSachEntities3())
             {
+                // 0. Ensure GIOHANG table exists
+                db.Database.ExecuteSqlCommand(@"
+                    IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[GIOHANG]') AND type in (N'U'))
+                    BEGIN
+                        CREATE TABLE [dbo].[GIOHANG] (
+                            [MaKH] INT NOT NULL,
+                            [MaSanPham] INT NOT NULL,
+                            [SoLuong] INT NOT NULL DEFAULT 1,
+                            [NgayTao] DATETIME NULL DEFAULT GETDATE(),
+                            CONSTRAINT [PK_GIOHANG] PRIMARY KEY CLUSTERED ([MaKH] ASC, [MaSanPham] ASC),
+                            CONSTRAINT [FK_GIOHANG_KHACHHANG] FOREIGN KEY ([MaKH]) REFERENCES [dbo].[KHACHHANG] ([MaKH]) ON DELETE CASCADE,
+                            CONSTRAINT [FK_GIOHANG_SANPHAM] FOREIGN KEY ([MaSanPham]) REFERENCES [dbo].[SANPHAM] ([MaSanPham]) ON DELETE CASCADE
+                        )
+                    END
+                ");
+
                 // 1. Seed NHANVIEN (Admin, Managers)
                 if (!db.NHANVIENs.Any())
                 {

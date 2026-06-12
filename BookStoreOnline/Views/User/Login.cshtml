@@ -1,73 +1,152 @@
-﻿@{
-    ViewBag.Title = "Login";
+@{
+    ViewBag.Title = "Đăng Nhập";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@{
-    ViewBag.Title = "Đăng Nhập";
-}
-
-<form class="ml-lg-auto ml-0 col-12 col-lg-12 form-container" method="post">
-    <h2>Đăng Nhập</h2>
-    <div class="form-group">
-        <label for="Email">Email</label>
-        <input style="margin-left:0;" type="email" class="form-control" id="Email" name="Email" required />
-    </div>
-
-    <div class="form-group">
-        <label for="MatKhau">Mật Khẩu</label>
-        <input type="password" class="form-control" id="MatKhau" name="MatKhau" required />
-    </div>
-
-    <button type="submit" class="btn-primary sign-in custom-btn">Đăng Nhập</button>
-
-    @if (ViewBag.ThongBao != null)
-    {
-        <div class="alert alert-danger mt-2">
-            @ViewBag.ThongBao
-        </div>
-    }
-    <div class="">
-        <a href="@Url.Action("ForgotPassword", "User")" class="forgot-password-link">
-            ForgotPassword?
-        </a>
-    </div>
-</form>
 <style>
-    .forgot-password-link {
-        color: #C92127; /* Màu đỏ cho liên kết */
-        text-decoration: underline; /* Đường gạch dưới */
-        font-size: 14px; /* Kích thước font */
-        font-weight: 500; /* Độ đậm của chữ */
-        display: inline-block; /* Đảm bảo liên kết ở dạng inline-block để dễ căn chỉnh */
-        margin-top: 10px; /* Khoảng cách phía trên */
-        text-align: right; /* Căn phải liên kết */
-        width: 100%; /* Đảm bảo căn phải trong phần tử chứa */
-        margin-left:-185px;
-    }
-
-    .sign-in {
-        width: 100px;
-        padding: 0px;
-        margin: 0;
-        margin-left: 171px;
-        background-color: #C92127;
-        border: none;
-        color: #fff;
-        border-radius: 5px;
-    }
-
-    .form-container {
-        border-radius: 5px;
-        padding: 20px 20px;
-        background: #fff;
-        margin: 32px 500px;
-        width: 500px;
-    }
-
-    /* Hiệu ứng hover */
-    .forgot-password-link:hover {
-        color: #b11f1f; /* Màu đỏ đậm khi hover */
-        text-decoration: none; /* Bỏ gạch dưới khi hover */
-    }
+.auth-wrap {
+    min-height: calc(100vh - 280px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    background: linear-gradient(135deg, #fef2f2 0%, #f5f6fa 50%, #eff6ff 100%);
+}
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 24px;
+    padding: 44px 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.10);
+    border: 1px solid #f1f5f9;
+}
+.auth-logo { text-align: center; margin-bottom: 20px; }
+.auth-logo-badge {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg,#e8392a,#ff6b5b);
+    border-radius: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 28px; color: #fff; margin: 0 auto 10px;
+    box-shadow: 0 8px 20px rgba(232,57,42,.3);
+}
+.auth-card h2 {
+    font-size: 24px; font-weight: 800; color: #111827;
+    text-align: center; margin-bottom: 4px;
+}
+.auth-subtitle { text-align: center; color: #9ca3af; font-size: 14px; margin-bottom: 28px; }
+.form-field { margin-bottom: 18px; }
+.form-field label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: #374151; margin-bottom: 8px;
+}
+.form-field .field-input {
+    width: 100%; height: 48px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0 16px;
+    font-size: 14px; font-family: 'Inter',sans-serif;
+    color: #374151; background: #f9fafb;
+    outline: none; transition: .25s;
+    display: block;
+}
+.form-field .field-input:focus {
+    border-color: #e8392a;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(232,57,42,.1);
+}
+.btn-auth {
+    width: 100%; height: 50px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg,#e8392a,#ff6b5b);
+    color: #fff; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: .25s;
+    box-shadow: 0 6px 20px rgba(232,57,42,.25);
+    margin-top: 4px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-auth:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,57,42,.35); }
+.auth-links {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 18px;
+}
+.auth-links a { font-size: 13px; color: #e8392a; font-weight: 600; text-decoration: none; }
+.auth-links a:hover { text-decoration: underline; }
+.auth-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 24px 0; color: #d1d5db; font-size: 13px;
+}
+.auth-divider::before, .auth-divider::after {
+    content: ''; flex: 1; height: 1px; background: #e5e7eb;
+}
+.register-prompt {
+    text-align: center; font-size: 14px; color: #6b7280; margin-top: 22px;
+}
+.register-prompt a { color: #e8392a; font-weight: 700; text-decoration: none; }
+.register-prompt a:hover { text-decoration: underline; }
+.alert-custom {
+    border-radius: 10px; border: none; font-size: 13px;
+    padding: 12px 14px; margin-bottom: 18px;
+    background: #fee2e2; color: #991b1b;
+    display: flex; align-items: center; gap: 8px;
+}
 </style>
+
+<div class="auth-wrap">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="auth-logo-badge"><i class="bi bi-book"></i></div>
+        </div>
+        <h2>Đăng Nhập</h2>
+        <p class="auth-subtitle">Chào mừng trở lại! Đăng nhập để tiếp tục.</p>
+
+        @if (ViewBag.ThongBao != null)
+        {
+            <div class="alert-custom">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                @ViewBag.ThongBao
+            </div>
+        }
+
+        <form method="post">
+            <div class="form-field">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" name="Email" class="field-input" placeholder="ten@email.com" required>
+            </div>
+            <div class="form-field">
+                <label for="loginPass">Mật Khẩu</label>
+                <div style="position:relative;">
+                    <input type="password" id="loginPass" name="MatKhau" class="field-input" placeholder="••••••••" required style="padding-right:44px;">
+                    <button type="button" onclick="togglePass('loginPass', this)"
+                        style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#9ca3af;cursor:pointer;font-size:16px;padding:0;">
+                        <i class="bi bi-eye-slash" id="eyeLoginPass"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="submit" class="btn-auth">
+                <i class="bi bi-box-arrow-in-right"></i> Đăng Nhập
+            </button>
+            <div class="auth-links">
+                <a href="@Url.Action("ForgotPassword","User")">Quên mật khẩu?</a>
+                <a href="@Url.Action("SignUp","User")">Tạo tài khoản mới →</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+<script>
+function togglePass(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye-slash';
+    }
+}
+</script>
+}

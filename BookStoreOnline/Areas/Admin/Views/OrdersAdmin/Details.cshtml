@@ -1,114 +1,193 @@
-﻿@model BookStoreOnline.Models.DONHANG
+@model BookStoreOnline.Models.DONHANG
 @using BookStoreOnline.Areas.Admin.Constants;
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Chi Tiết Đơn Hàng";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var price = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
 }
-<title>Chi Tiết Đơn Hàng</title>
-<div class="card-body">
-    <h2>Chi tiết đơn hàng</h2>
+
+<style>
+    .form-page-header { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+    .form-page-header .back-btn {
+        width:36px; height:36px; border-radius:10px; background:#f1f5f9;
+        display:flex; align-items:center; justify-content:center;
+        text-decoration:none; color:#475569; transition:all 0.2s; font-size:16px;
+    }
+    .form-page-header .back-btn:hover { background:#e2e8f0; color:#0f172a; }
+    .form-page-title { font-size:20px; font-weight:800; color:#0f172a; }
+    .form-page-title span { color:#e8392a; }
+    .detail-grid { display:grid; grid-template-columns:1fr 380px; gap:24px; align-items:start; }
+    .section-card {
+        background:#fff; border-radius:16px;
+        border:1px solid #f1f5f9;
+        box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden;
+    }
+    .section-card-header { padding:18px 24px; border-bottom:1px solid #f1f5f9; }
+    .section-card-title { font-size:15px; font-weight:700; color:#0f172a; }
+    .admin-table { width:100%; border-collapse:collapse; }
+    .admin-table thead th {
+        background:#f8fafc; font-size:11px; font-weight:700;
+        text-transform:uppercase; letter-spacing:0.6px;
+        color:#64748b; padding:12px 16px;
+        border-bottom:1px solid #e2e8f0; text-align:left;
+    }
+    .admin-table tbody tr { border-bottom:1px solid #f1f5f9; }
+    .admin-table tbody tr:hover { background:#f8fafc; }
+    .admin-table tbody tr:last-child { border-bottom:none; }
+    .admin-table tbody td { padding:14px 16px; font-size:13px; color:#334155; vertical-align:middle; }
+    .product-thumb { width:52px; height:68px; object-fit:cover; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    .product-thumb-placeholder {
+        width:52px; height:68px; background:#f1f5f9; border-radius:8px;
+        display:flex; align-items:center; justify-content:center; color:#94a3b8;
+    }
+    .info-panel { padding:24px; }
+    .info-row { display:flex; align-items:flex-start; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9; }
+    .info-row:last-child { border-bottom:none; }
+    .info-label { font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.4px; }
+    .info-value { font-size:14px; font-weight:600; color:#0f172a; text-align:right; max-width:55%; }
+    .total-box {
+        background:linear-gradient(135deg,#fef2f2,#fff1f0);
+        border:1px solid #fecaca; border-radius:12px; padding:16px 20px;
+        margin-bottom:20px; text-align:center;
+    }
+    .total-box .label { font-size:12px; font-weight:700; text-transform:uppercase; color:#991b1b; letter-spacing:0.5px; margin-bottom:4px; }
+    .total-box .amount { font-size:26px; font-weight:800; color:#e8392a; }
+    .action-buttons { display:flex; flex-direction:column; gap:10px; }
+    .btn-action {
+        display:flex; align-items:center; justify-content:center; gap:8px;
+        padding:11px; border:none; border-radius:10px; font-size:14px; font-weight:700;
+        cursor:pointer; text-decoration:none; transition:all 0.2s; width:100%;
+    }
+    .btn-confirm { background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff; box-shadow:0 4px 12px rgba(34,197,94,0.3); }
+    .btn-confirm:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(34,197,94,0.4); color:#fff; text-decoration:none; }
+    .btn-ship { background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; box-shadow:0 4px 12px rgba(59,130,246,0.3); }
+    .btn-ship:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(59,130,246,0.4); color:#fff; text-decoration:none; }
+    .btn-success-ship { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; box-shadow:0 4px 12px rgba(139,92,246,0.3); }
+    .btn-success-ship:hover { transform:translateY(-1px); color:#fff; text-decoration:none; }
+    .btn-cancel { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; box-shadow:0 4px 12px rgba(239,68,68,0.3); }
+    .btn-cancel:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(239,68,68,0.4); color:#fff; text-decoration:none; }
+    .btn-back {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#f1f5f9; color:#475569; border:none; border-radius:10px;
+        padding:10px 20px; font-size:13px; font-weight:600;
+        text-decoration:none; transition:all 0.2s; margin-top:12px; width:100%; justify-content:center;
+    }
+    .btn-back:hover { background:#e2e8f0; color:#0f172a; text-decoration:none; }
+    @@media (max-width:1024px) { .detail-grid { grid-template-columns:1fr; } }
+</style>
+
+<div class="form-page-header">
+    <a href="/Admin/OrdersAdmin" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <div class="form-page-title">Chi Tiết <span>Đơn Hàng #@Model.MaDonHang</span></div>
 </div>
-<div class="card-body">
-    <div class="table-responsive">
-        <table class="table table-striped text-center" style=" width: 96%;">
-            <tr>
-                <th>Sản phẩm</th>
-                <th>Tên sản phẩm</th>
-                <th>Số lượng</th>
-                <th>Đơn giá</th>
-            </tr>
 
-            @foreach (var item in ViewBag.Detail)
-            {
-                <tr>
-                    <td style="width: 15%;">
-                        <img src="~/Images/@item.SANPHAM.Anh" style="width: 60%; position: relative; left: 0;height:100px" />
-                    </td>
-                    <td style="width:35%">
-                        @item.SANPHAM.TenSanPham
-                    </td>
-                    <td>
-                        @item.SoLuong
-                    </td>
-                    <td>
-                        <h6>@String.Format(price, "{0:c0}", item.SANPHAM.Gia)</h6>
-                    </td>
-                </tr>
-            }
+<div class="detail-grid">
+    <div class="section-card">
+        <div class="section-card-header">
+            <span class="section-card-title"><i class="bi bi-bag-fill me-2" style="color:#e8392a"></i>Sản Phẩm Trong Đơn Hàng</span>
+        </div>
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width:70px">Ảnh</th>
+                        <th>Tên Sản Phẩm</th>
+                        <th style="width:100px; text-align:center;">Số Lượng</th>
+                        <th style="width:140px; text-align:right;">Đơn Giá</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in ViewBag.Detail)
+                    {
+                        <tr>
+                            <td>
+                                @{
+                                    string anh = item.SANPHAM.Anh ?? "";
+                                    string imgSrc = anh.StartsWith("http") || anh.StartsWith("/") ? anh : "/Images/" + anh;
+                                }
+                                @if (!string.IsNullOrEmpty(item.SANPHAM.Anh))
+                                {
+                                    <img src="@imgSrc" alt="@item.SANPHAM.TenSanPham" class="product-thumb" onerror="this.style.display='none'" />
+                                }
+                                else
+                                {
+                                    <div class="product-thumb-placeholder"><i class="bi bi-image"></i></div>
+                                }
+                            </td>
+                            <td><strong>@item.SANPHAM.TenSanPham</strong></td>
+                            <td style="text-align:center;">
+                                <span style="background:#f1f5f9; border-radius:6px; padding:3px 12px; font-weight:700;">@item.SoLuong</span>
+                            </td>
+                            <td style="text-align:right; font-weight:700; color:#e8392a;">
+                                @String.Format(price, "{0:c0}", item.SANPHAM.Gia)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-        </table>
-
-        <div class="container-fluid">
-            <!-- Page Heading -->
-            <div class="row">
-                <div class="row">
-                    <div class="col-lg-6">
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card shadow mb-4 custom-card-body">
-                            <!-- Card Header - Dropdown -->
-                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                <h6 class="m-0 font-weight-bold text-primary">Chi tiết tổng đơn</h6>
-                            </div>
-                            <!-- Card Body -->
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        Tên khách hàng: <span style="font-weight:bold">@Model.KHACHHANG.Ten</span> <br /><br />
-                                        Địa chỉ giao hàng: @Model.DiaChi <br /> <br />
-                                        @if (Model.TrangThai == (int)Constants.StatusOrder.NoInform)
-                                        {
-                                            <a href="@Url.Action("ConfirmOrder/"+ Model.MaDonHang,"OrdersAdmin")" class="btn btn-success">Xác nhận đơn hàng</a>
-                                        }
-                                        @if (Model.TrangThai == (int)Constants.StatusOrder.Informed)
-                                        {
-                                            <a href="@Url.Action("Shipping/"+ Model.MaDonHang,"OrdersAdmin")" class="btn btn-success">Chuyển cho shipper</a>
-                                        }
-                                        @if (Model.TrangThai == (int)Constants.StatusOrder.Shipping)
-                                        {
-                                            <a href="@Url.Action("ShippingSuccess/"+ Model.MaDonHang,"OrdersAdmin")" class="btn btn-success">Xác nhận giao thành công</a>
-                                        }
-                                        @if (Model.TrangThai != (int)Constants.StatusOrder.Canceled
-                                                && Model.TrangThai != (int)Constants.StatusOrder.Received
-                                                && Model.TrangThai != (int)Constants.StatusOrder.Shipping)
-                                        {
-                                            <a href="@Url.Action("CancelOrder/"+ Model.MaDonHang,"OrdersAdmin")" class="btn btn-danger">Hủy đơn hàng</a>
-                                        }
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="card-body">
-                                            <div class="row no-gutters align-items-center">
-                                                <div class="col mr-2">
-                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                        Tổng tiền
-                                                    </div>
-                                                    <div class="h5 mb-0 font-weight-bold text-gray-800"> @String.Format(price, "{0:c0}", ViewBag.Total)</div>
-                                                </div>
-                                        @*        <div class="col-auto d-flex align-items-center">
-                                                    <i class="fas fa-calendar fa-2x text-gray-300 me-2"></i>
-                                                    <span class="text-muted">@((Constants.StatusOrder)Model.TrangThai).ToString()</span>
-                                                </div>*@
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <div>
+        <div class="section-card" style="margin-bottom:20px;">
+            <div class="section-card-header">
+                <span class="section-card-title"><i class="bi bi-info-circle-fill me-2" style="color:#e8392a"></i>Thông Tin Đơn Hàng</span>
+            </div>
+            <div class="info-panel">
+                <div class="total-box">
+                    <div class="label">Tổng Tiền Đơn Hàng</div>
+                    <div class="amount">@String.Format(price, "{0:c0}", ViewBag.Total)</div>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Khách hàng</span>
+                    <span class="info-value">@Model.KHACHHANG.Ten</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Địa chỉ</span>
+                    <span class="info-value">@Model.DiaChi</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ngày đặt</span>
+                    <span class="info-value">@Model.NgayDat.ToString("dd/MM/yyyy")</span>
                 </div>
             </div>
+        </div>
 
+        <div class="section-card">
+            <div class="section-card-header">
+                <span class="section-card-title"><i class="bi bi-gear-fill me-2" style="color:#e8392a"></i>Hành Động</span>
+            </div>
+            <div class="info-panel">
+                <div class="action-buttons">
+                    @if (Model.TrangThai == (int)Constants.StatusOrder.NoInform)
+                    {
+                        <a href="@Url.Action("ConfirmOrder/" + Model.MaDonHang, "OrdersAdmin")" class="btn-action btn-confirm">
+                            <i class="bi bi-check-circle-fill"></i> Xác Nhận Đơn Hàng
+                        </a>
+                    }
+                    @if (Model.TrangThai == (int)Constants.StatusOrder.Informed)
+                    {
+                        <a href="@Url.Action("Shipping/" + Model.MaDonHang, "OrdersAdmin")" class="btn-action btn-ship">
+                            <i class="bi bi-truck"></i> Chuyển Cho Shipper
+                        </a>
+                    }
+                    @if (Model.TrangThai == (int)Constants.StatusOrder.Shipping)
+                    {
+                        <a href="@Url.Action("ShippingSuccess/" + Model.MaDonHang, "OrdersAdmin")" class="btn-action btn-success-ship">
+                            <i class="bi bi-bag-check-fill"></i> Xác Nhận Giao Thành Công
+                        </a>
+                    }
+                    @if (Model.TrangThai != (int)Constants.StatusOrder.Canceled
+                            && Model.TrangThai != (int)Constants.StatusOrder.Received
+                            && Model.TrangThai != (int)Constants.StatusOrder.Shipping)
+                    {
+                        <a href="@Url.Action("CancelOrder/" + Model.MaDonHang, "OrdersAdmin")" class="btn-action btn-cancel">
+                            <i class="bi bi-x-circle-fill"></i> Hủy Đơn Hàng
+                        </a>
+                    }
+                    @Html.ActionLink("← Quay Lại Danh Sách", "Index", null, new { @class = "btn-back" })
+                </div>
+            </div>
         </div>
     </div>
 </div>
-<p>
-    @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary", style = "color: white !important;" })
-</p>
-<style>
-    /* Tạo lớp CSS tùy chỉnh để mở rộng chiều rộng */
-    .custom-card-body {
-        width: 130%; /* Điều chỉnh chiều rộng tùy theo nhu cầu */
-    }
-
-</style>

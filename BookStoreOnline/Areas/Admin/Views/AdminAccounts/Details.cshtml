@@ -1,38 +1,136 @@
-﻿@model BookStoreOnline.Models.NHANVIEN
+@model BookStoreOnline.Models.NHANVIEN
 @using BookStoreOnline.Areas.Admin.Constants;
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Chi Tiết Quản Trị Viên";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<div class="card-body">
-    <h2>Tài khoản quản trị</h2>
 
-    <div>
-        <h4>AdminAccount</h4>
-        <hr />
-        <dl class="dl-horizontal">
-            <dt>
-                @Html.DisplayNameFor(model => model.Ten)
-            </dt>
+<style>
+    .form-page-header { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+    .form-page-header .back-btn {
+        width:36px; height:36px; border-radius:10px; background:#f1f5f9;
+        display:flex; align-items:center; justify-content:center;
+        text-decoration:none; color:#475569; transition:all 0.2s; font-size:16px;
+    }
+    .form-page-header .back-btn:hover { background:#e2e8f0; color:#0f172a; }
+    .form-page-title { font-size:20px; font-weight:800; color:#0f172a; }
+    .form-page-title span { color:#e8392a; }
+    .profile-card {
+        background:#fff; border-radius:16px;
+        border:1px solid #f1f5f9;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        overflow:hidden; max-width:640px;
+    }
+    .profile-header {
+        padding:28px; border-bottom:1px solid #f1f5f9;
+        background:linear-gradient(to right, #f8fafc, #ffffff);
+        display:flex; align-items:center; gap:20px;
+    }
+    .profile-avatar {
+        width:64px; height:64px; border-radius:50%;
+        background:linear-gradient(135deg, #e8392a, #ff6b5b);
+        display:flex; align-items:center; justify-content:center;
+        color:#fff; font-weight:800; font-size:24px;
+        box-shadow: 0 4px 12px rgba(232,57,42,0.2);
+    }
+    .profile-meta h2 { font-size:18px; font-weight:800; color:#0f172a; margin:0 0 4px 0; }
+    .profile-meta p { font-size:13px; color:#64748b; margin:0; }
+    
+    .profile-body { padding:28px; }
+    
+    .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 28px; }
+    .info-row { display: flex; flex-direction: column; gap: 6px; }
+    .info-row.full-width { grid-column: span 2; }
+    .info-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-value { font-size: 14px; font-weight: 600; color: #0f172a; }
+    
+    .role-badge {
+        display:inline-block; padding:3px 10px; border-radius:20px;
+        font-size:11px; font-weight:700; width: fit-content;
+    }
+    .role-1 { background:#fef9c3; color:#854d0e; }
+    .role-2 { background:#dbeafe; color:#1e40af; }
+    .role-3 { background:#f0fdf4; color:#166534; }
+    
+    .status-active { background:#dcfce7; color:#166534; border-radius:20px; padding:3px 10px; font-size:11px; font-weight:700; display:inline-block; width: fit-content; }
+    .status-disabled { background:#fee2e2; color:#991b1b; border-radius:20px; padding:3px 10px; font-size:11px; font-weight:700; display:inline-block; width: fit-content; }
 
-            <dd>
-                @Html.DisplayFor(model => model.Email)
-            </dd>
+    .form-actions { display:flex; align-items:center; justify-content:space-between; border-top:1px solid #f1f5f9; padding-top:20px; }
+    .btn-cancel {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#f1f5f9; color:#475569; border:none; border-radius:10px;
+        padding:11px 20px; font-size:14px; font-weight:600;
+        text-decoration:none; transition:all 0.2s; cursor:pointer;
+    }
+    .btn-cancel:hover { background:#e2e8f0; color:#0f172a; text-decoration:none; }
+    .btn-edit {
+        display:inline-flex; align-items:center; gap:6px;
+        background:linear-gradient(135deg,#e8392a,#ff6b5b); color:#fff;
+        border:none; border-radius:10px; padding:11px 24px;
+        font-size:14px; font-weight:600; text-decoration:none;
+        transition:all 0.2s; box-shadow:0 4px 12px rgba(232,57,42,0.3);
+    }
+    .btn-edit:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(232,57,42,0.4); color:#fff; text-decoration:none; }
+</style>
 
-            <dt>
-                @*<td>@EnumExtensions.GetDescription((Constants.StatusOrder)item.AdminRole)</td>
-            </dt>*@
+<div class="form-page-header">
+    <a href="/Admin/AdminAccounts" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <div class="form-page-title">Chi Tiết <span>Quản Trị Viên</span></div>
+</div>
 
-            <dd>
-                @Html.DisplayFor(model => model.TrangThai)
-            </dd>
-
-
-
-        </dl>
+<div class="profile-card">
+    <div class="profile-header">
+        <div class="profile-avatar">@(Model.Ten != null && Model.Ten.Length > 0 ? Model.Ten[0].ToString().ToUpper() : "A")</div>
+        <div class="profile-meta">
+            <h2>@Model.Ten</h2>
+            <p>Mã nhân viên: #@Model.MaNV</p>
+        </div>
     </div>
-    <p>
+    
+    <div class="profile-body">
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">Email đăng nhập</span>
+                <span class="info-value">@Model.Email</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Trạng thái</span>
+                <div>
+                    @if (Model.TrangThai)
+                    {
+                        <span class="status-active"><i class="bi bi-check-circle-fill me-1"></i>Đang Kích Hoạt</span>
+                    }
+                    else
+                    {
+                        <span class="status-disabled"><i class="bi bi-x-circle-fill me-1"></i>Vô Hiệu Hóa</span>
+                    }
+                </div>
+            </div>
 
-        @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary", style = "color: white !important;" })
-    </p>
+            <div class="info-row">
+                <span class="info-label">Quyền hạn</span>
+                <div>
+                    @{
+                        string roleClass = Model.Quyen == 1 ? "role-1" : (Model.Quyen == 2 ? "role-2" : "role-3");
+                    }
+                    <span class="role-badge @roleClass">
+                        @EHelper.GetEnumDescription((Constants.AdminRole)Model.Quyen)
+                    </span>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Ngày tạo tài khoản</span>
+                <span class="info-value">@(Model.NgayTao.HasValue ? Model.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</span>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            @Html.ActionLink("Quay lại danh sách", "Index", null, new { @class = "btn-cancel" })
+            <a href="@Url.Action("Edit", new { id = Model.MaNV })" class="btn-edit">
+                <i class="bi bi-pencil-fill"></i> Chỉnh Sửa
+            </a>
+        </div>
+    </div>
 </div>

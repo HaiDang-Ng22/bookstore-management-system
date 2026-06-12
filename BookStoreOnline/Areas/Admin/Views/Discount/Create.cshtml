@@ -1,207 +1,145 @@
-﻿@model BookStoreOnline.Models.KHUYENMAI
+@model BookStoreOnline.Models.KHUYENMAI
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Tạo Khuyến Mãi Mới";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<h2 class="page-title">Tạo Khuyến Mãi</h2>
-
-@using (Html.BeginForm()) 
-{
-    @Html.AntiForgeryToken()
+<style>
+    .form-page-header { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+    .form-page-header .back-btn {
+        width:36px; height:36px; border-radius:10px; background:#f1f5f9;
+        display:flex; align-items:center; justify-content:center;
+        text-decoration:none; color:#475569; transition:all 0.2s; font-size:16px;
+    }
+    .form-page-header .back-btn:hover { background:#e2e8f0; color:#0f172a; }
+    .form-page-title { font-size:20px; font-weight:800; color:#0f172a; }
+    .form-page-title span { color:#e8392a; }
+    .form-card {
+        background:#fff; border-radius:16px;
+        border:1px solid #f1f5f9;
+        box-shadow:0 2px 12px rgba(0,0,0,0.04);
+        overflow:hidden; max-width:800px;
+    }
+    .form-card-header {
+        padding:20px 28px; border-bottom:1px solid #f1f5f9;
+    }
+    .form-card-header h2 { font-size:16px; font-weight:700; color:#0f172a; margin:0; }
+    .form-card-header p { font-size:13px; color:#64748b; margin:4px 0 0; }
+    .form-card-body { padding:28px; }
     
-    <div class="form-container" >
-        <h4 class="form-header">KHUYẾN MÃI</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.TenChuongTrinh, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="form-input">
-                @Html.EditorFor(model => model.TenChuongTrinh, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.TenChuongTrinh, "", new { @class = "text-danger" })
-            </div>
-        </div>
+    .admin-label { font-size:13px; font-weight:600; color:#374151; display:block; margin-bottom:6px; }
+    .admin-input {
+        width:100%; padding:11px 14px; border:1.5px solid #e2e8f0;
+        border-radius:10px; font-size:14px; color:#0f172a;
+        background:#f8fafc; transition:all 0.2s; outline:none;
+        font-family:'Inter',sans-serif;
+    }
+    .admin-input:focus { border-color:#e8392a; background:#fff; box-shadow:0 0 0 3px rgba(232,57,42,0.08); }
+    
+    .form-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group.full-width { grid-column: span 2; }
+    
+    .field-error { font-size:12px; color:#dc2626; margin-top:5px; display:block; }
+    .form-actions { display:flex; align-items:center; justify-content:space-between; margin-top:12px; border-top:1px solid #f1f5f9; padding-top:20px; }
+    
+    .btn-cancel {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#f1f5f9; color:#475569; border:none; border-radius:10px;
+        padding:11px 20px; font-size:14px; font-weight:600;
+        text-decoration:none; transition:all 0.2s; cursor:pointer;
+    }
+    .btn-cancel:hover { background:#e2e8f0; color:#0f172a; text-decoration:none; }
+    .btn-save {
+        display:inline-flex; align-items:center; gap:6px;
+        background:linear-gradient(135deg,#e8392a,#ff6b5b); color:#fff;
+        border:none; border-radius:10px; padding:11px 24px;
+        font-size:14px; font-weight:600; cursor:pointer;
+        transition:all 0.2s; box-shadow:0 4px 12px rgba(232,57,42,0.3);
+    }
+    .btn-save:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(232,57,42,0.4); }
+    .validation-error { background:#fee2e2; border:1px solid #fca5a5; border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; color:#991b1b; }
+</style>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.MaKM, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="form-input">
-                @Html.EditorFor(model => model.MaKM, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.MaKM, "", new { @class = "text-danger" })
-            </div>
-        </div>
+<div class="form-page-header">
+    <a href="/Admin/Discount" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <div class="form-page-title">Tạo <span>Khuyến Mãi Mới</span></div>
+</div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.MoTa, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="form-input">
-                @Html.EditorFor(model => model.MoTa, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.MoTa, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.NgayTao, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="form-input">
-                @Html.EditorFor(model => model.NgayTao, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.NgayTao, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.NgayBatDau, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="form-input">
-                @Html.EditorFor(model => model.NgayBatDau, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.NgayBatDau, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.NgayKetThuc, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="form-input">
-                @Html.EditorFor(model => model.NgayKetThuc, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.NgayKetThuc, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.SoTienKM, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="form-input">
-                @Html.EditorFor(model => model.SoTienKM, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.SoTienKM, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.SoTienMuaHangToiThieu, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="form-input">
-                @Html.EditorFor(model => model.SoTienMuaHangToiThieu, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.SoTienMuaHangToiThieu, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.SoLanDung, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="form-input">
-                @Html.EditorFor(model => model.SoLanDung, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.SoLanDung, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-       
-
-        <div style="display:flex;" class="form-actions">
-            <div class="col-md-offset-2 col-md-10">
-                <input style="background-color: #000; color: #fff;" type="submit" value="Create" class="btn btn-default" />
-            </div>
-            <div style="background-color: #000; color: #fff;" class="btn btn-default">
-                @Html.ActionLink("Back to List", "Index")
-            </div>
-        </div>
+<div class="form-card">
+    <div class="form-card-header">
+        <h2><i class="bi bi-ticket-perforated-fill me-2" style="color:#e8392a"></i>Thông Tin Chương Trình Khuyến Mãi</h2>
+        <p>Điền đầy đủ thông tin để phát hành mã giảm giá mới cho khách hàng</p>
     </div>
+    <div class="form-card-body">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "validation-error" })
 
-    <style>
-        a:visited{
-            color:#fff !important;
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="admin-label" for="TenChuongTrinh">Tên Chương Trình <span style="color:#e8392a">*</span></label>
+                    @Html.EditorFor(model => model.TenChuongTrinh, new { htmlAttributes = new { @class = "admin-input", @placeholder = "VD: Mừng Khai Trương..." } })
+                    @Html.ValidationMessageFor(model => model.TenChuongTrinh, "", new { @class = "field-error" })
+                </div>
+
+                <div class="form-group">
+                    <label class="admin-label" for="MaKM">Mã Khuyến Mãi <span style="color:#e8392a">*</span></label>
+                    @Html.EditorFor(model => model.MaKM, new { htmlAttributes = new { @class = "admin-input", @placeholder = "VD: APERTURA20..." } })
+                    @Html.ValidationMessageFor(model => model.MaKM, "", new { @class = "field-error" })
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="admin-label" for="MoTa">Mô Tả Chương Trình</label>
+                    @Html.EditorFor(model => model.MoTa, new { htmlAttributes = new { @class = "admin-input", @placeholder = "Nhập mô tả chi tiết chương trình..." } })
+                    @Html.ValidationMessageFor(model => model.MoTa, "", new { @class = "field-error" })
+                </div>
+
+                <div class="form-group">
+                    <label class="admin-label" for="NgayBatDau">Ngày Bắt Đầu <span style="color:#e8392a">*</span></label>
+                    @Html.EditorFor(model => model.NgayBatDau, new { htmlAttributes = new { @class = "admin-input" } })
+                    @Html.ValidationMessageFor(model => model.NgayBatDau, "", new { @class = "field-error" })
+                </div>
+
+                <div class="form-group">
+                    <label class="admin-label" for="NgayKetThuc">Ngày Kết Thúc <span style="color:#e8392a">*</span></label>
+                    @Html.EditorFor(model => model.NgayKetThuc, new { htmlAttributes = new { @class = "admin-input" } })
+                    @Html.ValidationMessageFor(model => model.NgayKetThuc, "", new { @class = "field-error" })
+                </div>
+
+                <div class="form-group">
+                    <label class="admin-label" for="SoTienKM">Số Tiền Khuyến Mãi (VND) <span style="color:#e8392a">*</span></label>
+                    @Html.EditorFor(model => model.SoTienKM, new { htmlAttributes = new { @class = "admin-input", @placeholder = "Nhập số tiền giảm..." } })
+                    @Html.ValidationMessageFor(model => model.SoTienKM, "", new { @class = "field-error" })
+                </div>
+
+                <div class="form-group">
+                    <label class="admin-label" for="SoTienMuaHangToiThieu">Đơn Hàng Tối Thiểu (VND) <span style="color:#e8392a">*</span></label>
+                    @Html.EditorFor(model => model.SoTienMuaHangToiThieu, new { htmlAttributes = new { @class = "admin-input", @placeholder = "VD: 150000" } })
+                    @Html.ValidationMessageFor(model => model.SoTienMuaHangToiThieu, "", new { @class = "field-error" })
+                </div>
+
+                <div class="form-group">
+                    <label class="admin-label" for="SoLanDung">Số Lần Sử Dụng <span style="color:#e8392a">*</span></label>
+                    @Html.EditorFor(model => model.SoLanDung, new { htmlAttributes = new { @class = "admin-input", @placeholder = "VD: 100" } })
+                    @Html.ValidationMessageFor(model => model.SoLanDung, "", new { @class = "field-error" })
+                </div>
+
+                <div class="form-group">
+                    <label class="admin-label" for="NgayTao">Ngày Tạo</label>
+                    @Html.EditorFor(model => model.NgayTao, new { htmlAttributes = new { @class = "admin-input" } })
+                    @Html.ValidationMessageFor(model => model.NgayTao, "", new { @class = "field-error" })
+                </div>
+            </div>
+
+            <div class="form-actions">
+                @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn-cancel" })
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-check-lg"></i> Phát Hành Khuyến Mãi
+                </button>
+            </div>
         }
-        .control-label{
-            color:#000;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f4f4f4;
-        }
-
-        .page-title {
-            font-size: 2rem;
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .form-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-header {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .validation-summary {
-            color: #d9534f;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .form-input {
-            margin-bottom: 10px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-
-        .validation-message {
-            color: #d9534f;
-            font-size: 0.875rem;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        .btn-danger {
-            background-color: #d9534f;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-            .btn-danger:hover {
-                background-color: #c9302c;
-            }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-            .btn-secondary:hover {
-                background-color: #5a6268;
-            }
-    </style>
-}
-
-
+    </div>
+</div>

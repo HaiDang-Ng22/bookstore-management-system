@@ -1,12 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using BookStoreOnline.Models; // Đảm bảo bạn đã thêm namespace cho mô hình dữ liệu của bạn
 using static BookStoreOnline.Areas.Admin.Constants.Constants;
 
+using BookStoreOnline.Core;
+using static BookStoreOnline.Areas.Admin.Constants.Constants;
+
 namespace BookStoreOnline.Areas.Admin.Controllers
 {
+    [AdminAuthorize(AdminRole.Administrator, AdminRole.Manager, AdminRole.Seller)]
     public class Home_PageController : Controller
     {
         private NhaSachEntities3 db = new NhaSachEntities3();

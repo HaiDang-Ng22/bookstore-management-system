@@ -1,66 +1,169 @@
-﻿@model BookStoreOnline.Models.SANPHAM
+@model BookStoreOnline.Models.SANPHAM
 
 @{
-    ViewBag.Title = "Tạo mới";
+    ViewBag.Title = "Thêm Sách Mới";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<div class="card-body">
-    <h2>Thêm sách mới</h2>
+
+<style>
+    .form-page-header { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+    .form-page-header .back-btn {
+        width:36px; height:36px; border-radius:10px; background:#f1f5f9;
+        display:flex; align-items:center; justify-content:center;
+        text-decoration:none; color:#475569; transition:all 0.2s; font-size:16px;
+    }
+    .form-page-header .back-btn:hover { background:#e2e8f0; color:#0f172a; }
+    .form-page-title { font-size:20px; font-weight:800; color:#0f172a; }
+    .form-page-title span { color:#e8392a; }
+    .form-grid { display:grid; grid-template-columns:1fr 360px; gap:24px; align-items:start; }
+    .form-card {
+        background:#fff; border-radius:16px;
+        border:1px solid #f1f5f9;
+        box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden;
+    }
+    .form-card-header { padding:20px 28px; border-bottom:1px solid #f1f5f9; }
+    .form-card-header h2 { font-size:16px; font-weight:700; color:#0f172a; margin:0; }
+    .form-card-header p { font-size:13px; color:#64748b; margin:4px 0 0; }
+    .form-card-body { padding:28px; }
+    .admin-label { font-size:13px; font-weight:600; color:#374151; display:block; margin-bottom:6px; }
+    .admin-input, .admin-select, .admin-textarea {
+        width:100%; padding:11px 14px; border:1.5px solid #e2e8f0;
+        border-radius:10px; font-size:14px; color:#0f172a;
+        background:#f8fafc; transition:all 0.2s; outline:none;
+        font-family:'Inter',sans-serif; box-sizing:border-box;
+    }
+    .admin-input:focus, .admin-select:focus, .admin-textarea:focus {
+        border-color:#e8392a; background:#fff; box-shadow:0 0 0 3px rgba(232,57,42,0.08);
+    }
+    .admin-textarea { resize:vertical; min-height:120px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .form-group { margin-bottom:18px; }
+    .field-error { font-size:12px; color:#dc2626; margin-top:5px; display:block; }
+    .form-actions { display:flex; align-items:center; justify-content:space-between; margin-top:24px; padding-top:20px; border-top:1px solid #f1f5f9; }
+    .btn-cancel {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#f1f5f9; color:#475569; border:none; border-radius:10px;
+        padding:11px 20px; font-size:14px; font-weight:600;
+        text-decoration:none; transition:all 0.2s; cursor:pointer;
+    }
+    .btn-cancel:hover { background:#e2e8f0; color:#0f172a; text-decoration:none; }
+    .btn-save {
+        display:inline-flex; align-items:center; gap:6px;
+        background:linear-gradient(135deg,#e8392a,#ff6b5b); color:#fff;
+        border:none; border-radius:10px; padding:11px 24px;
+        font-size:14px; font-weight:600; cursor:pointer;
+        transition:all 0.2s; box-shadow:0 4px 12px rgba(232,57,42,0.3);
+    }
+    .btn-save:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(232,57,42,0.4); }
+    .validation-error { background:#fee2e2; border:1px solid #fca5a5; border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; color:#991b1b; }
+    .file-upload-area {
+        border:2px dashed #e2e8f0; border-radius:12px; padding:24px;
+        text-align:center; cursor:pointer; transition:all 0.2s; background:#f8fafc;
+    }
+    .file-upload-area:hover { border-color:#e8392a; background:#fef2f2; }
+    .file-upload-area i { font-size:32px; color:#cbd5e1; margin-bottom:8px; display:block; }
+    .file-upload-area .upload-text { font-size:13px; color:#64748b; font-weight:500; }
+    .file-upload-area input[type="file"] { position:absolute; opacity:0; cursor:pointer; width:100%; height:100%; top:0; left:0; }
+    .file-upload-wrap { position:relative; }
+    @@media (max-width: 1024px) { .form-grid { grid-template-columns:1fr; } }
+</style>
+
+<div class="form-page-header">
+    <a href="/Admin/Products" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <div class="form-page-title">Thêm <span>Sách Mới</span></div>
 </div>
 
 @using (Html.BeginForm("Create", "Products", FormMethod.Post, new { @enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
 
-<div class="form-horizontal">
-    <hr />
-    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="form-grid">
+        <div class="form-card">
+            <div class="form-card-header">
+                <h2><i class="bi bi-book-fill me-2" style="color:#e8392a"></i>Thông Tin Sách</h2>
+                <p>Điền đầy đủ thông tin về cuốn sách</p>
+            </div>
+            <div class="form-card-body">
+                @Html.ValidationSummary(true, "", new { @class = "validation-error" })
 
-    <div class="mb-3">
-        <label for="TenSanPham" class="form-label">Tên sách</label>
-        @Html.EditorFor(model => model.TenSanPham, new { htmlAttributes = new { @class = "form-control" } })
-        @Html.ValidationMessageFor(model => model.TenSanPham, "", new { @class = "text-danger" })
-    </div>
+                <div class="form-group">
+                    <label class="admin-label">Tên Sách <span style="color:#e8392a">*</span></label>
+                    @Html.EditorFor(model => model.TenSanPham, new { htmlAttributes = new { @class = "admin-input", @placeholder = "Nhập tên sách..." } })
+                    @Html.ValidationMessageFor(model => model.TenSanPham, "", new { @class = "field-error" })
+                </div>
 
-    <div class="mb-3">
-        <label for="TacGia" class="form-label">Tác giả</label>
-        @Html.EditorFor(model => model.TacGia, new { htmlAttributes = new { @class = "form-control" } })
-        @Html.ValidationMessageFor(model => model.TacGia, "", new { @class = "text-danger" })
-    </div>
+                <div class="form-group">
+                    <label class="admin-label">Tác Giả <span style="color:#e8392a">*</span></label>
+                    @Html.EditorFor(model => model.TacGia, new { htmlAttributes = new { @class = "admin-input", @placeholder = "Tên tác giả..." } })
+                    @Html.ValidationMessageFor(model => model.TacGia, "", new { @class = "field-error" })
+                </div>
 
-    <div class="mb-3">
-        <label for="GiaBan" class="form-label">Giá</label>
-        @Html.EditorFor(model => model.Gia, new { htmlAttributes = new { @class = "form-control" } })
-        @Html.ValidationMessageFor(model => model.Gia, "", new { @class = "text-danger" })
-    </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="admin-label">Giá Bán (VNĐ) <span style="color:#e8392a">*</span></label>
+                        @Html.EditorFor(model => model.Gia, new { htmlAttributes = new { @class = "admin-input", @placeholder = "0" } })
+                        @Html.ValidationMessageFor(model => model.Gia, "", new { @class = "field-error" })
+                    </div>
+                    <div class="form-group">
+                        <label class="admin-label">Số Lượng <span style="color:#e8392a">*</span></label>
+                        @Html.EditorFor(model => model.SoLuong, new { htmlAttributes = new { @class = "admin-input", @placeholder = "0" } })
+                        @Html.ValidationMessageFor(model => model.SoLuong, "", new { @class = "field-error" })
+                    </div>
+                </div>
 
-    <div class="mb-3">
-        <label for="MaLoai" class="form-label">Thể loại</label>
-        @Html.DropDownList("MaLoai", (SelectList)ViewBag.LoaiSP, "--Chọn thể loại--", new { @class = "form-control" })
-        @Html.ValidationMessageFor(model => model.MaLoai, "", new { @class = "text-danger" })
-    </div>
+                <div class="form-group">
+                    <label class="admin-label">Thể Loại <span style="color:#e8392a">*</span></label>
+                    @Html.DropDownList("MaLoai", (SelectList)ViewBag.LoaiSP, "--Chọn thể loại--", new { @class = "admin-select" })
+                    @Html.ValidationMessageFor(model => model.MaLoai, "", new { @class = "field-error" })
+                </div>
 
-    <div class="mb-3">
-        <label for="GioiThieu" class="form-label">Giới thiệu</label>
-        @Html.TextAreaFor(model => model.MoTa, new { placeholder = "Giới thiệu về sách", @class = "form-control", rows = 4 })
-        @Html.ValidationMessageFor(model => model.MoTa, "", new { @class = "text-danger" })
-    </div>
+                <div class="form-group">
+                    <label class="admin-label">Mô Tả / Giới Thiệu</label>
+                    @Html.TextAreaFor(model => model.MoTa, new { placeholder = "Nhập mô tả về cuốn sách...", @class = "admin-textarea" })
+                    @Html.ValidationMessageFor(model => model.MoTa, "", new { @class = "field-error" })
+                </div>
 
-    <div class="mb-3">
-        <label for="GiaBan" class="form-label">Số lượng</label>
-        @Html.EditorFor(model => model.SoLuong, new { htmlAttributes = new { @class = "form-control" } })
-        @Html.ValidationMessageFor(model => model.SoLuong, "", new { @class = "text-danger" })
-    </div>
+                <div class="form-actions">
+                    @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn-cancel" })
+                    <button type="submit" class="btn-save">
+                        <i class="bi bi-plus-circle-fill"></i> Thêm Sách
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    <div class="mb-3">
-        <label for="Anh" class="form-label">Hình ảnh</label>
-        <input type="file" name="imageBook" />
-        @Html.ValidationMessageFor(model => model.Anh, "", new { @class = "text-danger" })
+        <div class="form-card">
+            <div class="form-card-header">
+                <h2><i class="bi bi-image-fill me-2" style="color:#e8392a"></i>Hình Ảnh Bìa</h2>
+                <p>Tải lên ảnh bìa sách</p>
+            </div>
+            <div class="form-card-body">
+                <div class="file-upload-wrap">
+                    <div class="file-upload-area" id="uploadArea">
+                        <i class="bi bi-cloud-upload-fill"></i>
+                        <div class="upload-text">Nhấn hoặc kéo thả ảnh vào đây</div>
+                        <div style="font-size:11px; color:#94a3b8; margin-top:4px">PNG, JPG, WEBP (tối đa 5MB)</div>
+                        <input type="file" name="imageBook" accept="image/*" onchange="previewImage(this)" />
+                    </div>
+                </div>
+                <div id="imagePreviewWrap" style="display:none; margin-top:16px; text-align:center;">
+                    <img id="imagePreview" src="" alt="Preview" style="max-width:100%; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);" />
+                </div>
+                @Html.ValidationMessageFor(model => model.Anh, "", new { @class = "field-error" })
+            </div>
+        </div>
     </div>
-
-    <div class="d-flex justify-content-between align-items-center">
-        @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary", style = "color: white !important;" })
-        <button type="submit" class="btn btn-primary" style="color: white !important; background-color:black;">Thêm</button>
-    </div>
-</div>
 }
+
+<script>
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('imagePreview').src = e.target.result;
+            document.getElementById('imagePreviewWrap').style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>

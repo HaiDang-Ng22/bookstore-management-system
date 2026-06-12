@@ -1,70 +1,128 @@
-﻿@model BookStoreOnline.Models.SANPHAM
+@model BookStoreOnline.Models.SANPHAM
 
 @{
-    ViewBag.Title = "Delete";
+    ViewBag.Title = "Xóa Sách";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="card-body">
-    <h2 class="card-title">Xóa</h2>
+<style>
+    .form-page-header { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+    .form-page-header .back-btn {
+        width:36px; height:36px; border-radius:10px; background:#f1f5f9;
+        display:flex; align-items:center; justify-content:center;
+        text-decoration:none; color:#475569; transition:all 0.2s; font-size:16px;
+    }
+    .form-page-header .back-btn:hover { background:#e2e8f0; color:#0f172a; }
+    .form-page-title { font-size:20px; font-weight:800; color:#0f172a; }
+    .form-page-title span { color:#dc2626; }
+    .delete-layout { display:grid; grid-template-columns:340px 1fr; gap:24px; align-items:start; }
+    .danger-card {
+        background:#fff; border-radius:16px;
+        border:1.5px solid #fee2e2;
+        box-shadow:0 2px 12px rgba(220,38,38,0.06); overflow:hidden;
+    }
+    .danger-card-header {
+        background:linear-gradient(135deg,#fee2e2,#fef2f2);
+        padding:24px 28px; border-bottom:1px solid #fecaca; text-align:center;
+    }
+    .danger-icon {
+        width:64px; height:64px; background:#fca5a5; border-radius:50%;
+        display:inline-flex; align-items:center; justify-content:center;
+        font-size:28px; color:#7f1d1d; margin-bottom:12px;
+    }
+    .danger-card-header h2 { font-size:18px; font-weight:800; color:#7f1d1d; margin:0 0 4px; }
+    .danger-card-header p { font-size:13px; color:#991b1b; margin:0; }
+    .danger-card-body { padding:24px; }
+    .confirm-info { background:#f8fafc; border-radius:10px; padding:16px; margin-bottom:20px; border:1px solid #e2e8f0; }
+    .confirm-row { display:flex; justify-content:space-between; align-items:flex-start; padding:6px 0; border-bottom:1px solid #f1f5f9; }
+    .confirm-row:last-child { border-bottom:none; }
+    .confirm-label { font-size:11px; font-weight:700; text-transform:uppercase; color:#64748b; }
+    .confirm-value { font-size:13px; font-weight:700; color:#0f172a; text-align:right; max-width:60%; }
+    .form-actions { display:flex; align-items:center; justify-content:space-between; }
+    .btn-cancel {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#f1f5f9; color:#475569; border:none; border-radius:10px;
+        padding:11px 20px; font-size:14px; font-weight:600;
+        text-decoration:none; transition:all 0.2s; cursor:pointer;
+    }
+    .btn-cancel:hover { background:#e2e8f0; color:#0f172a; text-decoration:none; }
+    .btn-danger-del {
+        display:inline-flex; align-items:center; gap:6px;
+        background:linear-gradient(135deg,#dc2626,#ef4444); color:#fff;
+        border:none; border-radius:10px; padding:11px 24px;
+        font-size:14px; font-weight:600; cursor:pointer;
+        transition:all 0.2s; box-shadow:0 4px 12px rgba(220,38,38,0.3);
+    }
+    .btn-danger-del:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(220,38,38,0.4); }
+    .product-preview-card {
+        background:#fff; border-radius:16px;
+        border:1px solid #f1f5f9;
+        box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden;
+    }
+    .product-preview-header { padding:18px 24px; border-bottom:1px solid #f1f5f9; }
+    .product-preview-header h3 { font-size:15px; font-weight:700; color:#0f172a; margin:0; }
+    .product-preview-body { padding:24px; text-align:center; }
+    .product-preview-img { width:160px; height:210px; object-fit:cover; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.12); }
+    .product-preview-name { font-size:16px; font-weight:800; color:#0f172a; margin:16px 0 4px; }
+    .product-preview-author { font-size:13px; color:#64748b; margin:0 0 12px; }
+    .product-preview-price { font-size:18px; font-weight:800; color:#e8392a; }
+    @@media (max-width:768px) { .delete-layout { grid-template-columns:1fr; } }
+</style>
+
+<div class="form-page-header">
+    <a href="/Admin/Products" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <div class="form-page-title">Xóa <span>Sách</span></div>
 </div>
-<div class="card mt-4 shadow-sm">
-    <div class="card-body">
-        <h3 class="text-center mb-4">Bạn có chắc chắn muốn xóa danh mục này?</h3>
-        <h4 class="text-center">
-            Danh mục: @Html.DisplayFor(model => model.TenSanPham)
-        </h4>
-        @using (Html.BeginForm())
-        {
-            @Html.AntiForgeryToken()
-            <div class="d-flex justify-content-between">
-                <input type="submit" value="Xóa" class="btn btn-danger" />
-                @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary", style = "color: white !important;" })
+
+<div class="delete-layout">
+    <div class="danger-card">
+        <div class="danger-card-header">
+            <div class="danger-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <h2>Xác Nhận Xóa</h2>
+            <p>Hành động này không thể hoàn tác!</p>
+        </div>
+        <div class="danger-card-body">
+            <div class="confirm-info">
+                <div class="confirm-row">
+                    <span class="confirm-label">Tên sách</span>
+                    <span class="confirm-value">@Html.DisplayFor(model => model.TenSanPham)</span>
+                </div>
+                <div class="confirm-row">
+                    <span class="confirm-label">Tác giả</span>
+                    <span class="confirm-value">@Html.DisplayFor(model => model.TacGia)</span>
+                </div>
+                <div class="confirm-row">
+                    <span class="confirm-label">Giá bán</span>
+                    <span class="confirm-value" style="color:#e8392a;">@String.Format("{0:N0}đ", Model.Gia)</span>
+                </div>
             </div>
-        }
+
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-actions">
+                    @Html.ActionLink("Hủy Bỏ", "Index", null, new { @class = "btn-cancel" })
+                    <button type="submit" class="btn-danger-del">
+                        <i class="bi bi-trash-fill"></i> Xóa Sách
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="product-preview-card">
+        <div class="product-preview-header">
+            <h3><i class="bi bi-eye me-2" style="color:#e8392a"></i>Xem Trước</h3>
+        </div>
+        <div class="product-preview-body">
+            @if (!string.IsNullOrEmpty(Model.Anh))
+            {
+                string imgSrc = Model.Anh.StartsWith("http") || Model.Anh.StartsWith("/") ? Model.Anh : "/Images/" + Model.Anh;
+                <img src="@imgSrc" alt="@Model.TenSanPham" class="product-preview-img" onerror="this.style.display='none'" />
+            }
+            <div class="product-preview-name">@Model.TenSanPham</div>
+            <div class="product-preview-author">@Model.TacGia</div>
+            <div class="product-preview-price">@String.Format("{0:N0}đ", Model.Gia)</div>
+        </div>
     </div>
 </div>
-
-
-@*<h3>Bạn có chắc chắn muốn xóa sách này ?</h3>
-<div>
-
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            Tên
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.ProductName)
-        </dd>
-
-
-
-        <dt>
-            @Html.DisplayNameFor(model => model.ImageProd)
-        </dt>
-
-        <dd>
-            <img src="~/Images/@Model.ImageProd" style="width: 20%; position: relative; left: 0;height:280px" /> <br /> <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
-        </dd>
-
-        <dt>
-            Thể loại
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Category.CategoryName)
-        </dd>
-
-    </dl>
-
-    @using (Html.BeginForm())
-    {
-        @Html.AntiForgeryToken()
-        <div class="d-flex justify-content-between">
-            <input type="submit" value="Xóa" class="btn btn-danger" />
-            @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary", style = "color: white !important;" })
-        </div>
-    }
-</div>*@

@@ -1,60 +1,160 @@
-﻿@model IEnumerable<BookStoreOnline.Models.DONHANG>
+@model IEnumerable<BookStoreOnline.Models.DONHANG>
 @using BookStoreOnline.Areas.Admin.Constants;
 @using PagedList;
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Danh Sách Đơn Hàng";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    int status = ViewBag.Status ?? -1;
+    string[] statusLabels = { "Chờ Xác Nhận", "Đã Xác Nhận", "Đang Giao Hàng", "Đã Nhận Hàng", "Đã Hủy" };
+    string[] statusColors = { "#854d0e", "#166534", "#1e40af", "#15803d", "#991b1b" };
+    string[] statusBg    = { "#fef9c3", "#dcfce7", "#dbeafe", "#f0fdf4", "#fee2e2" };
+    string currentTitle  = status >= 0 && status <= 4 ? statusLabels[status] : "Tất Cả Đơn Hàng";
 }
-<title>Danh Sách Đơn Hàng</title>
-<div class="card-body">
-    <h2>Danh sách đơn hàng</h2>
+
+<style>
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .page-title { font-size:20px; font-weight:800; color:#0f172a; }
+    .page-title span { color:#e8392a; }
+    .status-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+    .status-tab {
+        display:inline-flex; align-items:center; gap:6px;
+        padding:8px 16px; border-radius:10px; font-size:13px; font-weight:600;
+        text-decoration:none; border:1.5px solid #e2e8f0; color:#64748b;
+        background:#fff; transition:all 0.2s;
+    }
+    .status-tab:hover { border-color:#e8392a; color:#e8392a; text-decoration:none; }
+    .status-tab.active { background:#e8392a; color:#fff; border-color:#e8392a; box-shadow:0 4px 12px rgba(232,57,42,0.3); }
+    .section-card {
+        background:#fff; border-radius:16px;
+        border:1px solid #f1f5f9;
+        box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden;
+    }
+    .section-card-header { padding:18px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; justify-content:space-between; }
+    .section-card-title { font-size:15px; font-weight:700; color:#0f172a; }
+    .count-badge { background:#f1f5f9; color:#475569; border-radius:6px; font-size:12px; font-weight:700; padding:3px 10px; }
+    .admin-table { width:100%; border-collapse:collapse; }
+    .admin-table thead th {
+        background:#f8fafc; font-size:11px; font-weight:700;
+        text-transform:uppercase; letter-spacing:0.6px;
+        color:#64748b; padding:12px 16px;
+        border-bottom:1px solid #e2e8f0; text-align:left;
+    }
+    .admin-table tbody tr { border-bottom:1px solid #f1f5f9; transition:background 0.15s; }
+    .admin-table tbody tr:hover { background:#f8fafc; }
+    .admin-table tbody tr:last-child { border-bottom:none; }
+    .admin-table tbody td { padding:13px 16px; font-size:13px; color:#334155; }
+    .order-id { font-weight:700; color:#0f172a; font-size:13px; }
+    .badge-status {
+        display:inline-block; padding:4px 12px;
+        border-radius:20px; font-size:11px; font-weight:700;
+    }
+    .btn-detail {
+        display:inline-flex; align-items:center; gap:5px;
+        background:#f0f9ff; color:#0369a1; border:none; border-radius:8px;
+        padding:6px 14px; font-size:12px; font-weight:700;
+        text-decoration:none; transition:all 0.2s;
+    }
+    .btn-detail:hover { background:#e0f2fe; color:#075985; text-decoration:none; }
+    .empty-state { text-align:center; padding:48px 20px; color:#94a3b8; }
+    .empty-state i { font-size:40px; margin-bottom:12px; display:block; }
+    .pay-badge {
+        display:inline-block; padding:3px 8px;
+        border-radius:6px; font-size:11px; font-weight:600;
+        background:#f1f5f9; color:#475569;
+    }
+    .pay-badge.paid { background:#dcfce7; color:#166534; }
+</style>
+
+<div class="page-header">
+    <div class="page-title">Quản Lý <span>Đơn Hàng</span></div>
 </div>
-<div class="card-body">
+
+<div class="status-tabs">
+    <a href="/Admin/OrdersAdmin" class="status-tab @(status == -1 ? "active" : "")">
+        <i class="bi bi-grid-3x3-gap-fill"></i> Tất Cả
+    </a>
+    <a href="/Admin/OrdersAdmin?status=0" class="status-tab @(status == 0 ? "active" : "")">
+        <i class="bi bi-hourglass-split"></i> Chờ Xác Nhận
+    </a>
+    <a href="/Admin/OrdersAdmin?status=1" class="status-tab @(status == 1 ? "active" : "")">
+        <i class="bi bi-check-circle-fill"></i> Đã Xác Nhận
+    </a>
+    <a href="/Admin/OrdersAdmin?status=2" class="status-tab @(status == 2 ? "active" : "")">
+        <i class="bi bi-truck"></i> Đang Giao
+    </a>
+    <a href="/Admin/OrdersAdmin?status=3" class="status-tab @(status == 3 ? "active" : "")">
+        <i class="bi bi-bag-check-fill"></i> Đã Nhận
+    </a>
+    <a href="/Admin/OrdersAdmin?status=4" class="status-tab @(status == 4 ? "active" : "")">
+        <i class="bi bi-x-circle-fill"></i> Đã Hủy
+    </a>
+</div>
+
+<div class="section-card">
+    <div class="section-card-header">
+        <span class="section-card-title"><i class="bi bi-receipt me-2" style="color:#e8392a"></i>@currentTitle</span>
+        <span class="count-badge">@Model.Count() đơn hàng</span>
+    </div>
     <div class="table-responsive">
-        <table class="table table-striped text-center">
-            <tr>
-                <th>Mã đơn hàng</th>
-                <th>Khách hàng</th>
-                <th>Ngày đặt</th>
-                <th>Địa chỉ giao hàng</th>
-                <th>Trạng thái đơn hàng</th>
-                <th>Trạng Thái Thanh Toán</th>
-                <th>Phương Thức Thanh Toán</th>
-                <th>Hoạt động</th>
-            </tr>
-
-            @foreach (var item in Model)
-            {
+        <table class="admin-table">
+            <thead>
                 <tr>
-                    <td>@item.MaDonHang</td>
-                    <td>@item.KHACHHANG.Ten</td>
-                    <td>@String.Format("{0:dd/MM/yyyy}", item.NgayDat)</td>
-                    <td>@item.DiaChi</td>
-                    @* Chuyển đổi từ value ENUM sang Description *@
-                    @{
-                        var trangThaiDonHangEnum = (Constants.StatusOrder)item.TrangThai;
-                        var trangThai = @EHelper.GetEnumDescription(trangThaiDonHangEnum);
-
-                        var trangThaiThanhToanEnum = (Constants.StatusPayment)item.TrangThaiThanhToan;
-                        var trangThaiThanhToan = @EHelper.GetEnumDescription(trangThaiThanhToanEnum);
-
-                        var phuongThucThanhToanEnum = (Constants.TypePayment)item.PhuongThucThanhToan;
-                        var phuongThucThanhToan = @EHelper.GetEnumDescription(phuongThucThanhToanEnum);
-                    }
-                    <td>@trangThai</td>
-                    <td>@trangThaiThanhToan</td>
-                    <td>@phuongThucThanhToan</td>
-                    <td>
-                        <a style="color:#fff; background-color:#000;border:none" href="@Url.Action("Details/" + item.MaDonHang, "OrdersAdmin")" class="btn btn-info">Xem chi tiết</a>
-                        @**@   @* <a style="color:#fff; background-color:#000;border:none" href="@Url.Action("Delete/" + item.MaDonHang, "OrdersAdmin")" class="btn btn-info">Xem chi tiết</a>*@
-                    </td>
+                    <th>Mã Đơn</th>
+                    <th>Khách Hàng</th>
+                    <th>Ngày Đặt</th>
+                    <th>Địa Chỉ</th>
+                    <th>Trạng Thái</th>
+                    <th>Thanh Toán</th>
+                    <th>Phương Thức</th>
+                    <th style="text-align:center;">Thao Tác</th>
                 </tr>
-
-            }
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        var trangThaiDonHangEnum = (Constants.StatusOrder)item.TrangThai;
+                        var trangThai = EHelper.GetEnumDescription(trangThaiDonHangEnum);
+                        var trangThaiThanhToanEnum = (Constants.StatusPayment)item.TrangThaiThanhToan;
+                        var trangThaiThanhToan = EHelper.GetEnumDescription(trangThaiThanhToanEnum);
+                        var phuongThucThanhToanEnum = (Constants.TypePayment)item.PhuongThucThanhToan;
+                        var phuongThucThanhToan = EHelper.GetEnumDescription(phuongThucThanhToanEnum);
+                        int s = item.TrangThai;
+                        string bg = s >= 0 && s <= 4 ? statusBg[s] : "#f1f5f9";
+                        string col = s >= 0 && s <= 4 ? statusColors[s] : "#475569";
+                        <tr>
+                            <td><span class="order-id">#@item.MaDonHang</span></td>
+                            <td><strong>@item.KHACHHANG.Ten</strong></td>
+                            <td>@String.Format("{0:dd/MM/yyyy}", item.NgayDat)</td>
+                            <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">@item.DiaChi</td>
+                            <td>
+                                <span class="badge-status" style="background:@bg; color:@col;">@trangThai</span>
+                            </td>
+                            <td>
+                                <span class="pay-badge @(item.TrangThaiThanhToan == 1 ? "paid" : "")">@trangThaiThanhToan</span>
+                            </td>
+                            <td>@phuongThucThanhToan</td>
+                            <td style="text-align:center;">
+                                <a href="@Url.Action("Details/" + item.MaDonHang, "OrdersAdmin")" class="btn-detail">
+                                    <i class="bi bi-eye-fill"></i> Chi Tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                Không có đơn hàng nào trong danh mục này
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
         </table>
     </div>
 </div>
-@*<p>
-    @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary", style = "color: white !important;" })
-</p>
-*@

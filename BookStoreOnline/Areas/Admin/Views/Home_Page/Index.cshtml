@@ -1,222 +1,175 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Trang Tổng Quan";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
-
     var admin = Session["TaiKhoan"] as BookStoreOnline.Models.NHANVIEN;
-
-    if (admin == null)
-    {
-        Response.Redirect("~/Home/Index");
-    }
-
-    // Định dạng giá
+    if (admin == null) { Response.Redirect("~/Home/Index"); }
     var price = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
 }
 
-<head>
-    <title>Trang chính</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Main CSS-->
-    <link rel="stylesheet" type="text/css" href="~/Content/AdminAssets/css/main.css">
-    <link rel="stylesheet" type="text/css" href="~/Content/AdminAssets/css/sb-admin-2.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
-    <!-- or -->
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
-    <!-- Font-icon css-->
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
-    <link rel="stylesheet" href="~/Content/font-awesome.min.css">
-</head>
-
-<body style="margin-right:50px;" onload="time()" class="app sidebar-mini rtl">
-    <main class="app-content">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="app-title">
-                    <ul style="background-color: white;" class="app-breadcrumb breadcrumb">
-                        <li class="breadcrumb-item"><a style="color:black;" href="#"><b>Trang chính</b></a></li>
-                    </ul>
-                    <div id="clock"></div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <!--Left-->
-            <div class="col-md-12 ">
-                <div class="row">
-                    <!-- col-6 -->
-                    <div class="col-md-6">
-                        <div class="widget-small primary coloured-icon">
-                            <i class='icon bx bxs-user-account fa-3x'></i>
-                            <div class="info">
-                                <h4>Tổng khách hàng</h4>
-                                <p><b>@ViewBag.SoLuongKhachHang khách hàng</b></p>
-                                <p class="info-tong">Tổng số khách hàng được quản lý.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- col-6 -->
-                    <div class="col-md-6">
-                        <div class="widget-small info coloured-icon">
-                            <i class='icon bx bxs-data fa-3x'></i>
-                            <div class="info">
-                                <h4>Tổng sản phẩm</h4>
-                                <p><b>@ViewBag.TongSanPham sản phẩm</b></p>
-                                <p class="info-tong">Tổng số sản phẩm được quản lý.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- col-6 -->
-                    <div class="col-md-6">
-                        <div class="widget-small warning coloured-icon">
-                            <i class='icon bx bxs-shopping-bags fa-3x'></i>
-                            <div class="info">
-                                <h4>Tổng đơn hàng</h4>
-                                <p><b>@ViewBag.TongDonHang đơn hàng</b></p>
-                                <p class="info-tong">Tổng số hóa đơn bán hàng trong tháng.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- col-6 -->
-                    <div class="col-md-6">
-                        <div class="widget-small danger coloured-icon">
-                            <i class='icon bx bxs-category fa-3x'></i>
-                            <div class="info">
-                                <h4>Tổng loại sản phẩm</h4>
-                                <p><b>@ViewBag.TongLoai loại</b></p>
-                                <p class="info-tong">Tổng số loại sản phẩm hiện có.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- col-12 -->
-                    <div class="col-md-12">
-                        <div class="tile">
-                            <h3 class="tile-title">Tình trạng đơn hàng</h3>
-                            <div>
-                                <table class="table table-bordered col-md-12">
-                                    <thead>
-                                        <tr>
-                                            <th>Mã đơn hàng</th> <!-- Cột Mã Đơn Hàng -->
-                                            <th>Tên khách hàng</th>
-                                            <th>Tổng tiền</th>
-                                            <th>Trạng thái</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var order in ViewBag.DonHangs as List<BookStoreOnline.Models.DONHANG>)
-                                        {
-                                            <tr>
-                                                <td>@order.MaDonHang</td> <!-- Hiển thị mã đơn hàng -->
-                                                <td>@order.KHACHHANG.Ten</td>
-                                                <td>@order.TongTien.ToString("C", price)</td>
-                                                <td>
-                                                    @switch (order.TrangThai)
-                                                    {
-                                                        case 0:
-                                                            @:Đang xử lý
-                                                            break;
-                                                        case 1:
-                                                            @:Đã xác nhận
-                                                            break;
-                                                        case 2:
-                                                            @:Đang giao hàng
-                                                            break;
-                                                        case 3:
-                                                            @:Đã nhận hàng
-                                                            break;
-                                                        case 4:
-                                                            @:Đã hủy đơn
-                                                            break;
-
-                                                    }
-                                                </td>
-
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-        <!-- / col-12 -->
-        <!-- col-12 -->
-        <!--END right-->
-        </div>
-        </div>
-        </div>
-    </main>
-    <script src="~/admin/js_doc/jquery-3.2.1.min..js"></script>
-    <script src="~/admin/js_doc/popper.min.js"></script>
-    <script src="https://unpkg.com/boxicons@latest/dist/boxicons.js"></script>
-    <script src="~/admin/js_doc/bootstrap.min.js"></script>
-    <script src="~/admin/js_doc/main.js"></script>
-    <script src="~/admin/js_doc/plugin/pace.min.js"></script>
-    <script type="text/javascript" src="~/admin/plugin/chart.js"></script>
-    <script type="text/javascript">
-
-
-        var ctxl = document.getElementById("myLineChart").getContext("2d");
-        var myLineChart = new Chart(ctxl, {
-            type: 'line',
-            data: data,
-            options: {
-                responsive: true
-            }
-        });
-    </script>
-</body>
-</html>
-<script type="text/javascript">
-    //Thời Gian
-    function time() {
-        var today = new Date();
-        var weekday = new Array(7);
-        weekday[0] = "Chủ Nhật";
-        weekday[1] = "Thứ Hai";
-        weekday[2] = "Thứ Ba";
-        weekday[3] = "Thứ Tư";
-        weekday[4] = "Thứ Năm";
-        weekday[5] = "Thứ Sáu";
-        weekday[6] = "Thứ Bảy";
-        var day = weekday[today.getDay()];
-        var dd = today.getDate();
-        var mm = today.getMonth() + 1;
-        var yyyy = today.getFullYear();
-        var h = today.getHours();
-        var m = today.getMinutes();
-        var s = today.getSeconds();
-        m = checkTime(m);
-        s = checkTime(s);
-        nowTime = h + " giờ " + m + " phút " + s + " giây";
-        if (dd < 10) {
-            dd = '0' + dd
-        }
-        if (mm < 10) {
-            mm = '0' + mm
-        }
-        today = day + ', ' + dd + '/' + mm + '/' + yyyy;
-        tmp = '<span class="date"> ' + today + ' - ' + nowTime +
-            '</span>';
-        document.getElementById("clock").innerHTML = tmp;
-        clocktime = setTimeout("time()", "1000", "Javascript");
-
-        function checkTime(i) {
-            if (i < 10) {
-                i = "0" + i;
-            }
-            return i;
-        }
+<style>
+    .dash-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
     }
+    .dash-title { font-size: 22px; font-weight: 800; color: #0f172a; }
+    .dash-title span { color: #e8392a; }
+    .dash-clock {
+        font-size: 13px; color: #64748b; font-weight: 500;
+        background: #fff; border: 1px solid #e2e8f0;
+        border-radius: 8px; padding: 8px 16px;
+    }
+    .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
+    .stat-card {
+        background: #fff; border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        padding: 24px 20px;
+        display: flex; align-items: center; gap: 18px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        transition: all 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .stat-icon {
+        width: 56px; height: 56px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px; flex-shrink: 0;
+    }
+    .stat-icon.blue  { background: #eff6ff; color: #3b82f6; }
+    .stat-icon.red   { background: #fef2f2; color: #e8392a; }
+    .stat-icon.green { background: #f0fdf4; color: #22c55e; }
+    .stat-icon.amber { background: #fffbeb; color: #f59e0b; }
+    .stat-label { font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .stat-value { font-size: 26px; font-weight: 800; color: #0f172a; }
+    .stat-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+
+    .section-card {
+        background: #fff; border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+    .section-card-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-card-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table thead th {
+        background: #f8fafc; font-size: 11px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.6px;
+        color: #64748b; padding: 12px 16px;
+        border-bottom: 1px solid #e2e8f0; text-align: left;
+    }
+    .admin-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+    .admin-table tbody tr:hover { background: #f8fafc; }
+    .admin-table tbody tr:last-child { border-bottom: none; }
+    .admin-table tbody td { padding: 12px 16px; font-size: 13px; color: #334155; }
+    .badge-status {
+        display: inline-block; padding: 3px 10px;
+        border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .badge-processing { background:#fef9c3; color:#854d0e; }
+    .badge-confirmed  { background:#dcfce7; color:#166534; }
+    .badge-shipping   { background:#dbeafe; color:#1e40af; }
+    .badge-received   { background:#f0fdf4; color:#15803d; }
+    .badge-canceled   { background:#fee2e2; color:#991b1b; }
+    @@media (max-width: 1200px) { .stat-cards { grid-template-columns: repeat(2, 1fr); } }
+    @@media (max-width: 768px) { .stat-cards { grid-template-columns: 1fr; } }
+</style>
+
+<div class="dash-header">
+    <div class="dash-title">Trang <span>Tổng Quan</span></div>
+    <div class="dash-clock" id="clock">Đang tải...</div>
+</div>
+
+<div class="stat-cards">
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+        <div>
+            <div class="stat-label">Khách Hàng</div>
+            <div class="stat-value">@ViewBag.SoLuongKhachHang</div>
+            <div class="stat-sub">Tổng khách hàng đang quản lý</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon red"><i class="bi bi-book-fill"></i></div>
+        <div>
+            <div class="stat-label">Sản Phẩm</div>
+            <div class="stat-value">@ViewBag.TongSanPham</div>
+            <div class="stat-sub">Tổng số sách trong hệ thống</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon amber"><i class="bi bi-cart-fill"></i></div>
+        <div>
+            <div class="stat-label">Đơn Hàng</div>
+            <div class="stat-value">@ViewBag.TongDonHang</div>
+            <div class="stat-sub">Tổng đơn hàng trong tháng</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="bi bi-tags-fill"></i></div>
+        <div>
+            <div class="stat-label">Thể Loại</div>
+            <div class="stat-value">@ViewBag.TongLoai</div>
+            <div class="stat-sub">Tổng loại sản phẩm hiện có</div>
+        </div>
+    </div>
+</div>
+
+<div class="section-card">
+    <div class="section-card-header">
+        <span class="section-card-title"><i class="bi bi-receipt me-2" style="color:#e8392a"></i>Đơn Hàng Gần Đây</span>
+        <a href="/Admin/OrdersAdmin?status=0" style="font-size:13px; color:#e8392a; text-decoration:none; font-weight:600;">Xem tất cả →</a>
+    </div>
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Mã Đơn</th>
+                    <th>Tên Khách Hàng</th>
+                    <th>Tổng Tiền</th>
+                    <th>Trạng Thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in ViewBag.DonHangs as List<BookStoreOnline.Models.DONHANG>)
+                {
+                    <tr>
+                        <td><strong>#@order.MaDonHang</strong></td>
+                        <td>@order.KHACHHANG.Ten</td>
+                        <td style="font-weight:600; color:#e8392a;">@order.TongTien.ToString("C", price)</td>
+                        <td>
+                            @switch (order.TrangThai)
+                            {
+                                case 0: <span class="badge-status badge-processing">Chờ xác nhận</span> break;
+                                case 1: <span class="badge-status badge-confirmed">Đã xác nhận</span> break;
+                                case 2: <span class="badge-status badge-shipping">Đang giao hàng</span> break;
+                                case 3: <span class="badge-status badge-received">Đã nhận hàng</span> break;
+                                case 4: <span class="badge-status badge-canceled">Đã hủy</span> break;
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function updateClock() {
+        var weekday = ["Chủ Nhật","Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy"];
+        var now = new Date();
+        var h = String(now.getHours()).padStart(2,'0');
+        var m = String(now.getMinutes()).padStart(2,'0');
+        var s = String(now.getSeconds()).padStart(2,'0');
+        var dd = String(now.getDate()).padStart(2,'0');
+        var mm = String(now.getMonth()+1).padStart(2,'0');
+        var day = weekday[now.getDay()];
+        document.getElementById('clock').innerText = day + ', ' + dd + '/' + mm + '/' + now.getFullYear() + '  ' + h + ':' + m + ':' + s;
+        setTimeout(updateClock, 1000);
+    }
+    updateClock();
 </script>
-
-

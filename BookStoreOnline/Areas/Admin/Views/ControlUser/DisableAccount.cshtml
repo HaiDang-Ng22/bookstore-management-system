@@ -1,25 +1,88 @@
-﻿@model BookStoreOnline.Models.KHACHHANG
+@model BookStoreOnline.Models.KHACHHANG
 @{
-    ViewBag.Title = "DisableAccount";
+    ViewBag.Title = "Vô Hiệu Hóa Tài Khoản Khách Hàng";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<div class="card-body">
-    <h2 class="card-title">Vô hiệu khóa</h2>
+
+<style>
+    .form-page-header { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+    .form-page-header .back-btn {
+        width:36px; height:36px; border-radius:10px; background:#f1f5f9;
+        display:flex; align-items:center; justify-content:center;
+        text-decoration:none; color:#475569; transition:all 0.2s; font-size:16px;
+    }
+    .form-page-header .back-btn:hover { background:#e2e8f0; color:#0f172a; }
+    .form-page-title { font-size:20px; font-weight:800; color:#0f172a; }
+    .form-page-title span { color:#d97706; }
+    .warning-card {
+        background:#fff; border-radius:16px;
+        border:1px solid #fef3c7;
+        box-shadow: 0 4px 20px rgba(217, 119, 6, 0.05);
+        overflow:hidden; max-width:560px;
+    }
+    .warning-card-header {
+        padding:24px 28px; border-bottom:1px solid #fef3c7;
+        background:#fffbeb; display:flex; align-items:center; gap:12px;
+    }
+    .warning-card-header h2 { font-size:16px; font-weight:700; color:#92400e; margin:0; }
+    .warning-card-body { padding:28px; }
+    .warning-text { font-size:15px; color:#4b5563; margin-bottom:24px; line-height:1.5; }
+    
+    .detail-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+    .detail-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .detail-value { font-size: 15px; font-weight: 700; color: #0f172a; }
+
+    .form-actions { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+    .btn-cancel {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#f1f5f9; color:#475569; border:none; border-radius:10px;
+        padding:11px 20px; font-size:14px; font-weight:600;
+        text-decoration:none; transition:all 0.2s; cursor:pointer;
+    }
+    .btn-cancel:hover { background:#e2e8f0; color:#0f172a; text-decoration:none; }
+    .btn-warning-action {
+        display:inline-flex; align-items:center; gap:6px;
+        background:linear-gradient(135deg,#d97706,#f59e0b); color:#fff;
+        border:none; border-radius:10px; padding:11px 24px;
+        font-size:14px; font-weight:600; cursor:pointer;
+        transition:all 0.2s; box-shadow:0 4px 12px rgba(217,119,6,0.25);
+    }
+    .btn-warning-action:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(217,119,6,0.35); }
+</style>
+
+<div class="form-page-header">
+    <a href="/Admin/ControlUser" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <div class="form-page-title">Khóa <span>Khách Hàng</span></div>
 </div>
-<div class="card mt-4 shadow-sm">
-    <div class="card-body">
-        <h3 class="text-center mb-4">Bạn có chắc chắn muốn vô hiệu khóa Người dùng này?</h3>
-        <h4 class="text-center">
-            Người dùng: @Html.DisplayFor(model => model.Ten)
-        </h4>
+
+<div class="warning-card">
+    <div class="warning-card-header">
+        <i class="bi bi-lock-fill text-warning fs-5"></i>
+        <h2>Vô Hiệu Hóa Tài Khoản</h2>
+    </div>
+    <div class="warning-card-body">
+        <p class="warning-text">
+            Khách hàng này sẽ không thể đăng nhập vào hệ thống cửa hàng cho đến khi được mở khóa lại. Bạn có chắc chắn muốn khóa không?
+        </p>
+
+        <div class="detail-row">
+            <span class="detail-label">Tên Khách Hàng</span>
+            <span class="detail-value">@Model.Ten</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">@Model.Email</span>
+        </div>
+
         @using (Html.BeginForm())
         {
             @Html.AntiForgeryToken()
-            <div class="d-flex justify-content-between">
-                <input type="submit" value="Vô hiệu" class="btn btn-danger" />
-                @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary", style = "color: white !important;" })
+            <div class="form-actions">
+                @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn-cancel" })
+                <button type="submit" class="btn-warning-action">
+                    <i class="bi bi-lock-fill"></i> Khóa Tài Khoản
+                </button>
             </div>
         }
     </div>
 </div>
-

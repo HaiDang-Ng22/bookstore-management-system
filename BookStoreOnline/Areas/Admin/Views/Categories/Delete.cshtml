@@ -1,28 +1,89 @@
-﻿@model BookStoreOnline.Models.LOAI
+@model BookStoreOnline.Models.LOAI
 
 @{
-    ViewBag.Title = "Delete";
+    ViewBag.Title = "Xóa Thể Loại";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<div class="card-body">
-    <h2 class="card-title">Xóa</h2>
+
+<style>
+    .form-page-header { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+    .form-page-header .back-btn {
+        width:36px; height:36px; border-radius:10px; background:#f1f5f9;
+        display:flex; align-items:center; justify-content:center;
+        text-decoration:none; color:#475569; transition:all 0.2s; font-size:16px;
+    }
+    .form-page-header .back-btn:hover { background:#e2e8f0; color:#0f172a; }
+    .form-page-title { font-size:20px; font-weight:800; color:#0f172a; }
+    .form-page-title span { color:#dc2626; }
+    .danger-card {
+        background:#fff; border-radius:16px;
+        border:1.5px solid #fee2e2;
+        box-shadow:0 2px 12px rgba(220,38,38,0.06);
+        overflow:hidden; max-width:520px;
+    }
+    .danger-card-header {
+        background:linear-gradient(135deg,#fee2e2,#fef2f2);
+        padding:24px 28px; border-bottom:1px solid #fecaca;
+        text-align:center;
+    }
+    .danger-icon {
+        width:64px; height:64px; background:#fca5a5; border-radius:50%;
+        display:inline-flex; align-items:center; justify-content:center;
+        font-size:28px; color:#7f1d1d; margin-bottom:12px;
+    }
+    .danger-card-header h2 { font-size:18px; font-weight:800; color:#7f1d1d; margin:0 0 4px; }
+    .danger-card-header p { font-size:13px; color:#991b1b; margin:0; }
+    .danger-card-body { padding:28px; }
+    .confirm-info {
+        background:#f8fafc; border-radius:10px; padding:16px 20px;
+        margin-bottom:24px; border:1px solid #e2e8f0;
+    }
+    .confirm-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; margin-bottom:4px; }
+    .confirm-value { font-size:15px; font-weight:700; color:#0f172a; }
+    .form-actions { display:flex; align-items:center; justify-content:space-between; }
+    .btn-cancel {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#f1f5f9; color:#475569; border:none; border-radius:10px;
+        padding:11px 20px; font-size:14px; font-weight:600;
+        text-decoration:none; transition:all 0.2s; cursor:pointer;
+    }
+    .btn-cancel:hover { background:#e2e8f0; color:#0f172a; text-decoration:none; }
+    .btn-danger-del {
+        display:inline-flex; align-items:center; gap:6px;
+        background:linear-gradient(135deg,#dc2626,#ef4444); color:#fff;
+        border:none; border-radius:10px; padding:11px 24px;
+        font-size:14px; font-weight:600; cursor:pointer;
+        transition:all 0.2s; box-shadow:0 4px 12px rgba(220,38,38,0.3);
+    }
+    .btn-danger-del:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(220,38,38,0.4); }
+</style>
+
+<div class="form-page-header">
+    <a href="/Admin/Categories" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <div class="form-page-title">Xóa <span>Thể Loại</span></div>
 </div>
-<div class="card mt-4 shadow-sm">
-    <div class="card-body">
-        <h3 class="text-center mb-4">Bạn có chắc chắn muốn xóa danh mục này?</h3>
-        <h4 class="text-center"> 
-             Danh mục: @Html.DisplayFor(model => model.Tenloai) 
-        </h4>
+
+<div class="danger-card">
+    <div class="danger-card-header">
+        <div class="danger-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <h2>Xác Nhận Xóa</h2>
+        <p>Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa thể loại này?</p>
+    </div>
+    <div class="danger-card-body">
+        <div class="confirm-info">
+            <div class="confirm-label">Thể Loại Sẽ Xóa</div>
+            <div class="confirm-value">@Html.DisplayFor(model => model.Tenloai)</div>
+        </div>
+
         @using (Html.BeginForm())
         {
             @Html.AntiForgeryToken()
-            <div class="d-flex justify-content-between">
-                <input type="submit" value="Xóa" class="btn btn-danger" />
-                @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary", style = "color: white !important;" })
+            <div class="form-actions">
+                @Html.ActionLink("Hủy Bỏ", "Index", null, new { @class = "btn-cancel" })
+                <button type="submit" class="btn-danger-del">
+                    <i class="bi bi-trash-fill"></i> Xác Nhận Xóa
+                </button>
             </div>
         }
     </div>
 </div>
-
-
-

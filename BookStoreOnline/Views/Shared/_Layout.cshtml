@@ -1,319 +1,461 @@
-﻿﻿﻿﻿@{
-    ViewBag.Title = "Nhà sách Online - Sách hay, giá rẻ";
-    ViewBag.MetaDescription = "Mua sách online chất lượng cao, giá tốt tại BookStoreOnline. Đặt hàng ngay!";
-    ViewBag.MetaKeywords = "mua sách online, nhà sách, sách hay, sách giá rẻ";
+@{
     var user = Session["TaiKhoan"] as BookStoreOnline.Models.KHACHHANG;
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-site-verification" content="jjyrKvLVNkAJrkhKMP8f3KkfobR2nMQ2PD07LZCQbZI" />
-    <title>@ViewBag.Title</title>
-    <meta name="description" content="@ViewBag.MetaDescription">
-    <meta name="keywords" content="@ViewBag.MetaKeywords">
-    <title>Nhà sách Online - Mua sách hay, giá rẻ | BookStoreOnline</title>
-    <meta name="description" content="Mua sách online với giá ưu đãi tại BookStoreOnline. Sách mới nhất, đa thể loại, giao hàng nhanh chóng. Khám phá ngay!">
-    <title>@ViewBag.Title | Nhà Sách Online</title>
-    <meta name="description" content="Nhà sách trực tuyến cung cấp hàng nghìn đầu sách chất lượng với giá tốt nhất." />
-    <meta name="keywords" content="sách, mua sách online, nhà sách, truyện tranh, sách giáo khoa, sách văn học" />
-    <meta name="author" content="Nhà Sách Online" />
-    <meta name="robots" content="index, follow" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- Open Graph để hiển thị đẹp trên Facebook -->
-    <meta property="og:title" content="Nhà Sách Online - Mua Sách Giá Tốt" />
-    <meta property="og:description" content="Nhà sách trực tuyến với hàng nghìn đầu sách phong phú, đa dạng thể loại." />
-    <meta property="og:image" content="https://ttmhoang8th4-001-site1.ntempurl.com/" />
-    <meta property="og:url" content="https://ttmhoang8th4-001-site1.ntempurl.com/" />
-
-    <!-- Twitter Card -->
-    <meta name="twitter:title" content="Nhà Sách Online - Mua Sách Giá Tốt" />
-    <meta name="twitter:description" content="Nhà sách trực tuyến với hàng nghìn đầu sách phong phú, đa dạng thể loại." />
-    <meta name="twitter:image" content="https://ttmhoang8th4-001-site1.ntempurl.com/" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <title>@(ViewBag.Title != null ? ViewBag.Title + " | " : "")Nhà Sách Online</title>
+    <meta name="description" content="@(ViewBag.MetaDescription ?? "Mua sách online chất lượng cao, giá tốt tại Nhà Sách Online. Đặt hàng ngay!")">
+    <meta name="keywords" content="sách, mua sách online, nhà sách, sách hay, sách giá rẻ">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Nhà Sách Online">
+    <meta property="og:description" content="Nhà sách trực tuyến cung cấp hàng nghìn đầu sách chất lượng với giá tốt nhất.">
     <link rel="icon" href="~/Images/z5482551824090_8d0041d8091c42fc59c7cfff0e837099.jpg">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link href="~/Content/style.css" rel="stylesheet" />
-    <link href="~/Content/AdminAssets/css/SignUp.css" rel="stylesheet" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap 4 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- Custom CSS -->
+    <link href="~/Content/style.css" rel="stylesheet">
+
     <style>
-        .row-navbar {
-            align-items: center;
-            background: #C92127;
-            padding: 3px;
-            border-radius: 3px;
-        }
+        body { font-family: 'Inter', sans-serif !important; background: #f5f6fa !important; }
 
-        .logo {
-            border-radius: 50%;
-            height: 100px;
-            width: 80%;
-        }
-
-        form button {
-            width: 91px;
-            background-color: #c92127;
-        }
-
-        .cart-link {
-            margin-left: 133px;
-            margin-bottom: 10px;
-        }
-
-            .cart-link i {
-                color: #c92127;
-            }
-
-        .navbar-nav a {
-            color: #000;
-            margin-right: 40px;
-            height: auto;
-            box-shadow: none;
-            font-weight: 500;
-        }
-
-        footer {
-            padding: 10px;
-            font-size: 12px;
-            height: 576px;
-        }
-
-        .footer-information {
-            border-right: 1px solid #cecece;
-            height: 300px;
-            display: block;
-            margin-bottom: 100px
-        }
-
-        h6 {
-            margin-top: 60px;
-            text-align: center;
-            display: inline-block;
-        }
-
-        .head-middle form button {
-            width: 80px;
-            height: 42px;
-            /* border-radius: 50%; */
-            border-radius: 14px;
-            border: none;
-            background-color: #C92127;
+        /* ---- Top announcement bar ---- */
+        .top-bar {
+            background: linear-gradient(135deg, #e8392a 0%, #ff6b5b 100%);
             color: #fff;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 7px 0;
+            letter-spacing: .3px;
+        }
+        .top-bar a { color: #fff; text-decoration: underline; margin-left: 6px; }
+
+        /* ---- Header ---- */
+        .site-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 12px rgba(0,0,0,.06);
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 12px 0;
+        }
+        .logo-wrap { flex: 0 0 auto; }
+        .logo-wrap img { height: 52px; width: auto; border-radius: 8px; transition: .25s; }
+        .logo-wrap img:hover { transform: scale(1.04); }
+
+        .search-wrap { flex: 1; max-width: 560px; }
+        .search-wrap form { position: relative; }
+        .search-input {
+            width: 100%;
+            height: 44px;
+            border-radius: 999px;
+            border: 1.5px solid #e5e7eb;
+            padding: 0 52px 0 20px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            background: #f5f6fa;
+            color: #374151;
             outline: none;
+            transition: .25s;
+        }
+        .search-input::placeholder { color: #9ca3af; }
+        .search-input:focus { border-color: #e8392a; background: #fff; box-shadow: 0 0 0 3px rgba(232,57,42,.1); }
+        .search-btn {
+            position: absolute;
+            right: 4px; top: 4px;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg,#e8392a,#ff6b5b);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
+            transition: .25s;
+            font-size: 14px;
+        }
+        .search-btn:hover { box-shadow: 0 4px 14px rgba(232,57,42,.4); transform: scale(1.08); }
+
+        .header-actions {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+        .cart-btn {
             position: relative;
-            left: -50px;
+            color: #e8392a;
+            font-size: 26px;
+            display: inline-flex;
+            align-items: center;
+            margin-right: 4px;
+            transition: .25s;
+            text-decoration: none;
+        }
+        .cart-btn:hover { color: #c0281c; transform: scale(1.1); }
+        .cart-count {
+            position: absolute;
+            top: -6px; right: -10px;
+            min-width: 19px; height: 19px;
+            padding: 0 5px;
+            background: #e8392a;
+            color: #fff;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .btn-nav-register {
+            border: 1.5px solid #e8392a !important;
+            color: #e8392a !important;
+            background: transparent !important;
+            padding: 7px 16px !important;
+            border-radius: 999px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            text-decoration: none;
+            transition: .25s;
+        }
+        .btn-nav-register:hover { background: #fef2f2 !important; text-decoration: none; }
+
+        .btn-nav-login {
+            background: linear-gradient(135deg,#e8392a,#ff6b5b) !important;
+            color: #fff !important;
+            padding: 7px 18px !important;
+            border-radius: 999px !important;
+            font-weight: 700 !important;
+            font-size: 13px !important;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(232,57,42,.25) !important;
+            transition: .25s;
+        }
+        .btn-nav-login:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,57,42,.35) !important; text-decoration: none; color: #fff !important; }
+
+        /* ---- Main nav ---- */
+        .main-nav {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .main-nav-inner {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0;
+        }
+        .nav-link-item {
+            color: #374151 !important;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 14px 16px !important;
+            display: block;
+            position: relative;
+            text-decoration: none;
+            transition: color .2s;
+        }
+        .nav-link-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            width: 0; height: 2.5px;
+            background: linear-gradient(135deg,#e8392a,#ff6b5b);
+            transform: translateX(-50%);
+            border-radius: 2px;
+            transition: width .25s;
+        }
+        .nav-link-item:hover { color: #e8392a !important; text-decoration: none; }
+        .nav-link-item:hover::after { width: 60%; }
+
+        .nav-cat-btn {
+            background: linear-gradient(135deg,#e8392a,#ff6b5b);
+            color: #fff;
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            transition: .25s;
+        }
+        .nav-cat-btn:hover { opacity: .88; color: #fff; }
+
+        /* ---- User dropdown ---- */
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            text-decoration: none;
+            color: #374151;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            transition: .2s;
+        }
+        .user-dropdown-toggle:hover { background: #fef2f2; color: #e8392a; text-decoration: none; }
+        .user-avatar { font-size: 26px; color: #e8392a; }
+        .user-name { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .dropdown-menu {
+            border: none !important;
+            border-radius: 14px !important;
+            box-shadow: 0 12px 40px rgba(0,0,0,.12) !important;
+            padding: 8px !important;
+            min-width: 190px !important;
+        }
+        .dropdown-item {
+            border-radius: 8px !important;
+            padding: 10px 14px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            color: #374151 !important;
+            transition: .2s !important;
+        }
+        .dropdown-item:hover { background: #fef2f2 !important; color: #e8392a !important; }
+        .dropdown-item i { width: 18px; margin-right: 8px; color: #9ca3af; }
+        .dropdown-item:hover i { color: #e8392a; }
+        .dropdown-divider { margin: 6px 0 !important; border-color: #e5e7eb !important; }
+
+        /* ---- Footer ---- */
+        .site-footer {
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            padding: 56px 0 0;
+            margin-top: 60px;
+            color: #374151;
+        }
+        .footer-brand p { font-size: 13px; color: #9ca3af; line-height: 1.7; margin-top: 12px; }
+        .footer-col h5 {
+            font-size: 12px;
+            font-weight: 700;
+            color: #111827;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            margin-bottom: 18px;
+        }
+        .footer-link {
+            display: block;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 10px;
+            transition: color .2s;
+        }
+        .footer-link:hover { color: #e8392a; text-decoration: none; }
+        .footer-social { display: flex; gap: 10px; margin-top: 16px; }
+        .footer-social a {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: #f5f6fa;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: .25s;
+        }
+        .footer-social a:hover { background: linear-gradient(135deg,#e8392a,#ff6b5b); color: #fff; transform: translateY(-3px); }
+        .footer-bottom {
+            border-top: 1px solid #e5e7eb;
+            margin-top: 44px;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 12px;
+            color: #9ca3af;
         }
     </style>
+
+    @RenderSection("styles", required: false)
 </head>
-<body style="background: #F9F5EE">
-    <!-- header     -->
-    <div style="background-color: #F9F5EE;" class="header">
-        <div style="height:68px;" class="container head-content">
-            <div class="row">
-                <div class=" d-none d-lg-inline-block">
-                    <a href="@Url.Action("Index","Home")">
-                        <img class="logo" src="~/Images/z5482551824090_8d0041d8091c42fc59c7cfff0e837099.jpg" alt="">
+<body>
+    <!-- Top bar -->
+    <div class="top-bar d-none d-md-block">
+        🎉 Miễn phí vận chuyển cho đơn hàng trên 200.000đ &nbsp;|&nbsp; Giao hàng nhanh toàn quốc
+        <a href="@Url.Action("GetAllBook","Category")">Mua ngay</a>
+    </div>
+
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container header-inner">
+            <!-- Logo -->
+            <div class="logo-wrap d-none d-lg-block">
+                <a href="@Url.Action("Index","Home")">
+                    <img src="~/Images/z5482551824090_8d0041d8091c42fc59c7cfff0e837099.jpg" alt="BookStore Logo">
+                </a>
+            </div>
+
+            <!-- Search -->
+            <div class="search-wrap">
+                @using (Html.BeginForm("Search", "Category", FormMethod.Post))
+                {
+                    <div style="position:relative;">
+                        <input type="text" name="inputString" placeholder="Tìm kiếm sách, tác giả..." class="search-input">
+                        <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+                    </div>
+                }
+            </div>
+
+            <!-- Actions -->
+            <div class="header-actions">
+                <!-- Cart -->
+                @if (user == null)
+                {
+                    <a href="@Url.Action("Login","User")" class="cart-btn">
+                        <i class="bi bi-bag"></i>
                     </a>
-                </div>
-                <div style="margin-left: 70px;" class="col-lg-6 col-12 head-middle">
-                    @using (Html.BeginForm("Search", "Category", FormMethod.Post))
-                    {
-                        <form class="d-flex d-lg-block">
-                            <input style="min-width: 300px;" type="text" name="inputString" placeholder="Nhập từ khóa tìm kiếm...">
-                            <button class="d-none d-lg-inline-block btn-search" type="submit"><i class="bi bi-search"></i></button>
-                        </form>
-                    }
-                </div>
-                <div class="col-lg-3  mt-auto mt-lg-0  head-right">
-                    @if (user == null)
-                    {
-                        <a href="@Url.Action("Login","User")" class="cart-link">
-                            <i class="bi bi-cart-fill"></i>
-                            <span class="icon-down">
-                                <i class="bi bi-chevron-down"></i>
-                            </span>
+                }
+                else
+                {
+                    { Html.RenderAction("CartPartial", "Cart"); }
+                }
+
+                <!-- Auth or User -->
+                @if (user == null)
+                {
+                    <a href="@Url.Action("SignUp","User")" class="btn-nav-register d-none d-sm-inline">Đăng ký</a>
+                    <a href="@Url.Action("Login","User")" class="btn-nav-login">Đăng nhập</a>
+                }
+                else
+                {
+                    <div class="dropdown">
+                        <a class="user-dropdown-toggle" href="#" role="button" id="userDropdown" data-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle user-avatar"></i>
+                            <span class="user-name d-none d-sm-inline">@user.Ten</span>
+                            <i class="bi bi-chevron-down" style="font-size:11px; color:#9ca3af;"></i>
                         </a>
-                    }
-                    else
-                    {
-                        { Html.RenderAction("CartPartial", "Cart"); }
-                    }
-
-                    @if (user == null)
-                    {
-                        <a style="background-color: #fff; color: #000; font-size: 15px;" href="@Url.Action("SignUp", "User")" class="custom-btn btn-login btn-register">Đăng ký</a>
-                        <a style="background-color: #C92127; font-size: 14px;" href="@Url.Action("Login", "User")" class="custom-btn btn-signup">Đăng nhập</a>
-                    }
-                    else
-                    {
-                        <div class="dropdown show">
-                            <a class="user-link-option" href="" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i style="margin: 20px; color: #c92127;" class="bi bi-person-circle"></i>
-                                <p style="font-size: 22px; color: #c92127; width: 100px; "> @user.Ten</p>
-
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                            <div style="padding:8px 14px 6px; border-bottom:1px solid #e5e7eb; margin-bottom:4px;">
+                                <div style="font-weight:700; font-size:14px; color:#111827;">@user.Ten</div>
+                                <div style="font-size:12px; color:#9ca3af;">@user.Email</div>
+                            </div>
+                            <a class="dropdown-item" href="@Url.Action("UpdateInfo","User")">
+                                <i class="bi bi-person"></i> Thông tin cá nhân
                             </a>
-
-
-                            <div class="dropdown-menu mr-5" aria-labelledby="dropdownMenuLink">
-                                <a class="dropdown-item" href="@Url.Action("UpdateInfo", "User")">Thông Tin Cá Nhân</a>
-                                <a class="dropdown-item" href="@Url.Action("Index/"+user.MaKH,"Order")">Đơn Hàng Của Bạn</a>
-                                <a class="dropdown-item" href="@Url.Action("ChangePassword", "User")">Đổi Mật Khẩu</a>
-                                <a class="dropdown-item" href="@Url.Action("LogOut","User")">Đăng Xuất</a>
-                            </div>
+                            <a class="dropdown-item" href="@Url.Action("Index/" + user.MaKH,"Order")">
+                                <i class="bi bi-bag-check"></i> Đơn hàng của tôi
+                            </a>
+                            <a class="dropdown-item" href="@Url.Action("ChangePassword","User")">
+                                <i class="bi bi-shield-lock"></i> Đổi mật khẩu
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="@Url.Action("LogOut","User")" style="color:#e8392a !important;">
+                                <i class="bi bi-box-arrow-right" style="color:#e8392a;"></i> Đăng xuất
+                            </a>
                         </div>
-
-                    }
-
-                </div>
-            </div>
-        </div>
-
-    </div>
-    <!-- end-header -->
-    <!-- nav -->
-    <div class="nav">
-        <div style="margin-top:20px; margin-bottom:-10px" class="container nav-list">
-            <div class="row row-navbar">
-                <div class="col-lg-2">
-                    <div style="z-index:1;" class="col-lg-1 d-lg-none d-inline-block">
-                        @{Html.RenderAction("GetPartialCategoryNav", "CategoryPartial");}
                     </div>
-                </div>
-
-                <div class="col-lg-8">
-                    <nav class="navbar d-none d-lg-inline-block navbar-expand-lg navbar-light">
-                        <div class="collapse navbar-collapse" id="">
-                            <div style="margin-left: 49px;" class="navbar-nav">
-                                <a class="nav-item nav-link " href="@Url.Action("Index","Home")">Trang chủ <span class="sr-only">(current)</span></a>
-                                <a class="nav-item nav-link " href="@Url.Action("GetAllBook","Category")">Tất cả sản phẩm</a>
-                                <a class="nav-item nav-link " href="@Url.Action("Index","GioiThieu")">Giới thiệu</a>
-                                <a class="nav-item nav-link " href="@Url.Action("Index", "LienHe")">Liên hệ</a>
-                            </div>
-                        </div>
-                    </nav>
-
-                </div>
+                }
             </div>
         </div>
-    </div>
-    <!-- end-nav -->
-    @RenderBody()
-    <footer class="col-lg-12 col-12">
-        <div class="footer-container">
+    </header>
+
+    <!-- Main Nav -->
+    <nav class="main-nav d-none d-lg-block">
+        <div class="container">
+            <div class="main-nav-inner">
+                <!-- Category toggle -->
+                <div style="z-index:10;">
+                    @{ Html.RenderAction("GetPartialCategoryNav", "CategoryPartial"); }
+                </div>
+
+                <a class="nav-link-item" href="@Url.Action("Index","Home")">
+                    <i class="bi bi-house me-1"></i> Trang chủ
+                </a>
+                <a class="nav-link-item" href="@Url.Action("GetAllBook","Category")">
+                    <i class="bi bi-grid me-1"></i> Tất cả sản phẩm
+                </a>
+                <a class="nav-link-item" href="@Url.Action("Index","GioiThieu")">
+                    <i class="bi bi-info-circle me-1"></i> Giới thiệu
+                </a>
+                <a class="nav-link-item" href="@Url.Action("Index","LienHe")">
+                    <i class="bi bi-envelope me-1"></i> Liên hệ
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page content -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
             <div class="row">
-                <div class="col-md-4 d-none d-lg-block">
-                    <div class="footer-information">
-                        <img class="col-12" style="width:450px;" src="~/Images/z5482551824090_8d0041d8091c42fc59c7cfff0e837099.jpg" />
+                <div class="col-md-3 mb-4 footer-brand">
+                    <img src="~/Images/z5482551824090_8d0041d8091c42fc59c7cfff0e837099.jpg" alt="Logo" style="height:52px; border-radius:8px;">
+                    <p>Nhà sách trực tuyến chất lượng cao, mang tri thức đến mọi nhà với giá tốt nhất.</p>
+                    <div class="footer-social">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" title="TikTok"><i class="fab fa-tiktok"></i></a>
                     </div>
                 </div>
-                <div style="float:right" class="col-md-8">
-                    <div class="col footer-item col-four">
-                        <h4>Dịch vụ </h4>
-                        <p class="text-footer">
-                            Giới thiệu về nhà sách
-                        </p>
-                        <p class="text-footer">
-                            Hệ thống nhà sách
-                        </p>
-                        <p class="text-footer">
-                            Điều khoản sử dụng
-                        </p>
-                        <p class="text-footer">
-                            Chính sách bảo mật
-                        </p>
-                        <p class="text-footer">
-                            Chính sách bán hàng
-                        </p>
-                        <p class="text-footer">
-                            Phương thức vận chuyển
-                        </p>
-                    </div>
 
+                <div class="col-md-3 mb-4 footer-col">
+                    <h5>Dịch vụ</h5>
+                    <a class="footer-link" href="#">Giới thiệu về nhà sách</a>
+                    <a class="footer-link" href="#">Hệ thống nhà sách</a>
+                    <a class="footer-link" href="#">Điều khoản sử dụng</a>
+                    <a class="footer-link" href="#">Chính sách bảo mật</a>
+                    <a class="footer-link" href="#">Phương thức vận chuyển</a>
+                </div>
 
+                <div class="col-md-3 mb-4 footer-col">
+                    <h5>Hỗ trợ</h5>
+                    <a class="footer-link" href="#">Chính sách đổi – trả</a>
+                    <a class="footer-link" href="#">Chính sách bảo hành</a>
+                    <a class="footer-link" href="#">Chính sách vận chuyển</a>
+                    <a class="footer-link" href="#">Phương thức thanh toán</a>
+                    <a class="footer-link" href="#">Câu hỏi thường gặp</a>
+                </div>
 
-                    <div class="col footer-item col-four">
-
-                        <h4>Tài khoản của tôi </h4>
-
-                        <p class="text-footer">
-                            Đăng nhập/Tạo mới tài khoản
-                        </p>
-                        <p class="text-footer">
-                            Thay đổi dịa chỉ khách hàng
-                        </p>
-                        <p class="text-footer">
-                            Chi tiết tài khoản
-                        </p>
-                        <p class="text-footer">
-                            Lịch sử mua hàng
-                        </p>
-
-                    </div>
-                    <div class="col footer-item col-four">
-                        <h4>Hỗ trợ</h4>
-                        <p class="text-footer">
-                            Chính sách đổi - trả - hoàn tiền
-                        </p>
-                        <p class="text-footer">
-                            Chính sách bảo hành - bồi hoàn
-                        </p>
-                        <p class="text-footer">
-                            Chính sách vận chuyển
-                        </p>
-                        <p class="text-footer">
-                            Chính sách khách sỉ
-                        </p>
-                        <p class="text-footer">
-                            Phương thức thanh toán và xuất HĐ
-                        </p>
-                    </div>
-                    <div class="col footer-item col-four">
-                        <h4>Liên hệ chúng tôi </h4>
-                        <p class="text-footer">
-                            Địa chỉ:60-62 Lê Lợi, Q.1, TP. HCM
-                        </p>
-                        <p class="d-none text-footer d-lg-block">
-                            Hotline:00000000000<br>
-                            Email:Nhasach@gmail.com
-                        </p>
-                        <ul class="social-icons d-none d-lg-block">
-                            <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                            <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                            <li><a href="#"><i class="fab fa-instagram"></i></a></li>
-                            <li><a href="#"><i class="fab fa-youtube"></i></a></li>
-                            <li><a href="#"><i class="fab fa-tiktok"></i></a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-donvihotro">
-                        <img class="d-none d-lg-block" style="display:block" src="~/Images/donvihotro.jpg" />
+                <div class="col-md-3 mb-4 footer-col">
+                    <h5>Liên hệ</h5>
+                    <a class="footer-link" href="#"><i class="bi bi-geo-alt me-2" style="color:#e8392a;"></i>60-62 Lê Lợi, Q.1, TP.HCM</a>
+                    <a class="footer-link" href="tel:0000000000"><i class="bi bi-telephone me-2" style="color:#e8392a;"></i>Hotline: 0000 000 000</a>
+                    <a class="footer-link" href="mailto:nhasach@gmail.com"><i class="bi bi-envelope me-2" style="color:#e8392a;"></i>nhasach@gmail.com</a>
+                    <div style="margin-top:16px;">
+                        <img src="~/Images/donvihotro.jpg" alt="Đơn vị hỗ trợ" style="max-height:36px; border-radius:4px;" onerror="this.style.display='none'">
                     </div>
                 </div>
             </div>
         </div>
-        <div class="">
-            <h6 class="d-lg-block d-none">
-                Giấy chứng nhận Đăng ký Kinh doanh số 0304132047 do Sở Kế hoạch và Đầu tư Thành phố Hồ Chí Minh cấp ngày 20/12/2005, đăng ký thay đổi lần thứ 10, ngày 20/05/2022.
-            </h6>
+        <div class="footer-bottom">
+            <div class="container">
+                <p style="margin:0;">© @DateTime.Now.Year <strong>Nhà Sách Online</strong>. Bản quyền thuộc về nhà sách. Giấy phép ĐKKD số 0304132047 – Sở KH&ĐT TP.HCM.</p>
+            </div>
         </div>
     </footer>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-XXXXXXX-X"></script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-116NSQV8Q5"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
 
-        gtag('config', 'G-116NSQV8Q5');
-    </script>
-    <script>
-        (function () { if (!window.chatbase || window.chatbase("getState") !== "initialized") { window.chatbase = (...arguments) => { if (!window.chatbase.q) { window.chatbase.q = [] } window.chatbase.q.push(arguments) }; window.chatbase = new Proxy(window.chatbase, { get(target, prop) { if (prop === "q") { return target.q } return (...args) => target(prop, ...args) } }) } const onLoad = function () { const script = document.createElement("script"); script.src = "https://www.chatbase.co/embed.min.js"; script.id = "_Px6ZiNVNfm05e89KFes0"; script.domain = "www.chatbase.co"; document.body.appendChild(script) }; if (document.readyState === "complete") { onLoad() } else { window.addEventListener("load", onLoad) } })();
-    </script>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+
+    @RenderSection("scripts", required: false)
 </body>
 </html>

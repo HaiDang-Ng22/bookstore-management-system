@@ -1,160 +1,170 @@
-﻿﻿@{
+﻿@{
     ViewBag.Title = "Tìm kiếm";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 @model IEnumerable<BookStoreOnline.Models.SANPHAM>
-
 @{
     var price = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
     var user = Session["TaiKhoan"] as BookStoreOnline.Models.KHACHHANG;
 }
 
-<div class="container body-page">
-    <h3 style="color:gray">Kết quả tìm kiếm cho "@ViewBag.TextSeatch"</h3>
-    <div class="row">
-        @foreach (var item in Model)
+@section styles {
+<style>
+    .search-section {
+        padding: 40px 15px;
+        min-height: calc(100vh - 280px);
+    }
+    .list-title {
+        font-size: 22px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 24px;
+        position: relative;
+        padding-bottom: 10px;
+    }
+    .list-title::after {
+        content: ''; position: absolute; bottom: 0; left: 0;
+        width: 44px; height: 3.5px;
+        background: linear-gradient(135deg,#e8392a,#ff6b5b);
+        border-radius: 2px;
+    }
+
+    /* Product grid */
+    .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    @@media(max-width:991px) { .products-grid { grid-template-columns: repeat(3,1fr); } }
+    @@media(max-width:767px) { .products-grid { grid-template-columns: repeat(2,1fr); } }
+    @@media(max-width:480px) { .products-grid { grid-template-columns: 1fr; } }
+
+    /* Product card */
+    .product-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 14px rgba(0,0,0,.06);
+        border: 1px solid #f1f5f9;
+        transition: .3s;
+        display: flex; flex-direction: column;
+        position: relative;
+        height: 100%;
+    }
+    .product-card:hover { transform: translateY(-6px); box-shadow: 0 12px 36px rgba(0,0,0,.12); }
+
+    .product-img-wrap {
+        background: #fafafa;
+        display: flex; align-items: center; justify-content: center;
+        height: 210px; overflow: hidden; padding: 12px;
+    }
+    .product-img-wrap img {
+        max-height: 186px; width: auto; object-fit: contain;
+        transition: transform .4s ease;
+    }
+    .product-card:hover .product-img-wrap img { transform: scale(1.06); }
+
+    .product-body { padding: 14px 14px 16px; display: flex; flex-direction: column; flex: 1; }
+    .product-title {
+        font-size: 14px; font-weight: 600; color: #1e293b;
+        line-height: 1.4; margin-bottom: 8px;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        height: 38px;
+    }
+    .product-title a { color: inherit; text-decoration: none; }
+    .product-title a:hover { color: #e8392a; }
+
+    .product-price { font-size: 17px; font-weight: 800; color: #e8392a; margin-bottom: 8px; }
+
+    .stars-row { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+    .star-icon { font-size: 11px; color: #e2e8f0; }
+    .star-icon.on { color: #f59e0b; }
+    .rating-count { font-size: 11px; color: #9ca3af; margin-left: 4px; }
+
+    .sold-bar-wrap {
+        width: 100%; height: 12px;
+        background: #f1f5f9; border-radius: 999px;
+        overflow: hidden; position: relative; margin: 6px 0 12px;
+    }
+    .sold-bar-fill { height: 100%; border-radius: 999px; position: absolute; left:0; top:0; }
+    .sold-bar-text {
+        position: absolute; width: 100%; text-align: center;
+        font-size: 9px; font-weight: 700; color: #1e293b; line-height: 12px; z-index: 2;
+    }
+
+    .btn-buy-card {
+        display: flex; align-items: center; justify-content: center;
+        width: 100%; height: 38px; border-radius: 999px;
+        background: linear-gradient(135deg,#e8392a,#ff6b5b);
+        color: #fff; font-size: 13px; font-weight: 700;
+        border: none; cursor: pointer; margin-top: auto;
+        text-decoration: none; transition: .25s;
+        box-shadow: 0 4px 12px rgba(232,57,42,.2);
+    }
+    .btn-buy-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,57,42,.3); color: #fff; text-decoration: none; }
+</style>
+}
+
+<div class="container search-section">
+    <h3 class="list-title">Kết quả tìm kiếm cho "@ViewBag.TextSeatch"</h3>
+    
+    <div class="products-grid">
+        @if (Model != null && Model.Any())
         {
+            foreach (var item in Model)
+            {
+                var soldQuantity = item.SoLuongBan ?? 0;
+                var totalQuantity = item.SoLuong ?? 0;
+                var percentageSold = totalQuantity > 0 ? (soldQuantity / (float)totalQuantity) * 100 : 0;
+                var roundedPercentageSold = Math.Round(percentageSold);
+                var progressBarColor = roundedPercentageSold >= 100 ? "#ef4444" :
+                                       roundedPercentageSold >= 50 ? "#f59e0b" :
+                                       "#10b981";
 
-            // Tính số lượng đã bán và tổng số lượng
-            var soldQuantity = item.SoLuongBan;
-            var totalQuantity = item.SoLuong;
-            var percentageSold = totalQuantity > 0 ? (soldQuantity / (float)totalQuantity) * 100 : 0;
-            var roundedPercentageSold = Math.Round(percentageSold); // Làm tròn thành số nguyên
-            var progressBarColor = roundedPercentageSold == 100 ? "#C92127" : // đỏ (đã bán hết)
-                                   roundedPercentageSold >= 50 ? "#FFC107" : // vàng (đã bán trên 50%)
-                                   "#28A745"; // xanh lá (dưới 50%)
+                var imgUrl = string.IsNullOrEmpty(item.Anh) ? "~/Images/no-image.png" :
+                             (item.Anh.StartsWith("~/") || item.Anh.StartsWith("/") ? item.Anh : "~/Images/" + item.Anh);
 
-
-            <div class="prod-item">
-                <div class="card" style="width: 18rem;">
-                    <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })">
-                        <img class="card-img-top" src="~/Images/@item.Anh" alt="Card image cap">
-                    </a>
-                    <div class="card-body">
-                        <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })" class="title-prod">
-                            <h5 class="card-title">
-                                @Html.Raw(GetShortTitle(item.TenSanPham))
-                            </h5>
+                <div class="product-card">
+                    <div class="product-img-wrap">
+                        <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })">
+                            <img src="@Url.Content(imgUrl)" alt="@item.TenSanPham">
                         </a>
-                        <h5 style="color: darkred;">@String.Format(price, "{0:c0}", item.Gia)</h5>
-                        <p class="card-text rating-card">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <span style="color: black;">(0 đánh giá)</span>
-                        </p>
+                    </div>
+                    <div class="product-body">
+                        <h5 class="product-title">
+                            <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })">@item.TenSanPham</a>
+                        </h5>
+                        
+                        <div class="stars-row">
+                            <i class="fas fa-star star-icon on"></i>
+                            <i class="fas fa-star star-icon on"></i>
+                            <i class="fas fa-star star-icon on"></i>
+                            <i class="fas fa-star star-icon on"></i>
+                            <i class="fas fa-star star-icon on"></i>
+                            <span class="rating-count">(@item.DANHGIAs.Count.ToString())</span>
+                        </div>
 
-                        <!-- Hiển thị số lượng đã bán với thanh tiến độ -->
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: @roundedPercentageSold%; background-color: @progressBarColor; border-radius: 30px;"></div>
-                            <div class="sold-text">Đã bán @soldQuantity/@totalQuantity</div>
+                        <p class="product-price">@String.Format(price, "{0:c0}", item.Gia)</p>
+
+                        <div class="sold-bar-wrap">
+                            <div class="sold-bar-fill" style="width: @roundedPercentageSold%; background-color: @progressBarColor;"></div>
+                            <div class="sold-bar-text">Đã bán @soldQuantity/@totalQuantity</div>
                         </div>
 
                         @if (user != null)
                         {
-                            <a href="@Url.Action("AddSingleProduct", "Cart", new { id = item.MaSanPham })" class="custom-btn btn-14 btn-buy">Mua</a>
+                            <a href="@Url.Action("AddSingleProduct", "Cart", new { id = item.MaSanPham })" class="btn-buy-card">Mua</a>
                         }
                         else
                         {
-                            <a href="@Url.Action("Login", "User")" class="custom-btn btn-14 btn-buy">Mua</a>
+                            <a href="@Url.Action("Login", "User")" class="btn-buy-card">Mua</a>
                         }
-                        @*   <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })" class="see-detail-prod">
-                                <i class="bi bi-eye"></i>
-                            </a>*@
                     </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="bi bi-search" style="font-size: 48px; opacity: 0.5;"></i>
+                <p class="mt-2 mb-0">Không tìm thấy sản phẩm nào phù hợp với từ khóa của bạn.</p>
             </div>
         }
     </div>
 </div>
-
-@helper GetShortTitle(string title)
-{
-    var words = title.Split(' ');
-    if (words.Length > 4)
-    {
-        string shortTitle = string.Join(" ", words.Take(4)) + "...";
-        @shortTitle
-    }
-    else
-    {
-        @title
-    }
-}
-<style>
-    .progress-bar-container {
-        width: 100%;
-        background-color: #99999999;
-        border-radius: 10px;
-        overflow: hidden;
-        margin: 10px 0;
-        height: 20px;
-        position: relative;
-        padding: 0 10px;
-        box-sizing: border-box;
-        margin-bottom: -15px;
-    }
-
-    .progress-bar {
-        height: 100%;
-        text-align: center;
-        color: white;
-        line-height: 20px;
-        border-radius: 4px;
-        transition: width 0.4s ease;
-        position: absolute;
-        left: 0;
-        top: 0;
-        background-color: #C92127 !important; /* Đảm bảo màu sắc chính xác */
-        z-index: 1;
-    }
-
-    .sold-text {
-        font-weight: 500;
-        text-align: center;
-        color: white;
-        position: absolute;
-        width: 100%;
-        line-height: 20px;
-        top: 0;
-        left: 0;
-        z-index: 2;
-    }
-
-    .btn-buy {
-        text-align: center;
-        margin: 30px auto;
-        display: flex;
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: -webkit-flex;
-        -ms-flex-align: center;
-        -webkit-align-items: center;
-        align-items: center;
-        -webkit-justify-content: center;
-        justify-content: center;
-        color: #fff;
-        background-color: #c92127;
-        border: 2px solid #C92127;
-        font-size: 18px;
-        font-weight: 700;
-        width: 210px;
-        max-width: 100%;
-        height: 40px;
-        max-height: 100%;
-        border-radius: 8px;
-        -moz-border-radius: 8px;
-        -webkit-border-radius: 8px;
-        cursor: pointer;
-        -webkit-user-drag: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -o-user-select: none;
-        user-select: none;
-        transition: all 0.5s;
-    }
-</style>
