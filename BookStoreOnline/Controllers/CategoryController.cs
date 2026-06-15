@@ -12,10 +12,27 @@ namespace BookStoreOnline.Controllers
         NhaSachEntities3 db = new NhaSachEntities3();
 
         // GET: Category
-        public ActionResult Index(int id)
+        public ActionResult Index(int? id)
         {
-            ViewBag.CategoryName = db.LOAIs.FirstOrDefault(n => n.Maloai == id)?.Tenloai; // Use null-conditional operator
-            return View(db.SANPHAMs.Where(book => book.MaLoai == id).ToList());
+            if (id == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var danhMuc = db.LOAIs.FirstOrDefault(n => n.Maloai == id);
+            if (danhMuc == null)
+            {
+                return HttpNotFound();
+            }
+
+            ViewBag.CategoryName = danhMuc.Tenloai;
+
+            var sachTheoDanhMuc = db.SANPHAMs
+                                    .Where(book => book.MaLoai == id)
+                                    .OrderByDescending(book => book.MaSanPham)
+                                    .ToList();
+
+            return View(sachTheoDanhMuc);
         }
 
         public ActionResult GetAllBook()
@@ -25,14 +42,20 @@ namespace BookStoreOnline.Controllers
 
         public ActionResult Search(string inputString)
         {
-            ViewBag.TextSearch = inputString; // Corrected variable name
+            ViewBag.TextSearch = inputString;
+
+            if (string.IsNullOrEmpty(inputString))
+            {
+                return View("Search", new List<SANPHAM>());
+            }
+
             var result = db.SANPHAMs
                 .Where(s => s.TenSanPham.Contains(inputString) ||
-                            s.TacGia.Contains(inputString) ||
-                            s.LOAI.Tenloai.Contains(inputString)) // Search by category name
+                            (s.TacGia != null && s.TacGia.Contains(inputString)) ||
+                            (s.LOAI != null && s.LOAI.Tenloai.Contains(inputString)))
                 .ToList();
 
-            return View("Search", result); // Render the Search view with the result
+            return View("Search", result);
         }
     }
 }

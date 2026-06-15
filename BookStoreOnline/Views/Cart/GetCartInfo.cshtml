@@ -283,15 +283,37 @@
                 </div>
             </div>
 
-            <!-- Right Column: Summary & Checkout Details -->
             <div class="col-lg-4">
                 <div class="summary-card">
                     <h3 class="summary-title"><i class="bi bi-receipt-cutoff"></i> Thông tin đơn hàng</h3>
 
                     <div class="summary-group">
-                        <label for="address"><i class="bi bi-geo-alt-fill text-muted mr-1"></i> Địa chỉ giao hàng</label>
-                        <textarea id="address" name="address" placeholder="Nhập số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..." rows="3" required></textarea>
+                        <label><i class="bi bi-geo-alt-fill text-muted mr-1"></i> Tỉnh / Thành phố</label>
+                        <select id="province" class="form-control" required>
+                            <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                        </select>
                     </div>
+
+                    <div class="summary-group">
+                        <label>Quận / Huyện</label>
+                        <select id="district" class="form-control" required disabled>
+                            <option value="">-- Chọn Quận / Huyện --</option>
+                        </select>
+                    </div>
+
+                    <div class="summary-group">
+                        <label>Phường / Xã</label>
+                        <select id="ward" class="form-control" required disabled>
+                            <option value="">-- Chọn Phường / Xã --</option>
+                        </select>
+                    </div>
+
+                    <div class="summary-group">
+                        <label>Số nhà, tên đường</label>
+                        <input type="text" id="streetAddress" class="form-control" placeholder="Ví dụ: 123 Đường Lê Lợi" required />
+                    </div>
+
+                    <input type="hidden" id="address" name="address" />
 
                     <div class="summary-group">
                         <label for="paymentMethod1"><i class="bi bi-wallet2 text-muted mr-1"></i> Phương thức thanh toán</label>
@@ -306,7 +328,7 @@
                     <div class="summary-group">
                         <label for="discountCode"><i class="bi bi-ticket-perforated-fill text-muted mr-1"></i> Mã khuyến mãi (nếu có)</label>
                         <input type="text" id="discountCode" name="discountCode" placeholder="Nhập mã giảm giá..." />
-                        
+
                         <div class="discount-badge-box">
                             <span><i class="bi bi-check-circle-fill mr-1"></i> Đã giảm:</span>
                             <p id="discount-amount">0 đ</p>
@@ -447,5 +469,92 @@
                 console.error('Có lỗi xảy ra khi áp dụng mã giảm giá:', error);
             });
         });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const apiHost = "https://provinces.open-api.vn/api/";
+
+        // 1. Tự động tải danh sách Tỉnh / Thành phố từ API khi load trang
+        fetch(apiHost + "?depth=1")
+            .then(res => res.json())
+            .then(data => {
+                const pSelect = document.getElementById("province");
+                if (pSelect) {
+                    data.forEach(item => {
+                        pSelect.innerHTML += `<option value="${item.code}">${item.name}</option>`;
+                    });
+                }
+            }).catch(err => console.error("Lỗi kết nối API tỉnh thành:", err));
+
+        // 2. Khi người dùng chọn Tỉnh -> Tự động load danh sách Quận / Huyện tương ứng
+        document.getElementById("province").addEventListener("change", function () {
+            const pCode = this.value;
+            const dSelect = document.getElementById("district");
+            const wSelect = document.getElementById("ward");
+
+            dSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+            dSelect.disabled = true;
+            wSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+            wSelect.disabled = true;
+
+            if (pCode) {
+                fetch(`${apiHost}p/${pCode}?depth=2`)
+                    .then(res => res.json())
+                    .then(data => {
+                        dSelect.disabled = false;
+                        data.districts.forEach(item => {
+                            dSelect.innerHTML += `<option value="${item.code}">${item.name}</option>`;
+                        });
+                    });
+            }
+            gopDiaChiFull();
+        });
+
+        // 3. Khi người dùng chọn Quận -> Tự động load danh sách Phường / Xã tương ứng
+        document.getElementById("district").addEventListener("change", function () {
+            const dCode = this.value;
+            const wSelect = document.getElementById("ward");
+
+            wSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+            wSelect.disabled = true;
+
+            if (dCode) {
+                fetch(`${apiHost}d/${dCode}?depth=2`)
+                    .then(res => res.json())
+                    .then(data => {
+                        wSelect.disabled = false;
+                        data.wards.forEach(item => {
+                            wSelect.innerHTML += `<option value="${item.code}">${item.name}</option>`;
+                        });
+                    });
+            }
+            gopDiaChiFull();
+        });
+
+        // 4. Lắng nghe sự kiện khi chọn Phường hoặc gõ Số nhà để gộp chuỗi địa chỉ
+        document.getElementById("ward").addEventListener("change", gopDiaChiFull);
+        document.getElementById("streetAddress").addEventListener("input", gopDiaChiFull);
+
+        // Hàm tự động gộp chuỗi thành: "Số nhà, Phường ..., Quận ..., Tỉnh ..." để ném vào Database
+        function gopDiaChiFull() {
+            const pSelect = document.getElementById("province");
+            const dSelect = document.getElementById("district");
+            const wSelect = document.getElementById("ward");
+            const streetInput = document.getElementById("streetAddress");
+
+            const pText = pSelect.selectedIndex > 0 ? pSelect.options[pSelect.selectedIndex].text : "";
+            const dText = dSelect.selectedIndex > 0 ? dSelect.options[dSelect.selectedIndex].text : "";
+            const wText = wSelect.selectedIndex > 0 ? wSelect.options[wSelect.selectedIndex].text : "";
+            const street = streetInput ? streetInput.value.trim() : "";
+
+            // Nếu điền đầy đủ cả 4 trường thì mới gộp chuỗi hoàn chỉnh để lưu
+            if (pText && dText && wText && street) {
+                document.getElementById("address").value = `${street}, ${wText}, ${dText}, ${pText}`;
+            } else {
+                document.getElementById("address").value = "";
+            }
+        }
     });
 </script>

@@ -246,7 +246,7 @@
         @foreach (var item in Model)
         {
             var soldQty = item.SoLuongBan;
-            var totalQty = item.SoLuong;
+            var totalQty = item.SoLuong + 100;
             var soldPct = totalQty > 0 ? (soldQty / (float)totalQty) * 100 : 0;
             var soldPctR = Math.Round(soldPct);
             var barColor = soldPct == 100 ? "#dc2626" : soldPct >= 50 ? "#d97706" : "#16a34a";
@@ -266,10 +266,15 @@
                 <div class="product-body">
                     <div class="product-title">
                         <a href="@Url.Action("Index","ProductDetail", new { id = item.MaSanPham })">
-                            @Html.Raw(GetShortTitle(item.TenSanPham))
+                            Sách - @Html.Raw(GetShortTitle(item.TenSanPham))
                         </a>
                     </div>
-                    <div class="product-price">@String.Format(price, "{0:c0}", item.Gia)</div>
+                    <div class="product-price" style="display: flex; align-items: center; gap: 6px;">
+                        @String.Format(price, "{0:c0}", item.Gia)
+                        <span style="background-color: #ffeae9; color: #e8392a; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(232, 57, 42, 0.2); display: inline-block;">
+                            -@(new Random(item.MaSanPham).Next(10, 35))%
+                        </span>
+                    </div>
                     <div class="stars-row">
                         @for (int i = 1; i <= 5; i++)
                         {

@@ -63,7 +63,7 @@
 
 <div class="page-header">
     <div class="page-title">Danh Mục <span>Loại Sách</span></div>
-    <a class="btn-add-new" href="/Admin/Categories/Create">
+    <a class="btn-add-new" href="@Url.Action("Create", "Categories", new { area = "Admin" })">
         <i class="bi bi-plus-lg"></i> Thêm Thể Loại Mới
     </a>
 </div>
@@ -86,17 +86,17 @@
                 @if (Model.Any())
                 {
                     int i = 1;
-                    @foreach (var item in Model)
+                    foreach (var item in Model)
                     {
                         <tr>
                             <td><span class="badge-num">@i</span></td>
                             <td><strong>@Html.DisplayFor(modelItem => item.Tenloai)</strong></td>
                             <td style="text-align:center;">
-                                <a href="@Url.Action("Edit", new { id = item.Maloai })" class="btn-edit">
+                                <a href="@Url.Action("Edit", "Categories", new { area = "Admin", id = item.Maloai })" class="btn-edit">
                                     <i class="bi bi-pencil-fill"></i> Sửa
                                 </a>
                                 &nbsp;
-                                <a href="@Url.Action("Delete", new { id = item.Maloai })" class="btn-del">
+                                <a href="@Url.Action("Delete", "Categories", new { area = "Admin", id = item.Maloai })" class="btn-del">
                                     <i class="bi bi-trash-fill"></i> Xóa
                                 </a>
                             </td>

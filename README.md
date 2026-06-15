@@ -57,3 +57,20 @@ Dự án thực hành môn học Thương mại điện tử: Xây dựng websit
    - Nhấp chuột phải vào Solution -> Chọn **Restore NuGet Packages** để tự động tải các thư viện cần thiết.
    - Chạy các file SQL trong thư mục `/SQL` trên SQL Server của bạn nếu muốn tạo database local riêng, hoặc giữ nguyên chuỗi kết nối trong `Web.config` để chạy trực tiếp trên database cloud.
    - Nhấn **F5** để khởi chạy website. Cơ chế Seeder tự động sẽ gieo dữ liệu mẫu ngay khi dự án được chạy lần đầu nếu database trống.
+
+### 📝 Nhật ký cập nhật tiến độ công việc - Khải Tấn
+
+#### 1. Phần Thanh toán / Đăng ký
+- **Gọi API địa chỉ (Đơn vị hành chính):** Tích hợp thành công bộ 3 ô chọn (Tỉnh/Thành phố, Quận/Huyện, Xã/Phường) và ô nhập Số nhà tại form điền thông tin đơn hàng. 
+- Sử dụng JavaScript để gọi API công cộng, tự động đổ dữ liệu động khi chọn Tỉnh -> Huyện -> Xã.
+- Xử lý gộp dữ liệu thành một chuỗi địa chỉ hoàn chỉnh (`Số nhà, Xã, Huyện, Tỉnh`) tự động điền vào ô input ẩn để lưu trữ đồng bộ xuống Cơ sở dữ liệu khi khách hàng tiến hành đặt hàng hoặc đăng ký thông tin nhận hàng.
+
+#### 2. Fix lỗi hệ thống
+- **Sửa lỗi Compilation Error (Details.cshtml):** Khắc phục lỗi toán tử `?` (`Operator '?' cannot be applied to operand of type 'int'`) tại dòng hiển thị `@Model.TongTien` do thuộc tính trong Database không cho phép rỗng.
+- **Sửa lỗi hiển thị tên sản phẩm (Details.cshtml):** Khắc phục lỗi giao diện hiển thị chuỗi proxy động dài ngoằng của Entity Framework (`System.Data.Entity.DynamicProxies.SANPHAM_...`). Đã ép lại cú pháp hiển thị chuẩn để bóc tách đúng chuỗi Text tên sách tiếng Việt.
+- **Sửa lỗi/Cập nhật hiển thị số lượng sách (Index.cshtml ngoài Trang chủ):** Thay đổi logic tính toán số lượng kho hiển thị tăng thêm 100 cuốn dựa trên số lượng gốc của Database theo yêu cầu, đồng thời tối ưu lại các hàm điều kiện `@if` check hiển thị tag "Hết hàng".
+- **Cập nhật hiển thị Trạng thái thanh toán (Index.cshtml của Order):** Sửa lỗi trang lịch sử đơn hàng hiển thị mặc định một chữ "Chưa thanh toán", chuyển sang cấu trúc check điều kiện để hiển thị rõ ràng bằng màu sắc: Đã thanh toán Online, Thanh toán COD (Tiền mặt), Chờ thanh toán Online.
+
+#### 3. Phần Admin - Danh mục sách
+- Rà soát hệ thống quản lý danh mục sách trong phân hệ Admin.
+- Đảm bảo các chức năng cốt lõi (Xem danh sách danh mục, Thêm mới, Sửa thông tin và Xóa danh mục sách) liên kết dữ liệu chuẩn xác, không bị lỗi khi đồng bộ danh mục phân loại ra ngoài giao diện Trang chủ.

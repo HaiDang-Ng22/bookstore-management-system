@@ -142,7 +142,9 @@
                                         <td>
                                             <img src="@(item.SANPHAM?.Anh ?? "/images/no-image.png")" alt="@item.SANPHAM?.TenSanPham" class="prod-thumb" />
                                         </td>
-                                        <td class="font-weight-bold" style="max-width: 250px;">@item.SANPHAM?.TenSanPham</td>
+                                        <td class="font-weight-bold" style="max-width: 250px;">
+                                            @(item.SANPHAM != null ? item.SANPHAM.TenSanPham : "Sản phẩm đã xóa")
+                                        </td>
                                         <td>@item.SoLuong</td>
                                         <td>@((item.SANPHAM?.Gia ?? 0).ToString("N0")) VNĐ</td>
                                         <td class="text-right font-weight-bold text-danger">@(((item.SoLuong ?? 0) * (item.SANPHAM?.Gia ?? 0)).ToString("N0")) VNĐ</td>
@@ -169,7 +171,7 @@
                         </li>
                         <li>
                             <span>Tổng tiền:</span>
-                            <strong class="text-danger font-weight-bold">@(Model.TongTien?.ToString("N0")) VNĐ</strong>
+                            <strong class="text-danger font-weight-bold">@(Model.TongTien.ToString("N0")) VNĐ</strong>
                         </li>
                         <li>
                             <span>Trạng thái giao hàng:</span>

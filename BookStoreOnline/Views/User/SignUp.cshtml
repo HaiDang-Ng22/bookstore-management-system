@@ -4,55 +4,173 @@
 }
 
 <style>
-.auth-wrap {
-    min-height: calc(100vh - 280px);
-    display: flex; align-items: center; justify-content: center;
-    padding: 48px 16px;
-    background: linear-gradient(135deg, #fef2f2 0%, #f5f6fa 50%, #eff6ff 100%);
-}
-.auth-card {
-    width: 100%; max-width: 500px;
-    background: #fff; border-radius: 24px;
-    padding: 44px 40px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.10);
-    border: 1px solid #f1f5f9;
-}
-.auth-logo { text-align: center; margin-bottom: 20px; }
-.auth-logo-badge {
-    width: 60px; height: 60px;
-    background: linear-gradient(135deg,#e8392a,#ff6b5b);
-    border-radius: 18px;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 28px; color: #fff;
-    box-shadow: 0 8px 20px rgba(232,57,42,.3);
-}
-.auth-card h2 { font-size: 24px; font-weight: 800; color: #111827; text-align: center; margin-bottom: 4px; }
-.auth-subtitle { text-align: center; color: #9ca3af; font-size: 14px; margin-bottom: 28px; }
-.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-@@media(max-width:480px) { .form-row-2 { grid-template-columns: 1fr; } }
-.form-field { margin-bottom: 16px; }
-.form-field label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 7px; }
-.field-input {
-    width: 100%; height: 46px;
-    border: 1.5px solid #e5e7eb; border-radius: 12px;
-    padding: 0 14px; font-size: 14px; font-family:'Inter',sans-serif;
-    color: #374151; background: #f9fafb; outline: none; transition: .25s;
-}
-.field-input:focus { border-color: #e8392a; background: #fff; box-shadow: 0 0 0 3px rgba(232,57,42,.1); }
-.btn-auth {
-    width: 100%; height: 50px; border-radius: 999px; border: none;
-    background: linear-gradient(135deg,#e8392a,#ff6b5b);
-    color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
-    transition: .25s; box-shadow: 0 6px 20px rgba(232,57,42,.25);
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.btn-auth:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,57,42,.35); }
-.login-prompt { text-align: center; font-size: 14px; color: #6b7280; margin-top: 20px; }
-.login-prompt a { color: #e8392a; font-weight: 700; text-decoration: none; }
-.login-prompt a:hover { text-decoration: underline; }
-.field-error { font-size: 12px; color: #dc2626; margin-top: 5px; display: flex; align-items: center; gap: 4px; }
-.pass-wrap { position: relative; }
-.pass-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 16px; padding: 0; }
+    .auth-wrap {
+        min-height: calc(100vh - 280px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 16px;
+        background: linear-gradient(135deg, #fef2f2 0%, #f5f6fa 50%, #eff6ff 100%);
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 540px;
+        background: #fff;
+        border-radius: 24px;
+        padding: 44px 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,.10);
+        border: 1px solid #f1f5f9;
+    }
+
+    .auth-logo {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .auth-logo-badge {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg,#e8392a,#ff6b5b);
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(232,57,42,.3);
+    }
+
+    .auth-card h2 {
+        font-size: 24px;
+        font-weight: 800;
+        color: #111827;
+        text-align: center;
+        margin-bottom: 4px;
+    }
+
+    .auth-subtitle {
+        text-align: center;
+        color: #9ca3af;
+        font-size: 14px;
+        margin-bottom: 28px;
+    }
+
+    .form-row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    @@media(max-width:480px) {
+        .form-row-2 {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-field {
+        margin-bottom: 16px;
+    }
+
+        .form-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 7px;
+        }
+
+    .field-input {
+        width: 100%;
+        height: 46px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0 14px;
+        font-size: 14px;
+        font-family: 'Inter',sans-serif;
+        color: #374151;
+        background: #f9fafb;
+        outline: none;
+        transition: .25s;
+    }
+
+        .field-input:focus {
+            border-color: #e8392a;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(232,57,42,.1);
+        }
+
+    select.field-input {
+        padding: 0 10px;
+        cursor: pointer;
+    }
+
+    .btn-auth {
+        width: 100%;
+        height: 50px;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg,#e8392a,#ff6b5b);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .25s;
+        box-shadow: 0 6px 20px rgba(232,57,42,.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 15px;
+    }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(232,57,42,.35);
+        }
+
+    .login-prompt {
+        text-align: center;
+        font-size: 14px;
+        color: #6b7280;
+        margin-top: 20px;
+    }
+
+        .login-prompt a {
+            color: #e8392a;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+            .login-prompt a:hover {
+                text-decoration: underline;
+            }
+
+    .field-error {
+        font-size: 12px;
+        color: #dc2626;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .pass-wrap {
+        position: relative;
+    }
+
+    .pass-toggle {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #9ca3af;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0;
+    }
 </style>
 
 <div class="auth-wrap">
@@ -63,14 +181,18 @@
         <h2>Tạo Tài Khoản</h2>
         <p class="auth-subtitle">Đăng ký miễn phí và khám phá hàng nghìn đầu sách hay.</p>
 
-        @if (ViewBag.ThongBao != null)
-        {
-            <div style="background:#fee2e2;color:#991b1b;border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:13px;display:flex;align-items:center;gap:8px;">
-                <i class="bi bi-exclamation-circle-fill"></i> @ViewBag.ThongBao
-            </div>
-        }
+        <text>
+            @if (ViewBag.ThongBao != null)
+            {
+                <div style="background:#fee2e2;color:#991b1b;border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:13px;display:flex;align-items:center;gap:8px;">
+                    <i class="bi bi-exclamation-circle-fill"></i> @ViewBag.ThongBao
+                </div>
+            }
+        </text>
 
-        <form method="post">
+        <form method="post" id="registerForm">
+            <input type="hidden" id="fullAddress" name="DiaChi" />
+
             <div class="form-field">
                 <label for="regName">Họ và Tên</label>
                 <input type="text" id="regName" name="Ten" class="field-input" placeholder="Nguyễn Văn A" required>
@@ -79,10 +201,12 @@
             <div class="form-field">
                 <label for="regEmail">Email</label>
                 <input type="email" id="regEmail" name="Email" class="field-input" placeholder="ten@email.com" required>
-                @if (ViewBag.ThongBaoEmail != null)
-                {
-                    <div class="field-error"><i class="bi bi-exclamation-circle"></i> @ViewBag.ThongBaoEmail</div>
-                }
+                <text>
+                    @if (ViewBag.ThongBaoEmail != null)
+                    {
+                        <div class="field-error"><i class="bi bi-exclamation-circle"></i> @ViewBag.ThongBaoEmail</div>
+                    }
+                </text>
             </div>
 
             <div class="form-row-2">
@@ -92,10 +216,12 @@
                         <input type="password" id="regPass" name="MatKhau" class="field-input" placeholder="••••••••" required style="padding-right:42px;">
                         <button type="button" class="pass-toggle" onclick="togglePw('regPass',this)"><i class="bi bi-eye-slash"></i></button>
                     </div>
-                    @if (ViewBag.ThongBaoMK != null)
-                    {
-                        <div class="field-error"><i class="bi bi-exclamation-circle"></i> @ViewBag.ThongBaoMK</div>
-                    }
+                    <text>
+                        @if (ViewBag.ThongBaoMK != null)
+                        {
+                            <div class="field-error"><i class="bi bi-exclamation-circle"></i> @ViewBag.ThongBaoMK</div>
+                        }
+                    </text>
                 </div>
                 <div class="form-field">
                     <label for="regRePass">Xác Nhận Mật Khẩu</label>
@@ -106,14 +232,39 @@
                 </div>
             </div>
 
+            <div class="form-field">
+                <label for="regPhone">Số Điện Thoại</label>
+                <input type="tel" id="regPhone" name="SoDienThoai" class="field-input" placeholder="0912 345 678" required>
+            </div>
+
+            <hr style="border: 0; border-top: 1px dashed #e5e7eb; margin: 24px 0 16px 0;" />
+            <p style="font-size: 13px; font-weight: 700; color: #e8392a; margin-bottom: 12px;"><i class="bi bi-geo-alt-fill"></i> Địa Chỉ Giao Sách</p>
+
             <div class="form-row-2">
                 <div class="form-field">
-                    <label for="regPhone">Số Điện Thoại</label>
-                    <input type="tel" id="regPhone" name="SoDienThoai" class="field-input" placeholder="0912 345 678" required>
+                    <label for="provinces">Tỉnh / Thành phố</label>
+                    <select id="provinces" class="field-input" required>
+                        <option value="">-- Chọn Tỉnh / Thành --</option>
+                    </select>
                 </div>
                 <div class="form-field">
-                    <label for="regAddr">Địa Chỉ</label>
-                    <input type="text" id="regAddr" name="DiaChi" class="field-input" placeholder="123 Đường ABC, TP.HCM" required>
+                    <label for="districts">Quận / Huyện</label>
+                    <select id="districts" class="field-input" required disabled>
+                        <option value="">-- Chọn Quận / Huyện --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-field">
+                    <label for="wards">Phường / Xã</label>
+                    <select id="wards" class="field-input" required disabled>
+                        <option value="">-- Chọn Phường / Xã --</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="streetAddress">Số nhà, tên đường</label>
+                    <input type="text" id="streetAddress" class="field-input" placeholder="Ví dụ: 123 Nguyễn Trãi" required>
                 </div>
             </div>
 
@@ -129,12 +280,105 @@
 </div>
 
 @section scripts {
-<script>
-function togglePw(id, btn) {
-    const input = document.getElementById(id);
-    const icon = btn.querySelector('i');
-    input.type = input.type === 'password' ? 'text' : 'password';
-    icon.className = input.type === 'password' ? 'bi bi-eye-slash' : 'bi bi-eye';
-}
-</script>
+    <script>
+        function togglePw(id, btn) {
+            const input = document.getElementById(id);
+            const icon = btn.querySelector('i');
+            input.type = input.type === 'password' ? 'text' : 'password';
+            icon.className = input.type === 'password' ? 'bi bi-eye-slash' : 'bi bi-eye';
+        }
+
+        // Hoàn toàn sử dụng JavaScript thuần (Fetch API) - Chống triệt để lỗi trùng lặp/thiếu thư viện jQuery
+        document.addEventListener("DOMContentLoaded", function () {
+            const host = "https://provinces.open-api.vn/api/";
+
+            const provincesSelect = document.getElementById("provinces");
+            const districtsSelect = document.getElementById("districts");
+            const wardsSelect = document.getElementById("wards");
+            const registerForm = document.getElementById("registerForm");
+
+            // 1. Lấy danh sách Tỉnh/Thành phố
+            fetch(host + "?depth=1")
+                .then(response => response.json())
+                .then(data => {
+                    provincesSelect.innerHTML = '<option value="">-- Chọn Tỉnh / Thành --</option>';
+                    data.forEach(item => {
+                        let option = document.createElement("option");
+                        option.value = item.code;
+                        option.text = item.name;
+                        provincesSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Lỗi tải Tỉnh/Thành:", error));
+
+            // 2. Khi chọn Tỉnh -> Mở khóa và tải Quận/Huyện tương ứng
+            provincesSelect.addEventListener("change", function () {
+                let provinceCode = this.value;
+
+                districtsSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+                districtsSelect.disabled = true;
+                wardsSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+                wardsSelect.disabled = true;
+
+                if (provinceCode) {
+                    fetch(host + "p/" + provinceCode + "?depth=2")
+                        .then(response => response.json())
+                        .then(data => {
+                            districtsSelect.disabled = false; // Kích hoạt ô Quận/Huyện
+                            data.districts.forEach(item => {
+                                let option = document.createElement("option");
+                                option.value = item.code;
+                                option.text = item.name;
+                                districtsSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error("Lỗi tải Quận/Huyện:", error));
+                }
+            });
+
+            districtsSelect.addEventListener("change", function () {
+                let districtCode = this.value;
+
+                wardsSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+                wardsSelect.disabled = true;
+
+                if (districtCode) {
+                    fetch(host + "d/" + districtCode + "?depth=2")
+                        .then(response => response.json())
+                        .then(data => {
+                            wardsSelect.disabled = false; // Kích hoạt ô Phường/Xã
+                            data.wards.forEach(item => {
+                                let option = document.createElement("option");
+                                option.value = item.code;
+                                option.text = item.name;
+                                wardsSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error("Lỗi tải Phường/Xã:", error));
+                }
+            });
+
+            // 4. Gộp chuỗi địa chỉ đầy đủ trước khi gửi dữ liệu lên Controller
+            if (registerForm) {
+                registerForm.addEventListener("submit", function (e) {
+                    let provinceText = provincesSelect.options[provincesSelect.selectedIndex]?.text;
+                    let districtText = districtsSelect.options[districtsSelect.selectedIndex]?.text;
+                    let wardText = wardsSelect.options[wardsSelect.selectedIndex]?.text;
+                    let streetText = document.getElementById("streetAddress").value;
+
+                    if (!provinceText || provinceText.includes("--") ||
+                        !districtText || districtText.includes("--") ||
+                        !wardText || wardText.includes("--") || !streetText) {
+                        alert("Vui lòng kiểm tra và điền đầy đủ thông tin địa chỉ giao sách!");
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    // Tạo chuỗi địa chỉ đồng nhất chuẩn Việt Nam
+                    let fullAddressString = `${streetText}, ${wardText}, ${districtText}, ${provinceText}`;
+                    document.getElementById("fullAddress").value = fullAddressString;
+                });
+            }
+        });
+    </script>
 }
