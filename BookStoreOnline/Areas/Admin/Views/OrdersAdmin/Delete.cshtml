@@ -88,6 +88,7 @@
             <div class="detail-row">
                 <span class="detail-label">Ngày Đặt</span>
                 <span class="detail-value">@(Model.NgayDat.HasValue ? Model.NgayDat.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</span>
+                <span class="info-value">@(Model.NgayDat.HasValue ? Model.NgayDat.Value.ToString("dd/MM/yyyy") : "N/A")</span>
             </div>
 
             <div class="detail-row full-width">
