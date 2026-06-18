@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Web;
+using System.Text;
 using System.Web.Mvc;
 using BookStoreOnline.Models;
 
@@ -9,50 +10,81 @@ namespace BookStoreOnline.Controllers
 {
     public class CategoryController : Controller
     {
-        NhaSachEntities3 db = new NhaSachEntities3();
+        private NhaSachEntities3 db = new NhaSachEntities3();
 
-        // GET: Category
-        public ActionResult Index(int? id)
+        // Bỏ dấu tiếng Việt
+        private string RemoveDiacritics(string text)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(text))
+                return "";
+
+            string normalizedString = text.Normalize(NormalizationForm.FormD);
+            StringBuilder stringBuilder = new StringBuilder();
+
+            foreach (char c in normalizedString)
             {
-                return RedirectToAction("Index", "Home");
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
             }
 
-            var danhMuc = db.LOAIs.FirstOrDefault(n => n.Maloai == id);
-            if (danhMuc == null)
-            {
-                return HttpNotFound();
-            }
-
-            ViewBag.CategoryName = danhMuc.Tenloai;
-
-            var sachTheoDanhMuc = db.SANPHAMs
-                                    .Where(book => book.MaLoai == id)
-                                    .OrderByDescending(book => book.MaSanPham)
-                                    .ToList();
-
-            return View(sachTheoDanhMuc);
+            return stringBuilder.ToString()
+                .Replace('đ', 'd')
+                .Replace('Đ', 'D')
+                .Normalize(NormalizationForm.FormC);
         }
 
+        // Hiển thị sách theo loại
+        public ActionResult Index(int id)
+        {
+            ViewBag.CategoryName = db.LOAIs
+                .FirstOrDefault(x => x.Maloai == id)?.Tenloai;
+
+            var products = db.SANPHAMs
+                .Where(x => x.MaLoai == id)
+                .ToList();
+
+            return View(products);
+        }
+
+        // Hiển thị tất cả sách
         public ActionResult GetAllBook()
         {
             return View(db.SANPHAMs.ToList());
         }
 
+        // Tìm kiếm
         public ActionResult Search(string inputString)
         {
             ViewBag.TextSearch = inputString;
 
-            if (string.IsNullOrEmpty(inputString))
+            if (string.IsNullOrWhiteSpace(inputString))
             {
                 return View("Search", new List<SANPHAM>());
             }
 
+            string keyword = RemoveDiacritics(inputString.Trim().ToLower());
+
             var result = db.SANPHAMs
-                .Where(s => s.TenSanPham.Contains(inputString) ||
-                            (s.TacGia != null && s.TacGia.Contains(inputString)) ||
-                            (s.LOAI != null && s.LOAI.Tenloai.Contains(inputString)))
+                .ToList()
+                .Where(s =>
+                    RemoveDiacritics(s.TenSanPham ?? "")
+                        .ToLower()
+                        .Contains(keyword)
+
+                    ||
+
+                    RemoveDiacritics(s.TacGia ?? "")
+                        .ToLower()
+                        .Contains(keyword)
+
+                    ||
+
+                    RemoveDiacritics(s.LOAI.Tenloai ?? "")
+                        .ToLower()
+                        .Contains(keyword)
+                )
                 .ToList();
 
             return View("Search", result);
