@@ -376,7 +376,7 @@
                         </tr>
                     </table>
 
-                    <button type="submit" class="btn-checkout">
+                    <button type="button" onclick="validateAndShowQR(event)" class="btn-checkout">
                         <i class="bi bi-credit-card-2-front-fill"></i> Đặt Hàng Ngay
                     </button>
                 </div>
@@ -536,93 +536,82 @@
             totalQuantityElement.textContent = totalQuantity;
         }
 
-        discountInput.addEventListener('blur', function () {
-            var discountCode = discountInput.value;
-            if(!discountCode.trim()) {
-                discountDetails.textContent = '0 đ';
-                updateTotalPriceAndQuantity();
-                return;
-            }
-
-            fetch('@Url.Action("ApplyDiscount", "Cart")', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `discountCode=${discountCode}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    discountDetails.textContent = priceFormat.format(data.discountAmount);
-                    updateTotalPriceAndQuantity();
-                } else {
-                    alert(data.message);
+        if (discountInput) {
+            discountInput.addEventListener('blur', function () {
+                var discountCode = discountInput.value;
+                if(!discountCode.trim()) {
                     discountDetails.textContent = '0 đ';
                     updateTotalPriceAndQuantity();
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('Có lỗi xảy ra khi áp dụng mã giảm giá:', error);
-            });
-        });
-        var formElement = document.getElementById("checkoutForm");
-        if (formElement) {
-            formElement.addEventListener("submit", function (event) {
-                var selectedMethod = document.getElementById("paymentMethod1").value;
 
-                if (selectedMethod === "paypal") {
-                    event.preventDefault();
-
-                    document.getElementById("step-input-stk").style.display = "block";
-                    document.getElementById("step-show-qr").style.display = "none";
-                    document.getElementById("customerSTK").value = "";
-                    document.getElementById("stkError").style.display = "none";
-
-                    var currentTotal = totalPriceElement.textContent;
-                    document.getElementById("modalTotalAmount").innerText = currentTotal;
-                    document.getElementById("vietqrModal").style.display = "flex";
-                }
+                fetch('@Url.Action("ApplyDiscount", "Cart")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `discountCode=${discountCode}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        discountDetails.textContent = priceFormat.format(data.discountAmount);
+                        updateTotalPriceAndQuantity();
+                    } else {
+                        alert(data.message);
+                        discountDetails.textContent = '0 đ';
+                        updateTotalPriceAndQuantity();
+                    }
+                })
+                .catch(error => {
+                    console.error('Có lỗi xảy ra khi áp dụng mã giảm giá:', error);
+                });
             });
         }
-
-        window.goToQRStep = function () {
-            var stkValue = document.getElementById("customerSTK").value.trim();
-            var errorSpan = document.getElementById("stkError");
-
-            var stkPattern = /^[0-9]{9,15}$/;
-
-            if (!stkValue) {
-                errorSpan.innerText = "Vui lòng nhập số tài khoản ngân hàng của bạn!";
-                errorSpan.style.display = "block";
-                return;
-            }
-            if (!stkPattern.test(stkValue)) {
-                errorSpan.innerText = "Số tài khoản không hợp lệ! (Phải là dãy số từ 9 đến 15 chữ số)";
-                errorSpan.style.display = "block";
+        window.validateAndShowQR = function (event) {
+            var totalPriceElement = document.getElementById('total-price');
+            var fullAddress = document.getElementById("address").value;
+            if (!fullAddress || fullAddress.trim() === "") {
+                alert("Vui lòng chọn và điền đầy đủ thông tin địa chỉ giao hàng!");
                 return;
             }
 
-            errorSpan.style.display = "none";
+            var selectedMethod = document.getElementById("paymentMethod1").value;
 
-            if (typeof totalPriceElement !== 'undefined' && totalPriceElement) {
-                document.getElementById("modalTotalAmount").innerText = totalPriceElement.textContent;
+            if (selectedMethod === "paypal" || selectedMethod === "Chuyển khoản" || selectedMethod.includes("ngân hàng")) {
+                if (totalPriceElement) {
+                    document.getElementById("modalTotalAmount").innerText = totalPriceElement.textContent;
+                }
+
+                var myBankCode = "TCB";
+                var mySTK = "3038384869";
+                var myAccountName = "BANG KHAI TAN";
+
+                var rawAmount = totalPriceElement.textContent.replace(/[^\d]/g, '');
+                var orderMemo = "THANH TOAN DON HANG";
+
+                var qrUrl = `https://img.vietqr.io/image/${myBankCode}-${mySTK}-compact2.png?amount=${rawAmount}&addInfo=${encodeURIComponent(orderMemo)}&accountName=${encodeURIComponent(myAccountName)}`;
+
+                var qrImg = document.getElementById("dynamicVietQR");
+                if (qrImg) {
+                    qrImg.src = qrUrl;
+                }
+                var stepInputSTK = document.getElementById("step-input-stk");
+                if (stepInputSTK) {
+                    stepInputSTK.style.display = "none";
+                }
+
+                var stepShowQR = document.getElementById("step-show-qr");
+                if (stepShowQR) {
+                    stepShowQR.style.display = "block";
+                }
+
+                document.getElementById("vietqrModal").style.display = "flex";
+
+            } else {
+                var targetForm = document.getElementById("checkoutForm");
+                if (targetForm) {
+                    targetForm.submit();
+                }
             }
-
-            var myBankCode = "TCB";
-            var mySTK = "3038384869";
-            var myAccountName = "BANG KHAI TAN";
-
-            var rawAmount = totalPriceElement.textContent.replace(/[^\d]/g, '');
-            var orderMemo = "THANH TOAN DON HANG";
-
-            var qrUrl = `https://img.vietqr.io/image/${myBankCode}-${mySTK}-compact2.png?amount=${rawAmount}&addInfo=${encodeURIComponent(orderMemo)}&accountName=${encodeURIComponent(myAccountName)}`;
-
-            var qrImg = document.getElementById("dynamicVietQR");
-            if (qrImg) {
-                qrImg.src = qrUrl;
-            }
-
-            document.getElementById("step-input-stk").style.display = "none";
-            document.getElementById("step-show-qr").style.display = "block";
         };
 
         window.closeVietqrModal = function () {
