@@ -634,7 +634,7 @@
             var finalForm = document.getElementById("checkoutForm");
             if (finalForm) {
                 finalForm.action = '@Url.Action("InsertOrderVietQR", "Cart")';
-                finalForm.submit(); // Đẩy đơn lên Backend lưu db
+                finalForm.submit();
             }
         };
     });
