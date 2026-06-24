@@ -192,7 +192,8 @@ public class UserController : Controller
         var taikhoanAdmin = db.NHANVIENs.FirstOrDefault(k => k.Email == email && k.MatKhau == matkhau);
         if (taikhoanAdmin != null)
         {
-            if (!taikhoanAdmin.TrangThai)
+            // Nếu TrangThai bị null, coi như tài khoản chưa kích hoạt hoặc bị khóa (false)
+            if (!(taikhoanAdmin.TrangThai ?? false))
             {
                 ViewBag.ThongBao = "Tài khoản đã bị khóa";
                 return View();
@@ -207,7 +208,8 @@ public class UserController : Controller
 
         if (account != null)
         {
-            if (!account.TrangThai)
+            // Hoặc bạn cũng có thể dùng GetValueOrDefault() tương đương với toán tử ??
+            if (!account.TrangThai.GetValueOrDefault())
             {
                 ViewBag.ThongBao = "Tài khoản đã bị khóa";
                 return View();
