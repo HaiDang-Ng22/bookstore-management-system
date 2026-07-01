@@ -25,10 +25,27 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         }
 
         // GET: KhuyenMai
-        public ActionResult Index()
+        public ActionResult Index(int? page)
         {
-            //return View(db.KHUYENMAIs.ToList());
-            return View(_promotionFacade.GetAllPromotions()); // dùng Facade
+            int pageSize = 5; // Số khuyến mãi trên một trang
+            int pageNumber = page ?? 1;
+
+            // Lấy toàn bộ danh sách từ Facade hiện tại của bạn
+            var allPromotions = _promotionFacade.GetAllPromotions();
+
+            int totalItems = allPromotions.Count();
+
+            // Thực hiện phân trang trên bộ nhớ (In-memory Pagination)
+            var pagedPromotions = allPromotions
+                                   .OrderBy(p => p.ID)
+                                   .Skip((pageNumber - 1) * pageSize)
+                                   .Take(pageSize)
+                                   .ToList();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            return View(pagedPromotions);
         }
 
         // GET: KhuyenMai/Details/5

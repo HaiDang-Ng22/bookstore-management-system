@@ -4,111 +4,262 @@
     ViewBag.Title = "Quản Lý Khuyến Mãi";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var price = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+    int currentPage = ViewBag.CurrentPage ?? 1;
 }
 
 <style>
-    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
-    .page-title { font-size:20px; font-weight:800; color:#0f172a; }
-    .page-title span { color:#e8392a; }
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+    .page-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+        .page-title span {
+            color: #e8392a;
+        }
+
     .btn-add-new {
         background: linear-gradient(135deg, #e8392a, #ff6b5b);
-        color: #fff; border: none; border-radius: 10px;
-        padding: 10px 20px; font-size: 14px; font-weight: 600;
-        text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-        transition: all 0.2s; box-shadow: 0 4px 12px rgba(232,57,42,0.3);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(232,57,42,0.3);
         cursor: pointer;
     }
-    .btn-add-new:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(232,57,42,0.4); color:#fff; text-decoration:none; }
-    
+
+        .btn-add-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(232,57,42,0.4);
+            color: #fff;
+            text-decoration: none;
+        }
+
     .section-card {
-        background:#fff; border-radius:16px;
-        border:1px solid #f1f5f9;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.04); overflow:hidden;
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        overflow: hidden;
     }
+
     .section-card-header {
-        padding:18px 24px; border-bottom:1px solid #f1f5f9;
-        display:flex; align-items:center; justify-content:space-between;
+        padding: 18px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
-    .section-card-title { font-size:15px; font-weight:700; color:#0f172a; }
+
+    .section-card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
     .badge-num {
-        background:#f1f5f9; color:#475569; border-radius:6px;
-        font-size:12px; font-weight:700; padding:2px 10px;
+        background: #f1f5f9;
+        color: #475569;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 2px 10px;
     }
-    
-    .admin-table { width:100%; border-collapse:collapse; }
-    .admin-table thead th {
-        background:#f8fafc; font-size:11px; font-weight:700;
-        text-transform:uppercase; letter-spacing:0.6px;
-        color:#64748b; padding:12px 16px;
-        border-bottom:1px solid #e2e8f0; text-align:left;
-        white-space: nowrap;
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
     }
-    .admin-table tbody tr { border-bottom:1px solid #f1f5f9; transition:background 0.15s; }
-    .admin-table tbody tr:hover { background:#f8fafc; }
-    .admin-table tbody tr:last-child { border-bottom:none; }
-    .admin-table tbody td { padding:14px 16px; font-size:13px; color:#334155; vertical-align:middle; }
-    
+
+        .admin-table thead th {
+            background: #f8fafc;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #64748b;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .admin-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s;
+        }
+
+            .admin-table tbody tr:hover {
+                background: #f8fafc;
+            }
+
+            .admin-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+        .admin-table tbody td {
+            padding: 14px 16px;
+            font-size: 13px;
+            color: #334155;
+            vertical-align: middle;
+        }
+
     /* Premium iOS Switch */
     .ios-switch-container {
         display: inline-flex;
         align-items: center;
         cursor: pointer;
     }
+
     .ios-switch {
         position: relative;
         display: inline-block;
         width: 42px;
         height: 24px;
     }
-    .ios-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
+
+        .ios-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
     .ios-slider {
         position: absolute;
         cursor: pointer;
-        top: 0; left: 0; right: 0; bottom: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         background-color: #cbd5e1;
         transition: .3s;
         border-radius: 24px;
     }
-    .ios-slider:before {
-        position: absolute;
-        content: "";
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        bottom: 3px;
-        background-color: white;
-        transition: .3s;
-        border-radius: 50%;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    }
+
+        .ios-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
     input:checked + .ios-slider {
         background-color: #22c55e;
     }
-    input:checked + .ios-slider:before {
-        transform: translateX(18px);
-    }
+
+        input:checked + .ios-slider:before {
+            transform: translateX(18px);
+        }
 
     .btn-edit {
-        display:inline-flex; align-items:center; gap:4px;
-        background:#fef3c7; color:#92400e; border:none; border-radius:7px;
-        padding:5px 12px; font-size:11px; font-weight:700;
-        text-decoration:none; transition:all 0.2s; white-space:nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #fef3c7;
+        color: #92400e;
+        border: none;
+        border-radius: 7px;
+        padding: 5px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+        white-space: nowrap;
     }
-    .btn-edit:hover { background:#fde68a; color:#78350f; text-decoration:none; }
+
+        .btn-edit:hover {
+            background: #fde68a;
+            color: #78350f;
+            text-decoration: none;
+        }
+
     .btn-del {
-        display:inline-flex; align-items:center; gap:4px;
-        background:#fee2e2; color:#991b1b; border:none; border-radius:7px;
-        padding:5px 12px; font-size:11px; font-weight:700;
-        text-decoration:none; transition:all 0.2s; white-space:nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #fee2e2;
+        color: #991b1b;
+        border: none;
+        border-radius: 7px;
+        padding: 5px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+        white-space: nowrap;
     }
-    .btn-del:hover { background:#fecaca; color:#7f1d1d; text-decoration:none; }
-    
-    .empty-state { text-align:center; padding:48px 20px; color:#94a3b8; }
-    .empty-state i { font-size:40px; margin-bottom:12px; display:block; }
+
+        .btn-del:hover {
+            background: #fecaca;
+            color: #7f1d1d;
+            text-decoration: none;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 20px;
+        color: #94a3b8;
+    }
+
+        .empty-state i {
+            font-size: 40px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+    /* Hệ thống CSS Phân trang chuẩn */
+    .page-link-custom {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 32px;
+        padding: 0 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        background: #f1f5f9;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+        .page-link-custom:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+            text-decoration: none;
+        }
+
+        .page-link-custom.active {
+            background: linear-gradient(135deg, #e8392a, #ff6b5b);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(232,57,42,0.25);
+        }
+
+        .page-link-custom.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
 </style>
 
 <div class="page-header">
@@ -155,8 +306,8 @@
                             </td>
                             <td>
                                 <div style="font-size:12px; color:#64748b;">
-                                    Tố: @item.NgayBatDau.ToString("dd/MM/yyyy")<br />
-                                    Lúc: @item.NgayKetThuc.ToString("dd/MM/yyyy")
+                                    Từ: @item.NgayBatDau.ToString("dd/MM/yyyy")<br />
+                                    Đến: @item.NgayKetThuc.ToString("dd/MM/yyyy")
                                 </div>
                             </td>
                             <td><strong style="color:#e8392a;">@item.SoTienKM.ToString("C", price)</strong></td>
@@ -197,6 +348,35 @@
             </tbody>
         </table>
     </div>
+
+    @* Khối Phân Trang Chuẩn Đồng Bộ 100% *@
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-between align-items-center p-3 border-top" style="background: #f8fafc;">
+            <span style="font-size: 13px; color: #64748b;">
+                Trang <strong>@currentPage</strong> / @ViewBag.TotalPages
+            </span>
+            <div class="pagination-container d-flex gap-1" style="padding: 0; border: none;">
+                <a href="@Url.Action("Index", new { page = currentPage - 1 })"
+                   class="page-link-custom @(currentPage == 1 ? "disabled" : "")">
+                    <i class="bi bi-chevron-left"></i> Trước
+                </a>
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <a href="@Url.Action("Index", new { page = i })"
+                       class="page-link-custom @(currentPage == i ? "active" : "")">
+                        @i
+                    </a>
+                }
+
+                <a href="@Url.Action("Index", new { page = currentPage + 1 })"
+                   class="page-link-custom @(currentPage == ViewBag.TotalPages ? "disabled" : "")">
+                    Sau <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    }
 </div>
 
 <script>
@@ -213,12 +393,12 @@
                 success: function(response) {
                     if (!response.success) {
                         alert('Có lỗi xảy ra: ' + response.message);
-                        $toggle.prop('checked', !isChecked); // Revert switch state
+                        $toggle.prop('checked', !isChecked);
                     }
                 },
                 error: function(xhr, status, error) {
                     alert('Có lỗi xảy ra khi cập nhật trạng thái. Chi tiết lỗi: ' + error);
-                    $toggle.prop('checked', !isChecked); // Revert switch state
+                    $toggle.prop('checked', !isChecked);
                 }
             });
         });

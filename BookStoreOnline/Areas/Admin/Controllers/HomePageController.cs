@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using BookStoreOnline.Models; // Đảm bảo bạn đã thêm namespace cho mô hình dữ liệu của bạn
+using BookStoreOnline.Models;
 using static BookStoreOnline.Areas.Admin.Constants.Constants;
-
 using BookStoreOnline.Core;
-using static BookStoreOnline.Areas.Admin.Constants.Constants;
 
 namespace BookStoreOnline.Areas.Admin.Controllers
 {
@@ -14,41 +12,56 @@ namespace BookStoreOnline.Areas.Admin.Controllers
     public class Home_PageController : Controller
     {
         private NhaSachEntities3 db = new NhaSachEntities3();
-        private string status;
 
         // GET: Admin/HomePage
-        public ActionResult Index()
+        public ActionResult Index(string status, int? page)
         {
-            // Đếm tổng số khách hàng
-            var soLuongKhachHang = db.KHACHHANGs.Count();
+            // Đếm các thông số tổng quan
+            ViewBag.SoLuongKhachHang = db.KHACHHANGs.Count();
+            ViewBag.TongSanPham = db.SANPHAMs.Count();
+            ViewBag.TongDonHang = db.DONHANGs.Count();
+            ViewBag.TongLoai = db.LOAIs.Count();
 
+            // Lưu trạng thái để đồng bộ filter nếu cần
+            ViewBag.CurrentStatus = status;
 
-            // Gửi thông tin số lượng khách hàng tới view
-            ViewBag.SoLuongKhachHang = soLuongKhachHang;
-            ViewBag.TongSanPham = db.SANPHAMs.Count(); // Tổng số sản phẩm
-            ViewBag.TongDonHang = db.DONHANGs.Count(); // Tổng số đơn hàng
-            ViewBag.TongLoai = db.LOAIs.Count();//
-                                                // Lấy danh sách đơn hàng từ cơ sở dữ liệu
+            // Lấy danh sách đơn hàng từ cơ sở dữ liệu và sắp xếp mới nhất lên đầu
             List<DONHANG> donHang;
             if (!string.IsNullOrEmpty(status))
             {
                 if (Enum.TryParse(status, out StatusOrder parsedStatusOrder))
                 {
                     int parsedStatusOrderInt = (int)parsedStatusOrder;
-                    donHang = db.DONHANGs.Where(x => x.TrangThai == parsedStatusOrderInt).ToList();
+                    donHang = db.DONHANGs.Where(x => x.TrangThai == parsedStatusOrderInt).OrderByDescending(x => x.NgayDat).ToList();
                 }
                 else
                 {
-                    donHang = db.DONHANGs.ToList();  // Lấy tất cả đơn hàng nếu trạng thái không hợp lệ
+                    donHang = db.DONHANGs.OrderByDescending(x => x.NgayDat).ToList();
                 }
             }
             else
             {
-                donHang = db.DONHANGs.ToList();  // Lấy tất cả đơn hàng nếu không có trạng thái
+                donHang = db.DONHANGs.OrderByDescending(x => x.NgayDat).ToList();
             }
 
-            // Truyền vào ViewBag
-            ViewBag.DonHangs = donHang;
+            // --- XỬ LÝ PHÂN TRANG CHO TRANG CHỦ DASHBOARD ---
+            int pageSize = 7; // Hiển thị 7 đơn hàng gần đây nhất mỗi trang
+            int currentPage = page ?? 1;
+            int totalCount = donHang.Count;
+            int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            if (currentPage > totalPages && totalPages > 0)
+            {
+                currentPage = totalPages;
+            }
+
+            // Gán danh sách đã phân trang vào ViewBag thay vì lấy ToList() toàn bộ
+            ViewBag.DonHangs = donHang.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+
+            // Truyền dữ liệu phân trang sang View
+            ViewBag.CurrentPage = currentPage;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
 
             return View();
         }

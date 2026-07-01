@@ -16,9 +16,22 @@ namespace BookStoreOnline.Areas.Admin.Controllers
     {
         private NhaSachEntities3 db = new NhaSachEntities3();
         // GET: Admin/ControlUser
-        public ActionResult Index()
+        public ActionResult Index(int? page)
         {
-            var users = db.KHACHHANGs.ToList();
+            int pageSize = 7; // S? l??ng khách hàng trên m?t trang
+            int pageNumber = page ?? 1; // N?u page null thì m?c ??nh là trang 1
+
+            var totalItems = db.KHACHHANGs.Count();
+            var users = db.KHACHHANGs
+                          .OrderBy(kh => kh.MaKH) // B?t bu?c ph?i OrderBy tr??c khi Skip
+                          .Skip((pageNumber - 1) * pageSize)
+                          .Take(pageSize)
+                          .ToList();
+
+            // Truy?n các thông tin phân trang qua ViewBag ?? View s? d?ng
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
             return View(users);
         }
         public ActionResult Delete(int? id)

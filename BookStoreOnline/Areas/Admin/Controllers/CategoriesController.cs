@@ -27,10 +27,29 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         }
 
         // GET: Admin/LOAIs.
-        public ActionResult Index()
+        // GET: Admin/LOAIs.
+        public ActionResult Index(int page = 1)
         {
-            //return View(db.LOAIs.ToList());
-            return View(_categorySingleton.GetAllCategories()); //  Lấy danh sách danh mục từ Singleton Service
+            var allCategories = _categorySingleton.GetAllCategories();
+
+            int pageSize = 7;
+            int totalCategories = allCategories.Count();
+            int totalPages = (int)Math.Ceiling((double)totalCategories / pageSize);
+
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            var pagedCategories = allCategories
+                                    .Skip((page - 1) * pageSize)
+                                    .Take(pageSize)
+                                    .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCategories;
+
+            return View(pagedCategories);
         }
 
         // GET: Admin/LOAIs.Details/5

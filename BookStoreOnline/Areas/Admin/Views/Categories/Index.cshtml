@@ -6,59 +6,213 @@
 }
 
 <style>
-    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
-    .page-title { font-size:20px; font-weight:800; color:#0f172a; }
-    .page-title span { color:#e8392a; }
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+    .page-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+        .page-title span {
+            color: #e8392a;
+        }
+
     .btn-add-new {
         background: linear-gradient(135deg, #e8392a, #ff6b5b);
-        color: #fff; border: none; border-radius: 10px;
-        padding: 10px 20px; font-size: 14px; font-weight: 600;
-        text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-        transition: all 0.2s; box-shadow: 0 4px 12px rgba(232,57,42,0.3);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(232,57,42,0.3);
         cursor: pointer;
     }
-    .btn-add-new:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(232,57,42,0.4); color:#fff; text-decoration:none; }
+
+        .btn-add-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(232,57,42,0.4);
+            color: #fff;
+            text-decoration: none;
+        }
+
     .section-card {
-        background:#fff; border-radius:16px;
-        border:1px solid #f1f5f9;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.04); overflow:hidden;
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        overflow: hidden;
     }
+
     .section-card-header {
-        padding:18px 24px; border-bottom:1px solid #f1f5f9;
-        display:flex; align-items:center; justify-content:space-between;
+        padding: 18px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
-    .section-card-title { font-size:15px; font-weight:700; color:#0f172a; }
-    .admin-table { width:100%; border-collapse:collapse; }
-    .admin-table thead th {
-        background:#f8fafc; font-size:11px; font-weight:700;
-        text-transform:uppercase; letter-spacing:0.6px;
-        color:#64748b; padding:12px 20px;
-        border-bottom:1px solid #e2e8f0; text-align:left;
+
+    .section-card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
     }
-    .admin-table tbody tr { border-bottom:1px solid #f1f5f9; transition:background 0.15s; }
-    .admin-table tbody tr:hover { background:#f8fafc; }
-    .admin-table tbody tr:last-child { border-bottom:none; }
-    .admin-table tbody td { padding:14px 20px; font-size:14px; color:#334155; }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .admin-table thead th {
+            background: #f8fafc;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #64748b;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .admin-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s;
+        }
+
+            .admin-table tbody tr:hover {
+                background: #f8fafc;
+            }
+
+            .admin-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+        .admin-table tbody td {
+            padding: 14px 20px;
+            font-size: 14px;
+            color: #334155;
+            vertical-align: middle;
+        }
+
     .btn-edit {
-        display:inline-flex; align-items:center; gap:5px;
-        background:#fef3c7; color:#92400e; border:none; border-radius:8px;
-        padding:6px 14px; font-size:12px; font-weight:600;
-        text-decoration:none; transition:all 0.2s; cursor:pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #fef3c7;
+        color: #92400e;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
     }
-    .btn-edit:hover { background:#fde68a; color:#78350f; text-decoration:none; }
+
+        .btn-edit:hover {
+            background: #fde68a;
+            color: #78350f;
+            text-decoration: none;
+        }
+
     .btn-del {
-        display:inline-flex; align-items:center; gap:5px;
-        background:#fee2e2; color:#991b1b; border:none; border-radius:8px;
-        padding:6px 14px; font-size:12px; font-weight:600;
-        text-decoration:none; transition:all 0.2s; cursor:pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #fee2e2;
+        color: #991b1b;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
     }
-    .btn-del:hover { background:#fecaca; color:#7f1d1d; text-decoration:none; }
+
+        .btn-del:hover {
+            background: #fecaca;
+            color: #7f1d1d;
+            text-decoration: none;
+        }
+
     .badge-num {
-        background:#f1f5f9; color:#475569; border-radius:6px;
-        font-size:12px; font-weight:700; padding:2px 10px;
+        background: #f1f5f9;
+        color: #475569;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 2px 10px;
     }
-    .empty-state { text-align:center; padding:48px 20px; color:#94a3b8; }
-    .empty-state i { font-size:40px; margin-bottom:12px; display:block; }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 20px;
+        color: #94a3b8;
+    }
+
+        .empty-state i {
+            font-size: 40px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+    /* CSS Thanh phân trang */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 18px 24px;
+        gap: 6px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .page-link-custom {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 32px;
+        padding: 0 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        background: #f1f5f9;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+        .page-link-custom:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+            text-decoration: none;
+        }
+
+        .page-link-custom.active {
+            background: linear-gradient(135deg,#e8392a,#ff6b5b);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(232,57,42,0.25);
+        }
+
+        .page-link-custom.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
 </style>
 
 <div class="page-header">
@@ -71,7 +225,7 @@
 <div class="section-card">
     <div class="section-card-header">
         <span class="section-card-title"><i class="bi bi-tags-fill me-2" style="color:#e8392a"></i>Tất Cả Thể Loại</span>
-        <span class="badge-num">@Model.Count() thể loại</span>
+        <span class="badge-num">@ViewBag.TotalCount thể loại</span>
     </div>
     <div class="table-responsive">
         <table class="admin-table">
@@ -83,13 +237,16 @@
                 </tr>
             </thead>
             <tbody>
-                @if (Model.Any())
+                @if (Model != null && Model.Any())
                 {
-                    int i = 1;
+                    int currentPage = ViewBag.CurrentPage ?? 1;
+                    int pageSize = ViewBag.PageSize ?? 7;
+                    int stt = ((currentPage - 1) * pageSize) + 1;
+
                     foreach (var item in Model)
                     {
                         <tr>
-                            <td><span class="badge-num">@i</span></td>
+                            <td><span class="badge-num">@stt</span></td>
                             <td><strong>@Html.DisplayFor(modelItem => item.Tenloai)</strong></td>
                             <td style="text-align:center;">
                                 <a href="@Url.Action("Edit", "Categories", new { area = "Admin", id = item.Maloai })" class="btn-edit">
@@ -101,7 +258,7 @@
                                 </a>
                             </td>
                         </tr>
-                        i++;
+                        stt++;
                     }
                 }
                 else
@@ -118,4 +275,32 @@
             </tbody>
         </table>
     </div>
+    @if (ViewBag.TotalPages > 1)
+    {
+        int curPage = ViewBag.CurrentPage ?? 1;
+        <div class="d-flex justify-content-between align-items-center p-3 border-top" style="background: #f8fafc;">
+            <span style="font-size: 13px; color: #64748b;">
+                Trang <strong>@curPage</strong> / @ViewBag.TotalPages
+            </span>
+            <div class="pagination-container d-flex gap-1" style="padding: 0; border: none;">
+                <a href="@Url.Action("Index", "Categories", new { area = "Admin", page = curPage - 1 })"
+                   class="page-link-custom @(curPage == 1 ? "disabled" : "")">
+                    <i class="bi bi-chevron-left"></i> Trước
+                </a>
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <a href="@Url.Action("Index", "Categories", new { area = "Admin", page = i })"
+                       class="page-link-custom @(curPage == i ? "active" : "")">
+                        @i
+                    </a>
+                }
+
+                <a href="@Url.Action("Index", "Categories", new { area = "Admin", page = curPage + 1 })"
+                   class="page-link-custom @(curPage == ViewBag.TotalPages ? "disabled" : "")">
+                    Sau <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    }
 </div>

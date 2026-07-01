@@ -35,8 +35,10 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         }
 
         // GET: Admin/Products
-        public ActionResult Index(string searchString)
+        // GET: Admin/Products
+        public ActionResult Index(string searchString, int? page)
         {
+
             IQueryable<SANPHAM> sanPham = db.SANPHAMs.OrderByDescending(p => p.MaSanPham);
 
             if (!String.IsNullOrEmpty(searchString))
@@ -44,7 +46,24 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                 sanPham = sanPham.Where(s => s.TenSanPham.Contains(searchString));
             }
 
-            return View(sanPham.ToList());
+            int pageSize = 7;
+            int pageNumber = page ?? 1; // Nếu page null thì mặc định là trang 1
+            int totalItems = sanPham.Count();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageNumber > totalPages && totalPages > 0) pageNumber = totalPages;
+
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.CurrentFilter = searchString; // Giữ lại từ khóa tìm kiếm khi chuyển trang
+
+ 
+            var pagedList = sanPham.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            return View(pagedList);
         }
 
         // GET: Admin/Products/Details/5

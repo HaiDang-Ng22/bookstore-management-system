@@ -22,9 +22,35 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         private NhaSachEntities3 db = new NhaSachEntities3();
 
         // GET: Admin/NHANVIENs
-        public ActionResult Index()
+        // GET: Admin/NHANVIENs
+        public ActionResult Index(int? page)
         {
-            return View(db.NHANVIENs.ToList());
+            // 1. Xác định số dòng tối đa trên 1 trang
+            int pageSize = 7;
+
+            // 2. Xác định trang hiện tại (nếu null thì mặc định là trang 1)
+            int pageNumber = (page ?? 1);
+
+            // 3. Lấy tổng số lượng bản ghi để tính tổng số trang ở View
+            int totalItems = db.NHANVIENs.Count();
+
+            // Tính tổng số trang (ép kiểu để chia lấy trần, ví dụ 15 dòng / 7 = 3 trang)
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // 4. Truy vấn phân trang bằng Skip và Take
+            // Lưu ý: Entity Framework yêu cầu phải OrderBy trước khi Skip
+            var danhSachNhanVien = db.NHANVIENs
+                                     .OrderBy(nv => nv.MaNV)
+                                     .Skip((pageNumber - 1) * pageSize)
+                                     .Take(pageSize)
+                                     .ToList();
+
+            // 5. Gửi các thông số phân trang sang View qua ViewBag
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.PageSize = pageSize;
+
+            return View(danhSachNhanVien);
         }
 
         // GET: Admin/NHANVIENs/Details/5

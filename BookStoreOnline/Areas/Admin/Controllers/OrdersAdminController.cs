@@ -18,30 +18,53 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         private NhaSachEntities3 db = new NhaSachEntities3();
 
         // GET: Admin/Orders
-        public ActionResult Index(string status)
+        public ActionResult Index(string status, int? page)
         {
             List<DONHANG> donHang;
 
             // LƯU TRẠNG THÁI HIỆN TẠI ĐỂ RA VIEW FILTER NÚT ACTIVE
             ViewBag.CurrentStatus = status;
 
+            // 1. Lọc dữ liệu theo trạng thái
             if (!string.IsNullOrEmpty(status))
             {
                 if (Enum.TryParse(status, out StatusOrder parsedStatusOrder))
                 {
                     int parsedStatusOrderInt = (int)parsedStatusOrder;
-                    donHang = db.DONHANGs.Where(x => x.TrangThai == parsedStatusOrderInt).ToList();
+                    donHang = db.DONHANGs.Where(x => x.TrangThai == parsedStatusOrderInt).OrderByDescending(x => x.NgayDat).ToList();
                 }
                 else
                 {
-                    donHang = db.DONHANGs.ToList();
+                    donHang = db.DONHANGs.OrderByDescending(x => x.NgayDat).ToList();
                 }
             }
             else
             {
-                donHang = db.DONHANGs.ToList();
+                donHang = db.DONHANGs.OrderByDescending(x => x.NgayDat).ToList();
             }
-            return View(donHang);
+
+            // 2. Cấu hình phân trang
+            int pageSize = 7; // Số lượng đơn hàng trên mỗi trang
+            int currentPage = page ?? 1;
+            int totalCount = donHang.Count;
+            int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            // Tránh trường hợp trang hiện tại lớn hơn tổng số trang khi đổi bộ lọc
+            if (currentPage > totalPages && totalPages > 0)
+            {
+                currentPage = totalPages;
+            }
+
+            // Cắt danh sách theo trang hiện tại
+            var pagedDonHang = donHang.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+
+            // Truyền các giá trị phân trang ra View
+            ViewBag.CurrentPage = currentPage;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalCount = totalCount;
+
+            return View(pagedDonHang);
         }
 
         // GET: Admin/Orders/Details/5

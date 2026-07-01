@@ -215,6 +215,46 @@
             background: #fca5a5;
             text-decoration: none;
         }
+
+    /* CSS Thanh phân trang custom */
+    .pagination-container {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .page-link-custom {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 32px;
+        padding: 0 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        background: #f1f5f9;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+        .page-link-custom:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+            text-decoration: none;
+        }
+
+        .page-link-custom.active {
+            background: linear-gradient(135deg, #e8392a, #ff6b5b);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(232,57,42,0.25);
+        }
+
+        .page-link-custom.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
 </style>
 
 <div class="form-page-header">
@@ -334,6 +374,38 @@
             </tbody>
         </table>
     </div>
+
+    @* --- THANH PHÂN TRANG GIAO DIỆN SPACE-BETWEEN --- *@
+    @if (ViewBag.TotalPages > 1)
+    {
+        int curPage = ViewBag.CurrentPage ?? 1;
+        <div class="d-flex justify-content-between align-items-center p-3 border-top" style="background: #f8fafc;">
+            <span style="font-size: 13px; color: #64748b;">
+                Trang <strong>@curPage</strong> / @ViewBag.TotalPages (Tổng số: @ViewBag.TotalCount đơn hàng)
+            </span>
+            <div class="pagination-container d-flex gap-1" style="padding: 0; border: none;">
+
+                <a href="@Url.Action("Index", "OrdersAdmin", new { area = "Admin", status = currentStatus, page = curPage - 1 })"
+                   class="page-link-custom @(curPage == 1 ? "disabled" : "")">
+                    <i class="bi bi-chevron-left"></i> Trước
+                </a>
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <a href="@Url.Action("Index", "OrdersAdmin", new { area = "Admin", status = currentStatus, page = i })"
+                       class="page-link-custom @(curPage == i ? "active" : "")">
+                        @i
+                    </a>
+                }
+
+                <a href="@Url.Action("Index", "OrdersAdmin", new { area = "Admin", status = currentStatus, page = curPage + 1 })"
+                   class="page-link-custom @(curPage == ViewBag.TotalPages ? "disabled" : "")">
+                    Sau <i class="bi bi-chevron-right"></i>
+                </a>
+
+            </div>
+        </div>
+    }
 </div>
 
 <script>
