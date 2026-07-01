@@ -268,6 +268,7 @@
     <Compile Include="Controllers\ReviewsController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Core\AdminAuthorizeAttribute.cs" />
+    <Compile Include="Core\CustomerTypeService.cs" />
     <Compile Include="Core\Extension.cs" />
     <Compile Include="Core\Iterator.cs" />
     <Compile Include="Global.asax.cs">
@@ -319,6 +320,7 @@
     </Compile>
     <Compile Include="Models\SANPHAM_Partial.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModel\CustomerVIPViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Admin\Controllers\conten\JavaScript.js" />
@@ -531,6 +533,7 @@
     <Content Include="Views\GioiThieu\Index.cshtml" />
     <Content Include="Views\Order\Details.cshtml" />
     <Content Include="Views\ProductDetail\_ReviewsPartial.cshtml" />
+    <Content Include="Views\Shared\_VIPStatus.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

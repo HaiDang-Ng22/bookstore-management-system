@@ -6,6 +6,7 @@ using System.Text;
 using System.Web.Mvc; 
 using Microsoft.IdentityModel.Tokens;
 using BookStoreOnline.Models;
+using BookStoreOnline.Core;
 using System.Security.Cryptography;
 using System.Web;
 using System.Net.Mail;
@@ -132,6 +133,9 @@ public class UserController : Controller
                 cus.TrangThai = true;
                 cus.NgayTao = DateTime.Now;
                 cus.MatKhau = HashPassword(cus.MatKhau);
+                cus.LoaiKhachHang = "Regular";  // Initialize as Regular customer
+                cus.TongChiTieu = 0;
+                cus.NgayCapNhatVIP = DateTime.Now;
 
                 db.KHACHHANGs.Add(cus);
                 db.SaveChanges();
@@ -233,6 +237,12 @@ public class UserController : Controller
 
             Session["TaiKhoan"] = account;
             
+            // Update customer VIP status based on spending
+            var customerService = new CustomerTypeService(db);
+            customerService.UpdateCustomerType(account.MaKH);
+            account = db.KHACHHANGs.FirstOrDefault(k => k.MaKH == account.MaKH);
+            Session["TaiKhoan"] = account;
+
             // Sync cart from database
             BookStoreOnline.Controllers.CartController.SyncCartOnLogin(account.MaKH, HttpContext);
 
@@ -470,53 +480,117 @@ public class UserController : Controller
         }
         return View();
     }
-    [HttpGet]
+    // GET: Hiển thị trang Cập Nhật Thông Tin
     public ActionResult UpdateInfo()
     {
         var currentUser = Session["TaiKhoan"] as KHACHHANG;
-
-        if (currentUser != null)
+        if (currentUser == null)
         {
-            var user = db.KHACHHANGs.FirstOrDefault(u => u.MaKH == currentUser.MaKH);
-            if (user != null)
-            {
-                return View(user);
-            }
+            return RedirectToAction("Login", "User");
         }
-        return RedirectToAction("Login", "User");
+
+        var user = db.KHACHHANGs.FirstOrDefault(u => u.MaKH == currentUser.MaKH);
+        if (user == null)
+        {
+            return RedirectToAction("Login", "User");
+        }
+
+        // ==================== THÊM PHẦN VIP ====================
+        var customerService = new CustomerTypeService(db);
+        customerService.RecalculateAllCustomerSpendings();
+        var vipBenefits = customerService.GetVIPBenefits(user.MaKH);   // Lấy thông tin VIP
+
+        ViewBag.VIPBenefits = vipBenefits;
+        // ======================================================
+
+        return View(user);
     }
+
+    // POST: Xử lý khi người dùng submit form
     [HttpPost]
     [ValidateAntiForgeryToken]
     public ActionResult UpdateInfo(KHACHHANG model)
     {
         var currentUser = Session["TaiKhoan"] as KHACHHANG;
-
         if (currentUser != null)
         {
             var user = db.KHACHHANGs.FirstOrDefault(u => u.MaKH == currentUser.MaKH);
             if (user != null)
             {
-                // Kiểm tra nếu email đã tồn tại trong database
+                // Kiểm tra email trùng
                 if (db.KHACHHANGs.Any(u => u.Email == model.Email && u.MaKH != user.MaKH))
                 {
-                    // Nếu email đã tồn tại (trùng email với một tài khoản khác), hiển thị lỗi
                     ModelState.AddModelError("Email", "Email này đã tồn tại trong hệ thống.");
-                    return View(user);  // Trả về View với dữ liệu và thông báo lỗi
+
+                    // ==================== THÊM VIP KHI CÓ LỖI ====================
+                    var customerService = new CustomerTypeService(db);
+                    customerService.RecalculateAllCustomerSpendings();
+                    ViewBag.VIPBenefits = customerService.GetVIPBenefits(user.MaKH);
+                    // =================================================================
+
+                    return View(user);
                 }
 
-                // Cập nhật thông tin người dùng nếu không có lỗi
+                // Cập nhật thông tin
                 user.Ten = model.Ten;
                 user.Email = model.Email;
                 user.DiaChi = model.DiaChi;
                 user.SoDienThoai = model.SoDienThoai;
-
                 db.SaveChanges();
+
                 ViewBag.ThongBao = "Thông tin đã được cập nhật thành công.";
-                return View(user);  // Trả về View với thông báo thành công
+
+                // ==================== THÊM VIP SAU KHI CẬP NHẬT ====================
+                var customerService2 = new CustomerTypeService(db);
+                customerService2.RecalculateAllCustomerSpendings();
+                ViewBag.VIPBenefits = customerService2.GetVIPBenefits(user.MaKH);
+                // =================================================================
+
+                return View(user);
             }
         }
-
         return RedirectToAction("Login", "User");
+    }
+
+    /// <summary>
+    /// Get VIP benefits information for current logged-in customer
+    /// </summary>
+    [HttpGet]
+    public ActionResult GetVIPInfo()
+    {
+        var currentUser = Session["TaiKhoan"] as KHACHHANG;
+        if (currentUser == null)
+        {
+            return RedirectToAction("Login", "User");
+        }
+
+        var customerService = new CustomerTypeService(db);
+        var vipBenefits = customerService.GetVIPBenefits(currentUser.MaKH);
+
+        return Json(vipBenefits, JsonRequestBehavior.AllowGet);
+    }
+
+    /// <summary>
+    /// Get customer profile with VIP information
+    /// </summary>
+    [HttpGet]
+    public ActionResult GetProfile()
+    {
+        var currentUser = Session["TaiKhoan"] as KHACHHANG;
+
+        if (currentUser == null)
+            return RedirectToAction("Login", "User");
+
+        var user = db.KHACHHANGs.FirstOrDefault(u => u.MaKH == currentUser.MaKH);
+
+        if (user == null)
+            return HttpNotFound();
+
+        var customerService = new CustomerTypeService(db);
+
+        ViewBag.VIPBenefits = customerService.GetVIPBenefits(user.MaKH);
+
+        return View("UpdateInfo", user);
     }
 
     public ActionResult LogOut()

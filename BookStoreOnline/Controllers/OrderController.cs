@@ -1,6 +1,7 @@
 ﻿using System.Data.Entity;
 using System.Web.Mvc;
 using BookStoreOnline.Models;
+using BookStoreOnline.Core;
 using BookStoreOnline.Areas.Admin.Constants;
 using System.Linq;
 using System.Net;
@@ -56,6 +57,13 @@ namespace BookStoreOnline.Controllers
                 db.Entry(order).State = EntityState.Modified;
                 db.SaveChanges(); // Lưu thay đổi vào cơ sở dữ liệu
 
+                // Update customer VIP status if order was cancelled
+                if (order.ID.HasValue)
+                {
+                    var customerService = new CustomerTypeService(db);
+                    customerService.UpdateCustomerType(order.ID.Value);
+                }
+
                 TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công và đã hoàn tiền";
             }
             else
@@ -78,6 +86,49 @@ namespace BookStoreOnline.Controllers
             }
 
             return View(order);
+        }
+
+        /// <summary>
+        /// Method called after order is completed/confirmed to update customer VIP status
+        /// This can be called from admin area or order processing system
+        /// </summary>
+        [HttpPost]
+        public ActionResult UpdateCustomerVIPStatus(int orderId)
+        {
+            var order = db.DONHANGs.Find(orderId);
+            if (order == null || !order.ID.HasValue)
+            {
+                return Json(new { success = false, message = "Order not found" });
+            }
+
+            try
+            {
+                var customerService = new CustomerTypeService(db);
+                customerService.UpdateCustomerType(order.ID.Value);
+                return Json(new { success = true, message = "Customer VIP status updated successfully" });
+            }
+            catch
+            {
+                return Json(new { success = false, message = "Error updating VIP status" });
+            }
+        }
+
+        /// <summary>
+        /// Get customer VIP benefits information
+        /// </summary>
+        [HttpGet]
+        public ActionResult GetCustomerVIPBenefits()
+        {
+            var user = GetAuthenticatedUser();
+            if (user == null)
+            {
+                return RedirectToAction("Login", "User");
+            }
+
+            var customerService = new CustomerTypeService(db);
+            var benefits = customerService.GetVIPBenefits(user.MaKH);
+
+            return Json(benefits, JsonRequestBehavior.AllowGet);
         }
     }
 }

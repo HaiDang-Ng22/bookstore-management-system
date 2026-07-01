@@ -1,0 +1,264 @@
+<!-- VIP Customer Display Component
+     This HTML can be used in your Razor views to display VIP information
+     Include this in your _Layout.cshtml or specific views
+-->
+
+<!-- VIP Badge Style CSS -->
+<style>
+    .vip-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .vip-badge.vip {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        color: #333;
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+    }
+
+    .vip-badge.regular {
+        background: #e0e0e0;
+        color: #666;
+    }
+
+    .vip-banner {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        border-left: 4px solid #FF8C00;
+        padding: 16px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        color: #333;
+    }
+
+    .vip-banner h4 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .vip-banner ul {
+        margin-bottom: 0;
+        padding-left: 20px;
+    }
+
+    .vip-banner li {
+        margin-bottom: 8px;
+    }
+
+    .vip-progress-container {
+        margin: 20px 0;
+    }
+
+    .vip-progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .vip-progress-bar {
+        height: 24px;
+        background-color: #f0f0f0;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid #ddd;
+    }
+
+    .vip-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
+        transition: width 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    .vip-progress-fill.full {
+        background: linear-gradient(90deg, #00C851 0%, #008744 100%);
+        color: white;
+    }
+
+    .vip-benefits-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .vip-benefits-list li {
+        padding: 10px;
+        background: #f9f9f9;
+        margin-bottom: 8px;
+        border-left: 4px solid #FFD700;
+        border-radius: 4px;
+    }
+
+    .vip-benefits-list li::before {
+        content: "✓ ";
+        color: #00C851;
+        font-weight: bold;
+    }
+
+    .vip-status-card {
+        border: 2px solid #FFD700;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 16px 0;
+        background: #fffef0;
+    }
+
+    .vip-status-card.regular {
+        border-color: #ddd;
+        background: #f9f9f9;
+    }
+</style>
+
+<!-- Template: Simple VIP Badge -->
+<template id="vip-badge-template">
+    <span class="vip-badge vip">👑 VIP Member</span>
+</template>
+
+<template id="regular-badge-template">
+    <span class="vip-badge regular">Regular Member</span>
+</template>
+
+<!-- Template: VIP Status Card -->
+<div class="vip-status-card" id="vip-status-card-vip">
+    <h5>
+        <span class="vip-badge vip">VIP</span>
+    </h5>
+    <p>Bạn là thành viên VIP! Cảm ơn vì đã ủng hộ Nhà Sách Thương Mại Điện Tử.</p>
+    <p><strong>Lợi ích VIP của bạn:</strong></p>
+    <ul class="vip-benefits-list">
+        <li>Giảm giá 10% cho tất cả đơn hàng</li>
+        <li>Ưu tiên xử lý đơn hàng</li>
+        <li>Hỗ trợ khách hàng ưu tiên 24/7</li>
+        <li>Tham gia chương trình khuyến mại VIP độc quyền</li>
+        <li>Miễn phí vận chuyển cho đơn từ 500,000 VND</li>
+    </ul>
+</div>
+
+<div class="vip-status-card regular" id="vip-status-card-regular">
+    <h5>
+        <span class="vip-badge regular">Regular</span>
+    </h5>
+    <p>Trở thành VIP để nhận nhiều ưu đãi hấp dẫn!</p>
+    <div class="vip-progress-container">
+        <div class="vip-progress-label">
+            <span>Tiến độ VIP</span>
+            <span id="spending-display">0 VND / 5,000,000 VND</span>
+        </div>
+        <div class="vip-progress-bar">
+            <div class="vip-progress-fill" id="progress-fill-bar" style="width: 0%">
+                <span id="progress-percentage">0%</span>
+            </div>
+        </div>
+        <p id="remaining-to-vip">Cần chi thêm <strong>5,000,000 VND</strong> để trở thành VIP</p>
+    </div>
+</div>
+
+<!-- JavaScript Utility Functions -->
+<script>
+    // Format number as Vietnamese currency
+    function formatVND(number) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(number);
+    }
+
+    // Update VIP status display
+    function updateVIPStatusDisplay(vipBenefits) {
+        if (!vipBenefits) return;
+
+        const isVIP = vipBenefits.isVIP;
+        const totalSpending = vipBenefits.totalSpending;
+        const remainingForVIP = vipBenefits.remainingSpendingForVIP;
+
+        if (isVIP) {
+            // Show VIP card
+            document.getElementById('vip-status-card-vip').style.display = 'block';
+            document.getElementById('vip-status-card-regular').style.display = 'none';
+        } else {
+            // Show Regular card with progress
+            document.getElementById('vip-status-card-vip').style.display = 'none';
+            document.getElementById('vip-status-card-regular').style.display = 'block';
+
+            // Update progress bar
+            const threshold = 5000000;
+            const percentage = Math.round((totalSpending / threshold) * 100);
+            const fillBar = document.getElementById('progress-fill-bar');
+            fillBar.style.width = Math.min(percentage, 100) + '%';
+
+            // Update text
+            document.getElementById('spending-display').textContent =
+                formatVND(totalSpending) + ' / ' + formatVND(threshold);
+            document.getElementById('progress-percentage').textContent = Math.min(percentage, 100) + '%';
+            document.getElementById('remaining-to-vip').innerHTML =
+                'Cần chi thêm <strong>' + formatVND(remainingForVIP) + '</strong> để trở thành VIP';
+        }
+    }
+
+    // Fetch VIP info from server
+    function fetchVIPInfo() {
+        fetch('/Order/GetCustomerVIPBenefits')
+            .then(response => response.json())
+            .then(data => {
+                updateVIPStatusDisplay(data);
+            })
+            .catch(error => console.error('Error fetching VIP info:', error));
+    }
+
+    // Initialize VIP display on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        // Only fetch if user is logged in
+        const userElement = document.getElementById('current-user');
+        if (userElement) {
+            fetchVIPInfo();
+            
+            // Refresh VIP status every 5 minutes
+            setInterval(fetchVIPInfo, 5 * 60 * 1000);
+        }
+    });
+</script>
+
+<!-- Usage Examples:
+
+1. Simple badge display:
+   <div class="vip-status-card" id="vip-status-card-vip" style="display: none;"></div>
+   <div class="vip-status-card regular" id="vip-status-card-regular"></div>
+
+2. In Razor view with Model:
+   @if (Model.LoaiKhachHang == "VIP")
+   {
+       <span class="vip-badge vip">👑 VIP Member</span>
+   }
+   else
+   {
+       <span class="vip-badge regular">Regular Member</span>
+   }
+
+3. With VIPBenefits:
+   @{
+       var customerService = new BookStoreOnline.Core.CustomerTypeService();
+       var benefits = customerService.GetVIPBenefits(Model.MaKH);
+   }
+   @Html.Partial("_VIPStatus", benefits)
+
+4. Display VIP progress:
+   <div class="vip-progress-container">
+       <div class="vip-progress-label">
+           <span>Tiến độ VIP</span>
+           <span>@Model.TongChiTieu?.ToString("#,##0") VND / 5,000,000 VND</span>
+       </div>
+       <div class="vip-progress-bar">
+           <div class="vip-progress-fill" style="width: @((Model.TongChiTieu ?? 0) * 100 / 5000000)%">
+           </div>
+       </div>
+   </div>
+-->

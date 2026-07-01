@@ -221,6 +221,12 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                 }
 
                 db.SaveChanges();
+
+                if (order.ID.HasValue)
+                {
+                    var customerService = new CustomerTypeService(db);
+                    customerService.UpdateCustomerType(order.ID.Value);
+                }
             }
             return RedirectToAction("Index");
         }

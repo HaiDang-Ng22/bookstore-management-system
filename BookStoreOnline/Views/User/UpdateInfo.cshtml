@@ -5,85 +5,263 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@using BookStoreOnline.Core
+@using BookStoreOnline.Models
+
+@{
+    var vipBenefits = ViewBag.VIPBenefits as VIPBenefits;
+}
+
 <style>
-.profile-wrap {
-    min-height: calc(100vh - 280px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 16px;
-    background: linear-gradient(135deg, #fef2f2 0%, #f5f6fa 50%, #eff6ff 100%);
-}
-.profile-card {
-    width: 100%;
-    max-width: 500px;
-    background: #fff;
-    border-radius: 24px;
-    padding: 44px 40px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.10);
-    border: 1px solid #f1f5f9;
-}
-.profile-header { text-align: center; margin-bottom: 28px; }
-.profile-icon-badge {
-    width: 60px; height: 60px;
-    background: linear-gradient(135deg,#e8392a,#ff6b5b);
-    border-radius: 18px;
-    display: inline-flex align-items: center; justify-content: center;
-    font-size: 28px; color: #fff; margin: 0 auto 12px;
-    box-shadow: 0 8px 20px rgba(232,57,42,.3);
-    align-items: center;
-    justify-content: center;
-}
-.profile-card h2 {
-    font-size: 24px; font-weight: 800; color: #111827;
-    margin-bottom: 4px;
-}
-.profile-subtitle { color: #9ca3af; font-size: 14px; }
-.form-field { margin-bottom: 18px; }
-.form-field label {
-    display: block; font-size: 13px; font-weight: 600;
-    color: #374151; margin-bottom: 8px;
-}
-.form-field .field-input {
-    width: 100%; height: 48px;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 0 16px;
-    font-size: 14px; font-family: 'Inter',sans-serif;
-    color: #374151; background: #f9fafb;
-    outline: none; transition: .25s;
-    display: block;
-}
-.form-field .field-input:focus {
-    border-color: #e8392a;
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(232,57,42,.1);
-}
-.validation-error {
-    color: #dc2626;
-    font-size: 12px;
-    font-weight: 600;
-    margin-top: 4px;
-    display: block;
-}
-.btn-profile {
-    width: 100%; height: 50px;
-    border-radius: 999px;
-    border: none;
-    background: linear-gradient(135deg,#e8392a,#ff6b5b);
-    color: #fff; font-size: 15px; font-weight: 700;
-    cursor: pointer; transition: .25s;
-    box-shadow: 0 6px 20px rgba(232,57,42,.25);
-    margin-top: 10px;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.btn-profile:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,57,42,.35); }
-.alert-custom-info {
-    border-radius: 10px; border: none; font-size: 13px;
-    padding: 12px 14px; margin-bottom: 20px;
-    background: #dbeafe; color: #1e40af;
-    display: flex; align-items: center; gap: 8px;
-}
+    /* === CSS Profile === */
+    .profile-wrap {
+        min-height: calc(100vh - 280px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 16px;
+        background: linear-gradient(135deg, #fef2f2 0%, #f5f6fa 50%, #eff6ff 100%);
+    }
+
+    .profile-card {
+        width: 100%;
+        max-width: 500px;
+        background: #fff;
+        border-radius: 24px;
+        padding: 44px 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,.10);
+        border: 1px solid #f1f5f9;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .profile-icon-badge {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg,#e8392a,#ff6b5b);
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: #fff;
+        margin: 0 auto 12px;
+        box-shadow: 0 8px 20px rgba(232,57,42,.3);
+    }
+
+    .profile-card h2 {
+        font-size: 24px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 4px;
+    }
+
+    .profile-subtitle {
+        color: #9ca3af;
+        font-size: 14px;
+    }
+
+    /* === CSS VIP === */
+    .vip-status-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        .vip-status-badge.vip {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #333;
+            box-shadow: 0 2px 6px rgba(255, 215, 0, 0.4);
+        }
+
+        .vip-status-badge.regular {
+            background: #e9ecef;
+            color: #666;
+        }
+
+    .vip-progress-section {
+        margin: 15px 0;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 6px;
+    }
+
+    .vip-progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 13px;
+    }
+
+    .vip-progress-value {
+        color: #666;
+        font-size: 12px;
+    }
+
+    .vip-progress-bar {
+        height: 20px;
+        background-color: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+    .vip-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
+        transition: width 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+        font-weight: bold;
+        font-size: 11px;
+    }
+
+        .vip-progress-fill.full {
+            background: linear-gradient(90deg, #00C851 0%, #008744 100%);
+            color: white;
+        }
+
+    .vip-message {
+        font-size: 12px;
+        color: #666;
+        margin-top: 6px;
+    }
+
+        .vip-message.near {
+            color: #FF8C00;
+            font-weight: 500;
+        }
+
+    .vip-benefits-mini {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 12px;
+    }
+
+        .vip-benefits-mini li {
+            padding: 4px 0;
+            color: #555;
+        }
+
+            .vip-benefits-mini li::before {
+                content: "✓ ";
+                color: #00C851;
+                font-weight: bold;
+                margin-right: 4px;
+            }
+
+    .vip-card {
+        background: linear-gradient(135deg, #fff8e1 0%, #fffef0 100%);
+        border: 2px solid #FFD700;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 20px 0;
+    }
+
+        .vip-card.regular {
+            background: #f8f9fa;
+            border-color: #ddd;
+        }
+
+    .vip-card-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #333;
+    }
+
+        .vip-card-title .vip-icon {
+            font-size: 18px;
+            margin-right: 8px;
+        }
+
+    /* Form styles */
+    .form-field {
+        margin-bottom: 18px;
+    }
+
+        .form-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-field .field-input {
+            width: 100%;
+            height: 48px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 0 16px;
+            font-size: 14px;
+            color: #374151;
+            background: #f9fafb;
+            outline: none;
+            transition: .25s;
+        }
+
+            .form-field .field-input:focus {
+                border-color: #e8392a;
+                background: #fff;
+                box-shadow: 0 0 0 3px rgba(232,57,42,.1);
+            }
+
+    .validation-error {
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 4px;
+        display: block;
+    }
+
+    .btn-profile {
+        width: 100%;
+        height: 50px;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg,#e8392a,#ff6b5b);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .25s;
+        box-shadow: 0 6px 20px rgba(232,57,42,.25);
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+        .btn-profile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(232,57,42,.35);
+        }
+
+    .alert-custom-info {
+        border-radius: 10px;
+        font-size: 13px;
+        padding: 12px 14px;
+        margin-bottom: 20px;
+        background: #dbeafe;
+        color: #1e40af;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 </style>
 
 <div class="profile-wrap">
@@ -100,6 +278,84 @@
                 <i class="bi bi-info-circle-fill"></i>
                 @ViewBag.ThongBao
             </div>
+        }
+
+        <!-- Phần VIP được thêm vào đây -->
+        @if (vipBenefits != null)
+        {
+            if (vipBenefits.IsVIP)
+            {
+                <!-- VIP Member -->
+                <div class="vip-card">
+                    <div class="vip-card-title">
+                        <span class="vip-icon">👑</span>
+                        <span class="vip-status-badge vip">VIP Member</span>
+                    </div>
+                    <p style="margin: 0 0 10px 0; font-size: 13px; color: #666;">
+                        Cảm ơn bạn đã là thành viên VIP!
+                    </p>
+                    <ul class="vip-benefits-mini">
+                        <li>Giảm giá 10% cho tất cả đơn hàng</li>
+                        <li>Ưu tiên xử lý đơn hàng</li>
+                        <li>Hỗ trợ khách hàng ưu tiên</li>
+                        <li>Chương trình khuyến mại VIP độc quyền</li>
+                    </ul>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 215, 0, 0.3); font-size: 12px; color: #666;">
+                        <strong>Tổng chi tiêu:</strong> @vipBenefits.TotalSpending.ToString("N0") VND
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Regular Member -->
+                <div class="vip-card regular">
+                    <div class="vip-card-title">
+                        <span class="vip-icon">🎯</span>
+                        <span class="vip-status-badge regular">Regular Member</span>
+                    </div>
+                    <div class="vip-progress-section">
+                        <div class="vip-progress-header">
+                            <strong>Tiến độ VIP</strong>
+                            <span class="vip-progress-value">
+                                @vipBenefits.TotalSpending.ToString("N0") / 5,000,000 VND
+                            </span>
+                        </div>
+                        <div class="vip-progress-bar">
+                            @{
+                                int percentage = (int)((double)vipBenefits.TotalSpending / 5000000 * 100);
+                                percentage = Math.Min(percentage, 100);
+                            }
+                            <div class="vip-progress-fill" style="width: @percentage%">
+                                @if (percentage > 5)
+                                {
+                                    <span>@percentage%</span>
+                                }
+                            </div>
+                        </div>
+
+                        @if (vipBenefits.IsNearVIP)
+                        {
+                            <div class="vip-message near">
+                                🎁 Bạn sắp trở thành VIP! Cần chi thêm <strong>@vipBenefits.RemainingSpendingForVIP.ToString("#,##0") VND</strong>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="vip-message">
+                                Cần chi thêm <strong>@vipBenefits.RemainingSpendingForVIP.ToString("#,##0") VND</strong> để trở thành VIP
+                            </div>
+                        }
+                    </div>
+                    <div style="font-size: 12px; color: #666; padding: 8px 0; border-top: 1px solid #e0e0e0; margin-top: 8px;">
+                        <strong>Lợi ích VIP:</strong>
+                        <ul class="vip-benefits-mini" style="margin: 6px 0 0 0;">
+                            <li>Giảm giá 10%</li>
+                            <li>Ưu tiên xử lý</li>
+                            <li>Hỗ trợ ưu tiên</li>
+                        </ul>
+                    </div>
+                </div>
+            }
         }
 
         @using (Html.BeginForm("UpdateInfo", "User", FormMethod.Post))
