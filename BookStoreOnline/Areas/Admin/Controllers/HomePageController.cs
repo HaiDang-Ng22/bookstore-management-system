@@ -8,7 +8,7 @@ using BookStoreOnline.Core;
 
 namespace BookStoreOnline.Areas.Admin.Controllers
 {
-    [AdminAuthorize(AdminRole.Administrator, AdminRole.Manager, AdminRole.Seller)]
+    [AdminAuthorize(AdminRole.Admin)]
     public class Home_PageController : Controller
     {
         private NhaSachEntities3 db = new NhaSachEntities3();

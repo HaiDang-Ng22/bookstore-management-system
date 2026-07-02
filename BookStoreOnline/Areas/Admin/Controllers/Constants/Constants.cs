@@ -10,12 +10,20 @@ namespace BookStoreOnline.Areas.Admin.Constants
     {
         public enum AdminRole
         {
-            [Description("Quản trị viên")]
-            Administrator = 1,
-            [Description("Quản lý")]
-            Manager = 2,
-            [Description("Nhân viên bán hàng")]
-            Seller = 3
+            [Description("Admin")]
+            Admin = 1,
+            [Description("User")]
+            User = 2,
+            [Description("Shipper")]
+            Shipper = 3
+        }
+
+        public enum AccountType
+        {
+            [Description("Nhân viên")]
+            Staff = 1,
+            [Description("Khách hàng")]
+            Customer = 2
         }
         public enum StatusOrder
         {

@@ -229,7 +229,7 @@
                     <img class="app-sidebar__user-avatar" src="~/Images/z5482551824090_8d0041d8091c42fc59c7cfff0e837099.jpg" width="44" height="44" alt="User Image">
                     <div>
                         <p class="app-sidebar__user-name">Quản lý hệ thống</p>
-                        <p class="app-sidebar__user-designation">Online</p>
+                        <p class="app-sidebar__user-designation">@(Session["TenVaiTro"] ?? "Online")</p>
                     </div>
                 </div>
 
@@ -243,45 +243,41 @@
 
                     <div class="sidebar-divider"></div>
 
-                    @if (admin != null && (admin.Quyen == 1 || admin.Quyen == 2))
-                    {
-                        <li>
-                            <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Categories" ? "active" : "")" href="/Admin/Categories">
-                                <i class="bi bi-tags mr-2"></i>
-                                <span>Danh Mục Loại Sách</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Products" ? "active" : "")" href="/Admin/Products">
-                                <i class="bi bi-book mr-2"></i>
-                                <span>Danh Sách Sách</span>
-                            </a>
-                        </li>
+                    <li>
+                        <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Categories" ? "active" : "")" href="/Admin/Categories">
+                            <i class="bi bi-tags mr-2"></i>
+                            <span>Danh Mục Loại Sách</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Products" ? "active" : "")" href="/Admin/Products">
+                            <i class="bi bi-book mr-2"></i>
+                            <span>Danh Sách Sách</span>
+                        </a>
+                    </li>
 
-                        <div class="sidebar-divider"></div>
-                    }
+                    <div class="sidebar-divider"></div>
 
-                    @if (admin != null && admin.Quyen == 1)
-                    {
-                        <li>
-                            <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "AdminAccounts" ? "active" : "")" href="/Admin/AdminAccounts">
-                                <i class="bi bi-person-badge mr-2"></i>
-                                <span>Tài Khoản Admin</span>
-                            </a>
-                        </li>
-                    }
+                    <li>
+                        <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "AdminAccounts" ? "active" : "")" href="/Admin/AdminAccounts">
+                            <i class="bi bi-person-badge mr-2"></i>
+                            <span>Tài Khoản Nhân Viên</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Roles" ? "active" : "")" href="/Admin/Roles">
+                            <i class="bi bi-shield-check mr-2"></i>
+                            <span>Phân Quyền (Vai Trò)</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "ControlUser" ? "active" : "")" href="/Admin/ControlUser">
+                            <i class="bi bi-people mr-2"></i>
+                            <span>Khách Hàng (User)</span>
+                        </a>
+                    </li>
 
-                    @if (admin != null && (admin.Quyen == 1 || admin.Quyen == 2))
-                    {
-                        <li>
-                            <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "ControlUser" ? "active" : "")" href="/Admin/ControlUser">
-                                <i class="bi bi-people mr-2"></i>
-                                <span>Khách Hàng</span>
-                            </a>
-                        </li>
-
-                        <div class="sidebar-divider"></div>
-                    }
+                    <div class="sidebar-divider"></div>
 
                     <li>
                         <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "OrdersAdmin" ? "active" : "")"
@@ -293,29 +289,26 @@
 
                     <div class="sidebar-divider"></div>
 
-                    @if (admin != null && (admin.Quyen == 1 || admin.Quyen == 2))
-                    {
-                        <li>
-                            <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Statistics" ? "active" : "")" href="/Admin/Statistics/Statistics">
-                                <i class="bi bi-graph-up-arrow mr-2"></i>
-                                <span>Thống Kê Doanh Thu</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Discount" ? "active" : "")" href="/Admin/Discount">
-                                <i class="bi bi-ticket-perforated mr-2"></i>
-                                <span>Khuyến Mãi</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "AdminReview" ? "active" : "")" href="/Admin/AdminReview">
-                                <i class="bi bi-chat-square-text mr-2"></i>
-                                <span>Quản Lý Đánh Giá</span>
-                            </a>
-                        </li>
+                    <li>
+                        <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Statistics" ? "active" : "")" href="/Admin/Statistics/Statistics">
+                            <i class="bi bi-graph-up-arrow mr-2"></i>
+                            <span>Thống Kê Doanh Thu</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Discount" ? "active" : "")" href="/Admin/Discount">
+                            <i class="bi bi-ticket-perforated mr-2"></i>
+                            <span>Khuyến Mãi</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "AdminReview" ? "active" : "")" href="/Admin/AdminReview">
+                            <i class="bi bi-chat-square-text mr-2"></i>
+                            <span>Quản Lý Đánh Giá</span>
+                        </a>
+                    </li>
 
-                        <div class="sidebar-divider"></div>
-                    }
+                    <div class="sidebar-divider"></div>
 
                     <li>
                         <a class="app-menu__item text-danger" href="/User/LogOut">

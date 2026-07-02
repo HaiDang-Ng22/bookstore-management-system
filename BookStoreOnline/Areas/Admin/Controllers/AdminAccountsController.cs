@@ -16,7 +16,7 @@ using static BookStoreOnline.Areas.Admin.Constants.Constants;
 
 namespace BookStoreOnline.Areas.Admin.Controllers
 {
-    [AdminAuthorize(AdminRole.Administrator)]
+    [AdminAuthorize(AdminRole.Admin)]
     public class AdminAccountsController : Controller
     {
         private NhaSachEntities3 db = new NhaSachEntities3();
@@ -50,6 +50,9 @@ namespace BookStoreOnline.Areas.Admin.Controllers
             ViewBag.TotalPages = totalPages;
             ViewBag.PageSize = pageSize;
 
+            var roleService = new RoleService(db);
+            ViewBag.RoleNames = roleService.GetAllRoles().ToDictionary(r => r.MaVaiTro, r => r.TenVaiTro);
+
             return View(danhSachNhanVien);
         }
 
@@ -71,10 +74,11 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         // GET: Admin/NHANVIENs/Create
         public ActionResult Create()
         {
-            var roles = from AdminRole e in Enum.GetValues(typeof(AdminRole))
-                        select new { Id = (int)e, Name = e.GetDescription() };
+            var roleService = new RoleService(db);
+            var staffRoles = roleService.GetStaffRoles()
+                .Select(r => new { Id = r.MaVaiTro, Name = r.TenVaiTro });
 
-            ViewBag.Role = new SelectList(roles, "Id", "Name");
+            ViewBag.Role = new SelectList(staffRoles, "Id", "Name");
             return View();
         }
 
@@ -87,6 +91,13 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                var roleService = new RoleService(db);
+                if (!roleService.IsValidStaffRole(nhanVienMoi.Quyen))
+                {
+                    ModelState.AddModelError("Quyen", "Vai trò không hợp lệ.");
+                }
+                else
+                {
                 // Extract the part before the '@' symbol
                 var emailParts = nhanVienMoi.Email.Split('@');
                 if (emailParts.Length > 0)
@@ -103,11 +114,13 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                 db.NHANVIENs.Add(nhanVienMoi);
                 db.SaveChanges();
                 return RedirectToAction("Index");
+                }
             }
 
-            var roles = from AdminRole e in Enum.GetValues(typeof(AdminRole))
-                        select new { Id = (int)e, Name = e.GetDescription() };
-            ViewBag.Role = new SelectList(roles, "Id", "Name");
+            var roleServiceFallback = new RoleService(db);
+            var staffRoles = roleServiceFallback.GetStaffRoles()
+                .Select(r => new { Id = r.MaVaiTro, Name = r.TenVaiTro });
+            ViewBag.Role = new SelectList(staffRoles, "Id", "Name");
 
             return View(nhanVienMoi);
         }
@@ -124,10 +137,11 @@ namespace BookStoreOnline.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }
-            var roles = from AdminRole e in Enum.GetValues(typeof(AdminRole))
-                        select new { Id = (int)e, Name = e.GetDescription() };
+            var roleService = new RoleService(db);
+            var staffRoles = roleService.GetStaffRoles()
+                .Select(r => new { Id = r.MaVaiTro, Name = r.TenVaiTro });
 
-            ViewBag.Role = new SelectList(roles, "Id", "Name");
+            ViewBag.Role = new SelectList(staffRoles, "Id", "Name", nhanVien.Quyen);
             return View(nhanVien);
         }
 
@@ -140,14 +154,13 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                //NHANVIEN admAccount = db.NHANVIENs.Find(nhanVien.MaNV);
-                //admAccount.Ten = nhanVien.Ten;
-                //admAccount.Quyen = nhanVien.Quyen;
-                //admAccount.Email = nhanVien.Email;
-                //admAccount.TrangThai= nhanVien.TrangThai;
-                //db.Entry(admAccount).State = EntityState.Modified;
-                //db.SaveChanges();
-                //return RedirectToAction("Index");
+                var roleService = new RoleService(db);
+                if (!roleService.IsValidStaffRole(nhanVien.Quyen))
+                {
+                    ModelState.AddModelError("Quyen", "Vai trò không hợp lệ.");
+                }
+                else
+                {
                 Iterator iterator = new AdminAccountsIterator(db.NHANVIENs.ToList());
                 var dbNhanVien = iterator.First();
                 while (!iterator.IsDone)
@@ -164,11 +177,13 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                     }
                     dbNhanVien = iterator.Next();
                 }
+                }
             }
 
-            var roles = from AdminRole e in Enum.GetValues(typeof(AdminRole))
-                        select new { Id = (int)e, Name = e.GetDescription() };
-            ViewBag.Role = new SelectList(roles, "Id", "Name");
+            var roleServiceFallback = new RoleService(db);
+            var staffRolesFallback = roleServiceFallback.GetStaffRoles()
+                .Select(r => new { Id = r.MaVaiTro, Name = r.TenVaiTro });
+            ViewBag.Role = new SelectList(staffRolesFallback, "Id", "Name", nhanVien.Quyen);
 
             return View(nhanVien);
         }

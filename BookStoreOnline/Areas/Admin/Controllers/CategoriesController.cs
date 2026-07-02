@@ -14,7 +14,7 @@ using static BookStoreOnline.Areas.Admin.Constants.Constants;
 
 namespace BookStoreOnline.Areas.Admin.Controllers
 {
-    [AdminAuthorize(AdminRole.Administrator, AdminRole.Manager)]
+    [AdminAuthorize(AdminRole.Admin)]
     public class CategoriesController : ControllerTemplateMethod
     {
         private readonly CategorySingleton _categorySingleton; //  Dùng Singleton cho GetAllCategories

@@ -1,0 +1,59 @@
+@model IEnumerable<BookStoreOnline.Models.VAITRO>
+@{
+    ViewBag.Title = "Danh sách vai trò";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<style>
+    .page-title { font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; }
+    .page-title span { color: #e8392a; }
+    .section-card { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; overflow: hidden; }
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table thead th { background: #f8fafc; padding: 12px 16px; font-size: 11px; text-transform: uppercase; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+    .admin-table tbody td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    .badge-staff { background: #fef2f2; color: #e8392a; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .badge-customer { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+</style>
+
+<div class="page-title">Quản lý <span>Vai Trò</span></div>
+
+<div class="section-card">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Mã</th>
+                <th>Tên vai trò</th>
+                <th>Mô tả</th>
+                <th>Loại tài khoản</th>
+                <th>Bảng liên kết</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var role in Model)
+            {
+                <tr>
+                    <td><strong>@role.MaVaiTro</strong></td>
+                    <td>@role.TenVaiTro</td>
+                    <td>@(role.MoTa ?? "-")</td>
+                    <td>
+                        @if (role.LoaiTaiKhoan == "NhanVien")
+                        {
+                            <span class="badge-staff">Nhân viên</span>
+                        }
+                        else
+                        {
+                            <span class="badge-customer">Khách hàng</span>
+                        }
+                    </td>
+                    <td>@(role.LoaiTaiKhoan == "NhanVien" ? "NHANVIEN.Quyen" : "KHACHHANG.MaVaiTro")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<p class="text-muted mt-3 small">
+    <i class="bi bi-info-circle"></i>
+    Hệ thống có 3 vai trò: <strong>Admin</strong> và <strong>Shipper</strong> gắn với bảng <strong>NHANVIEN</strong>,
+    <strong>User</strong> gắn với bảng <strong>KHACHHANG</strong>.
+</p>

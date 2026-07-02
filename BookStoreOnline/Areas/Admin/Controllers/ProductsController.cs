@@ -16,7 +16,7 @@ using static BookStoreOnline.Areas.Admin.Constants.Constants;
 
 namespace BookStoreOnline.Areas.Admin.Controllers
 {
-    [AdminAuthorize(AdminRole.Administrator, AdminRole.Manager)]
+    [AdminAuthorize(AdminRole.Admin)]
     public class ProductsController : Controller
     {
         private NhaSachEntities3 db = new NhaSachEntities3();

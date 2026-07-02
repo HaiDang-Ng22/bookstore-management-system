@@ -12,7 +12,7 @@ using BookStoreOnline.Core;
 
 namespace BookStoreOnline.Areas.Admin.Controllers
 {
-    [AdminAuthorize(AdminRole.Administrator, AdminRole.Manager, AdminRole.Seller)]
+    [AdminAuthorize(AdminRole.Admin)]
     public class OrdersAdminController : Controller
     {
         private NhaSachEntities3 db = new NhaSachEntities3();
@@ -84,6 +84,13 @@ namespace BookStoreOnline.Areas.Admin.Controllers
             var detail = db.CHITIETDONHANGs.Where(d => d.MaDonHang == id).ToList();
             ViewBag.Detail = detail;
             ViewBag.Total = order.TongTien;
+
+            var shippers = db.NHANVIENs
+                .Where(nv => nv.Quyen == (int)AdminRole.Shipper && (nv.TrangThai ?? false))
+                .OrderBy(nv => nv.Ten)
+                .ToList();
+            ViewBag.Shippers = new SelectList(shippers, "MaNV", "Ten", order.MaNVXuLy);
+
             return View(order);
         }
 
@@ -197,15 +204,24 @@ namespace BookStoreOnline.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
-        public ActionResult Shipping(int id)
+        public ActionResult Shipping(int id, int? shipperId)
         {
             var order = db.DONHANGs.FirstOrDefault(item => item.MaDonHang == id);
             if (order != null)
             {
                 order.TrangThai = (int)StatusOrder.Shipping;
+                if (shipperId.HasValue)
+                {
+                    var shipper = db.NHANVIENs.FirstOrDefault(nv =>
+                        nv.MaNV == shipperId.Value && nv.Quyen == (int)AdminRole.Shipper && (nv.TrangThai ?? false));
+                    if (shipper != null)
+                    {
+                        order.MaNVXuLy = shipper.MaNV;
+                    }
+                }
                 db.SaveChanges();
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Details", new { id });
         }
 
         public ActionResult ShippingSuccess(int id)

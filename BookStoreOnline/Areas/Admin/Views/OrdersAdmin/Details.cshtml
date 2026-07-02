@@ -167,9 +167,23 @@
                     }
                     @if (Model.TrangThai == (int)Constants.StatusOrder.Informed)
                     {
-                        <a href="@Url.Action("Shipping", "OrdersAdmin", new { id = Model.MaDonHang, area = "Admin" })" class="btn-action btn-ship">
-                            <i class="bi bi-truck"></i> Chuyển Cho Shipper
-                        </a>
+                        using (Html.BeginForm("Shipping", "OrdersAdmin", new { area = "Admin", id = Model.MaDonHang }, FormMethod.Get))
+                        {
+                            <div style="margin-bottom:10px;">
+                                <label class="info-label d-block mb-2">Chọn Shipper giao hàng</label>
+                                @Html.DropDownList("shipperId", ViewBag.Shippers as SelectList, "-- Chọn shipper --", new { @class = "form-select", required = "required" })
+                            </div>
+                            <button type="submit" class="btn-action btn-ship">
+                                <i class="bi bi-truck"></i> Chuyển Cho Shipper
+                            </button>
+                        }
+                    }
+                    @if (Model.MaNVXuLy.HasValue && Model.NHANVIEN != null)
+                    {
+                        <div class="info-row" style="padding:0 0 12px 0; border:none;">
+                            <span class="info-label">Shipper phụ trách</span>
+                            <span class="info-value">@Model.NHANVIEN.Ten</span>
+                        </div>
                     }
                     @if (Model.TrangThai == (int)Constants.StatusOrder.Shipping)
                     {

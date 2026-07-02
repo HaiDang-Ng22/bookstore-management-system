@@ -1,0 +1,104 @@
+@model BookStoreOnline.Models.DONHANG
+@using BookStoreOnline.Areas.Admin.Constants
+@{
+    ViewBag.Title = "Chi tiết đơn giao";
+    Layout = "~/Areas/Shipper/Views/Shared/_LayoutShipper.cshtml";
+    var price = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<style>
+    .detail-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
+    .section-card { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 20px; }
+    .section-header { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; font-weight: 700; }
+    .info-row { display: flex; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid #f8fafc; }
+    .info-label { color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+    .info-value { font-weight: 600; text-align: right; max-width: 60%; }
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th { background: #f8fafc; padding: 10px 16px; font-size: 11px; text-transform: uppercase; color: #64748b; }
+    .admin-table td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    .btn-action { display: block; width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; text-align: center; text-decoration: none; margin-bottom: 10px; border: none; }
+    .btn-success { background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; }
+    .btn-accept { background: linear-gradient(135deg,#3b82f6,#2563eb); color: #fff; }
+    .btn-back { background: #f1f5f9; color: #475569; }
+    .total-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px; text-align: center; margin: 16px 20px; }
+    .total-amount { font-size: 24px; font-weight: 800; color: #2563eb; }
+    @@media (max-width: 992px) { .detail-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="mb-3">
+    <a href="@Url.Action("Index", "OrdersShipper", new { area = "Shipper" })" class="text-decoration-none text-secondary">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    <h4 class="fw-bold mt-2">Đơn hàng <span class="text-primary">#@Model.MaDonHang</span></h4>
+</div>
+
+<div class="detail-grid">
+    <div class="section-card">
+        <div class="section-header"><i class="bi bi-bag me-2"></i>Sản phẩm</div>
+        <table class="admin-table">
+            <thead>
+                <tr><th>Tên sách</th><th>SL</th><th>Giá</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ViewBag.Detail)
+                {
+                    <tr>
+                        <td><strong>@item.SANPHAM.TenSanPham</strong></td>
+                        <td>@item.SoLuong</td>
+                        <td style="color:#2563eb; font-weight:700;">@String.Format(price, "{0:c0}", item.SANPHAM.Gia)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <div class="section-card">
+            <div class="section-header"><i class="bi bi-geo-alt me-2"></i>Thông tin giao hàng</div>
+            <div class="total-box">
+                <div class="info-label">Tổng tiền</div>
+                <div class="total-amount">@String.Format(price, "{0:c0}", ViewBag.Total)</div>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Khách hàng</span>
+                <span class="info-value">@Model.KHACHHANG.Ten</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">SĐT</span>
+                <span class="info-value">@(Model.KHACHHANG.SoDienThoai ?? "N/A")</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Địa chỉ</span>
+                <span class="info-value">@Model.DiaChi</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Thanh toán</span>
+                <span class="info-value">
+                    @(Model.PhuongThucThanhToan == (int)Constants.TypePayment.COD ? "COD - Thu tiền khi giao" : "Đã thanh toán online")
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Ngày đặt</span>
+                <span class="info-value">@(Model.NgayDat?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</span>
+            </div>
+        </div>
+
+        <div class="section-card p-3">
+            @if (Model.TrangThai == (int)Constants.StatusOrder.Informed && Model.MaNVXuLy == null)
+            {
+                <a href="@Url.Action("AcceptOrder", "OrdersShipper", new { area = "Shipper", id = Model.MaDonHang })" class="btn-action btn-accept"
+                   onclick="return confirm('Nhận đơn hàng này để giao?');">
+                    <i class="bi bi-check-circle"></i> Nhận đơn & Bắt đầu giao
+                </a>
+            }
+            @if (Model.TrangThai == (int)Constants.StatusOrder.Shipping)
+            {
+                <a href="@Url.Action("DeliverySuccess", "OrdersShipper", new { area = "Shipper", id = Model.MaDonHang })" class="btn-action btn-success"
+                   onclick="return confirm('Xác nhận đã giao hàng thành công cho khách?');">
+                    <i class="bi bi-bag-check"></i> Xác nhận giao thành công
+                </a>
+            }
+            <a href="@Url.Action("Index", "OrdersShipper", new { area = "Shipper" })" class="btn-action btn-back">← Quay lại danh sách</a>
+        </div>
+    </div>
+</div>

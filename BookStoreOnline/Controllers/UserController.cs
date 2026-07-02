@@ -140,6 +140,10 @@ public class UserController : Controller
                 db.KHACHHANGs.Add(cus);
                 db.SaveChanges();
 
+                var roleService = new RoleService(db);
+                roleService.EnsureRoleTableExists();
+                roleService.AssignCustomerRole(cus.MaKH, (int)BookStoreOnline.Areas.Admin.Constants.Constants.AdminRole.User);
+
                 // Tạo token
                 var accessToken = GenerateAccessToken(cus);
                 SetAccessTokenCookie(accessToken);
@@ -193,22 +197,47 @@ public class UserController : Controller
             return View();
         }
 
-        var taikhoanAdmin = db.NHANVIENs.FirstOrDefault(k => k.Email == email && k.MatKhau == matkhau);
-        if (taikhoanAdmin != null)
+        try
         {
-            // Nếu TrangThai bị null, coi như tài khoản chưa kích hoạt hoặc bị khóa (false)
-            if (!(taikhoanAdmin.TrangThai ?? false))
+            var authService = new AuthService(db);
+            var taikhoanAdmin = authService.TryStaffLogin(email.Trim(), matkhau);
+
+            if (taikhoanAdmin != null)
             {
-                ViewBag.ThongBao = "Tài khoản đã bị khóa";
+                if (!(taikhoanAdmin.TrangThai ?? false))
+                {
+                    ViewBag.ThongBao = "Tài khoản đã bị khóa";
+                    return View();
+                }
+
+                var roleService = new RoleService(db);
+                if (!roleService.IsValidStaffRole(taikhoanAdmin.Quyen))
+                {
+                    ViewBag.ThongBao = "Tài khoản nhân viên có vai trò không hợp lệ. Vui lòng liên hệ quản trị viên.";
+                    return View();
+                }
+
+                var vaiTro = roleService.GetById(taikhoanAdmin.Quyen);
+                Session["TaiKhoan"] = taikhoanAdmin;
+                Session["LoaiTaiKhoan"] = "NhanVien";
+                Session["TenVaiTro"] = vaiTro?.TenVaiTro ?? "Nhân viên";
+
+                var redirectUrl = authService.GetRedirectUrl(taikhoanAdmin);
+                if (!string.IsNullOrEmpty(redirectUrl))
+                    return Redirect(redirectUrl);
+
+                ViewBag.ThongBao = "Vai trò tài khoản chưa được cấu hình.";
                 return View();
             }
-
-            Session["TaiKhoan"] = taikhoanAdmin;
-            return RedirectToAction("Index", "Home_Page", new { area = "Admin" });
+        }
+        catch (Exception ex)
+        {
+            ViewBag.ThongBao = "Lỗi đăng nhập nhân viên: " + ex.Message;
+            return View();
         }
 
         var hashedPassword = HashPassword(matkhau);
-        var account = db.KHACHHANGs.FirstOrDefault(k => k.Email == email && k.MatKhau == hashedPassword);
+        var account = db.KHACHHANGs.FirstOrDefault(k => k.Email == email.Trim() && k.MatKhau == hashedPassword);
 
         if (account != null)
         {
@@ -236,6 +265,8 @@ public class UserController : Controller
             SetRefreshTokenCookie(refreshToken);
 
             Session["TaiKhoan"] = account;
+            Session["LoaiTaiKhoan"] = "KhachHang";
+            Session["TenVaiTro"] = "User";
             
             // Update customer VIP status based on spending
             var customerService = new CustomerTypeService(db);

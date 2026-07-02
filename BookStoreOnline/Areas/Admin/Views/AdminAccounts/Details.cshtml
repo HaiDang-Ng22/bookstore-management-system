@@ -112,7 +112,7 @@
                 <span class="info-label">Quyền hạn</span>
                 <div>
                     @{
-                        string roleClass = Model.Quyen == 1 ? "role-1" : (Model.Quyen == 2 ? "role-2" : "role-3");
+                        string roleClass = "role-" + Model.Quyen;
                     }
                     <span class="role-badge @roleClass">
                         @EHelper.GetEnumDescription((Constants.AdminRole)Model.Quyen)

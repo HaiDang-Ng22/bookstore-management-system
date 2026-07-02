@@ -1,4 +1,4 @@
-using System;
+using BookStoreOnline.Core;
 
 namespace BookStoreOnline.Models
 {
@@ -6,6 +6,11 @@ namespace BookStoreOnline.Models
     {
         public static void Seed()
         {
+            using (var db = new NhaSachEntities3())
+            {
+                var roleService = new RoleService(db);
+                roleService.EnsureRoleTableExists();
+            }
         }
     }
 }

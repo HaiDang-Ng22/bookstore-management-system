@@ -40,6 +40,12 @@ namespace BookStoreOnline.Core
                 return;
             }
 
+            if (admin.Quyen == (int)Constants.AdminRole.Shipper)
+            {
+                filterContext.Result = new RedirectResult("~/Shipper/OrdersShipper");
+                return;
+            }
+
             // If roles are specified, check if the employee's role is in the allowed roles list
             if (AllowedRoles != null && AllowedRoles.Length > 0)
             {
