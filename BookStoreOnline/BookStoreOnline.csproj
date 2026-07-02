@@ -313,12 +313,9 @@
       <DependentUpon>Entities.edmx</DependentUpon>
     </Compile>
     <Compile Include="Models\DbSeeder.cs" />
-<<<<<<< Updated upstream
     <Compile Include="Models\VAITRO.cs" />
-=======
     <Compile Include="Models\GeminiRequest.cs" />
     <Compile Include="Models\GeminiResponse.cs" />
->>>>>>> Stashed changes
     <Compile Include="Models\KHACHHANG.cs">
       <DependentUpon>Entities.tt</DependentUpon>
     </Compile>
