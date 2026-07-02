@@ -81,9 +81,9 @@ namespace BookStoreOnline.Controllers
 
                     ||
 
-                    RemoveDiacritics(s.LOAI.Tenloai ?? "")
+                    (s.LOAI != null && RemoveDiacritics(s.LOAI.Tenloai ?? "")
                         .ToLower()
-                        .Contains(keyword)
+                        .Contains(keyword))
                 )
                 .ToList();
 

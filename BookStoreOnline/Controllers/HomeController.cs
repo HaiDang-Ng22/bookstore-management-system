@@ -12,8 +12,8 @@ namespace BookStoreOnline.Controllers
         NhaSachEntities3 db = new NhaSachEntities3();
         public ActionResult Index()
         {
-            var book = db.SANPHAMs.ToList().Take(8);
-            return View(book);
+            var topBooks = db.SANPHAMs.OrderByDescending(s => s.SoLuongBan).Take(5).ToList(); // Lấy 5 cuốn sách bán chạy nhất
+            return View(topBooks);
         }
     }
 }

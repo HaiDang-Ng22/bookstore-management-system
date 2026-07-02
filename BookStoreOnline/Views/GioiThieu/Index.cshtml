@@ -259,38 +259,6 @@
         </div>
     </div>
 
-    <!-- Top Selling Books -->
-    @if (Model != null && Model.Count > 0)
-    {
-        <h2 class="top-books-title"><i class="bi bi-trophy-fill text-warning mr-2"></i> Top 5 Sách Bán Chạy Nhất</h2>
-
-        <div class="champion-book-card">
-            <span class="champion-badge"><i class="bi bi-award-fill"></i> Quán quân bán chạy</span>
-            <a href="@Url.Action("Index", "ProductDetail", new { id = Model[0].MaSanPham })">
-                <img src="@Model[0].Anh" alt="@Model[0].TenSanPham" />
-            </a>
-            <h3><a href="@Url.Action("Index", "ProductDetail", new { id = Model[0].MaSanPham })" class="text-dark">@Model[0].TenSanPham</a></h3>
-            <p class="author">Tác giả: <strong>@Model[0].TacGia</strong></p>
-            <p class="price">@String.Format("{0:0,0} đ", Model[0].Gia)</p>
-        </div>
-
-        <div class="row">
-            @for (int i = 1; i < 5 && i < Model.Count; i++)
-            {
-                <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
-                    <div class="sub-book-card">
-                        <a href="@Url.Action("Index", "ProductDetail", new { id = Model[i].MaSanPham })">
-                            <img src="@Model[i].Anh" alt="@Model[i].TenSanPham" />
-                        </a>
-                        <h4><a href="@Url.Action("Index", "ProductDetail", new { id = Model[i].MaSanPham })" class="text-dark">@Model[i].TenSanPham</a></h4>
-                        <p class="author">Tác giả: @Model[i].TacGia</p>
-                        <p class="price">@String.Format("{0:0,0} đ", Model[i].Gia)</p>
-                    </div>
-                </div>
-            }
-        </div>
-    }
-
     <!-- CTA Section -->
     <div class="cta-container">
         <a href="@Url.Action("GetAllBook", "Category")" class="btn-explore">
