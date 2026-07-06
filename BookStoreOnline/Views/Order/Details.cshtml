@@ -1,199 +1,27 @@
 @model BookStoreOnline.Models.DONHANG
-
-@{
-    ViewBag.Title = "Chi Tiết Đơn Hàng";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
+@using BookStoreOnline.Areas.Admin.Constants
+@{ ViewBag.Title="Chi tiết đơn hàng"; Layout="~/Views/Shared/_Layout.cshtml"; var vi=System.Globalization.CultureInfo.GetCultureInfo("vi-VN"); }
 <style>
-    .details-section {
-        padding: 40px 15px;
-        min-height: calc(100vh - 280px);
-    }
-    .details-title {
-        font-size: 26px;
-        font-weight: 800;
-        color: #111827;
-        margin-bottom: 24px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .details-card {
-        background: #fff;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-        border: 1px solid #e5e7eb;
-        padding: 24px;
-        margin-bottom: 30px;
-    }
-    .details-card h4 {
-        font-size: 18px;
-        font-weight: 800;
-        color: #111827;
-        margin-bottom: 20px;
-        border-bottom: 1.5px solid #f1f5f9;
-        padding-bottom: 12px;
-    }
-    .details-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .details-table th {
-        font-weight: 700;
-        font-size: 13px;
-        text-transform: uppercase;
-        color: #4b5563;
-        letter-spacing: 0.5px;
-        padding: 12px 16px;
-        border-bottom: 1.5px solid #e5e7eb;
-    }
-    .details-table td {
-        padding: 16px;
-        vertical-align: middle;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 14.5px;
-    }
-    .details-table tr:last-child td {
-        border-bottom: none;
-    }
-    .prod-thumb {
-        width: 60px;
-        height: 75px;
-        object-fit: contain;
-        border-radius: 6px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .info-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .info-list li {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 14.5px;
-        color: #4b5563;
-    }
-    .info-list li:last-child {
-        border-bottom: none;
-    }
-    .info-list li strong {
-        color: #111827;
-    }
-    .badge-status {
-        font-size: 12.5px;
-        font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 999px;
-    }
-    .badge-status-pending { background: #fee2e2; color: #991b1b; }
-    .badge-status-success { background: #dcfce7; color: #166534; }
-    .badge-status-info { background: #dbeafe; color: #1e40af; }
-    
-    .btn-back {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        height: 44px;
-        padding: 0 20px;
-        border-radius: 10px;
-        background: #fff;
-        border: 1.5px solid #d1d5db;
-        color: #374151;
-        font-weight: 700;
-        font-size: 14px;
-        transition: all 0.2s;
-    }
-    .btn-back:hover {
-        background: #f9fafb;
-        color: #111827;
-        text-decoration: none;
-    }
+ .detail-page{max-width:1100px;margin:0 auto;padding:42px 16px 70px}.back-link{display:inline-flex;align-items:center;gap:7px;color:#64748b;font-weight:700;text-decoration:none;margin-bottom:18px}.back-link:hover{color:#ef4438;text-decoration:none}.detail-title{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}.detail-title h2{font-size:27px;font-weight:800;color:#172033;margin:0}.status-pill{display:inline-flex;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800;background:#eef2ff;color:#3f51a3}.detail-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.8fr);gap:20px}.panel{background:#fff;border:1px solid #e5eaf0;border-radius:14px;padding:22px;box-shadow:0 6px 22px rgba(25,35,55,.04);margin-bottom:20px}.panel h3{font-size:17px;font-weight:800;color:#1d2739;margin:0 0 18px}.product-table{width:100%;border-collapse:collapse}.product-table th{padding:10px 8px;border-bottom:1px solid #e7ebf0;color:#7c8798;font-size:12px;text-transform:uppercase}.product-table td{padding:14px 8px;border-bottom:1px solid #f0f2f5;vertical-align:middle}.product-table tr:last-child td{border-bottom:0}.product{display:flex;align-items:center;gap:12px}.product img{width:52px;height:68px;object-fit:cover;border-radius:7px;border:1px solid #edf0f3}.product-name{font-weight:700;color:#253047}.info-row{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid #edf0f3}.info-row:last-child{border-bottom:0}.info-row span{color:#768195}.info-row strong{text-align:right;color:#202a3c}.total-row{font-size:18px}.total-row strong{color:#ef4438}.cancel-box{border-color:#ffd5d1;background:#fffafa}.cancel-box p{font-size:14px;color:#697386}.cancel-box textarea{width:100%;border:1px solid #d9dee7;border-radius:9px;padding:10px 12px;resize:vertical;margin:8px 0 12px}.cancel-btn{width:100%;border:0;border-radius:9px;background:#d9382e;color:#fff;padding:11px;font-weight:800;cursor:pointer}.cancel-btn:hover{background:#bd2d25}.locked{padding:13px;border-radius:9px;background:#f4f6f8;color:#697386;font-size:14px}.notice{padding:13px 16px;border-radius:10px;margin-bottom:18px}.notice-success{background:#eaf8ef;color:#18733a}.notice-error{background:#fff0ef;color:#a62921}@@media(max-width:850px){.detail-grid{grid-template-columns:1fr}.detail-title{align-items:flex-start;flex-direction:column}.product-table th:nth-child(3),.product-table td:nth-child(3){display:none}}
 </style>
-
-<div class="container mt-4">
-    <h2 class="text-center">Chi Tiết Đơn Hàng</h2>
-
-    @if (Model != null)
-    {
-        <div class="row">
-            <div class="col-md-8">
-                <h4 class="mb-3">Sản phẩm trong đơn hàng</h4>
-                <div class="table-responsive">
-                    <table class="table table-hover border">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Hình ảnh</th>
-                                <th>Tên sản phẩm</th>
-                                <th>Số lượng</th>
-                                <th>Giá</th>
-                                <th>Thành tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.CHITIETDONHANGs)
-                            {
-                                <tr>
-                                    <td>
-                                        <img src="@(item.SANPHAM?.Anh ?? "/images/no-image.png")" alt="@item.SANPHAM?.TenSanPham" class="img-thumbnail" style="width: 80px; height: 100px;" />
-                                    </td>
-                                    <td>@item.SANPHAM.TenSanPham</td>
-                                    <td>@item.SoLuong</td>
-                                    <td>@((item.SANPHAM?.Gia ?? 0).ToString("N0")) VNĐ</td>
-                                    <td>@(((item.SoLuong ?? 0) * (item.SANPHAM?.Gia ?? 0)).ToString("N0")) VNĐ</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card shadow-sm" , style="margin-top:45px">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Thông tin đơn hàng</h4>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Mã đơn hàng:</strong> @Model.MaDonHang</p>
-                        <p><strong>Ngày đặt:</strong> @(Model.NgayDat?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</p>
-                        <p><strong>Tổng tiền:</strong> @(Model.TongTien) VNĐ</p>
-                        <p>
-                            <strong>Trạng thái đơn hàng:</strong>
-                            <span class="badge @(Model.TrangThai == 0 ? "bg-warning text-dark" : Model.TrangThai == 1 ? "bg-success" : "bg-danger")">
-                                @(Model.TrangThai == 0 ? "Chờ xác nhận" : Model.TrangThai == 1 ? "Đã xác nhận" : "Đã hủy")
-                            </span>
-                        </p>
-                        <p>
-                            <strong>Trạng thái thanh toán:</strong>
-                            <span class="badge @(Model.TrangThaiThanhToan == 0 ? "bg-warning text-dark" : Model.TrangThaiThanhToan == 1 ? "bg-success" : "bg-danger")">
-                                @(Model.TrangThaiThanhToan == 0 ? "Chờ xác nhận" : Model.TrangThaiThanhToan == 1 ? "Đã thanh toán" : "Đã hủy")
-                            </span>
-                        </p>
-                    </div>
-                </div>
-
-                @*    @if (Model.TrangThai == 0)
-                    {
-                        <div class="mt-3">
-                            <form action="@Url.Action("Delete", "Order")" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@Model.MaDonHang" />
-                                <div class="form-group">
-                                    <label for="reason">Lý do hủy:</label>
-                                    <textarea class="form-control" name="reason" rows="3" required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-danger mt-2 w-100">Hủy Đơn Hàng</button>
-                            </form>
-                        </div>
-                    }   *@
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-danger text-center">Không tìm thấy đơn hàng.</div>
-    }
-</div>
+<main class="detail-page">
+ <a class="back-link" href="@Url.Action("Index","Order")"><i class="bi bi-arrow-left"></i> Quay lại đơn hàng</a>
+ @if(TempData["SuccessMessage"]!=null){<div class="notice notice-success">@TempData["SuccessMessage"]</div>}
+ @if(TempData["ErrorMessage"]!=null){<div class="notice notice-error">@TempData["ErrorMessage"]</div>}
+ <div class="detail-title"><h2>Đơn hàng #@Model.MaDonHang</h2><span class="status-pill">@OrderStatus(Model.TrangThai)</span></div>
+ <div class="detail-grid"><div>
+  <section class="panel"><h3>Sản phẩm đã đặt</h3><div class="table-responsive"><table class="product-table"><thead><tr><th>Sản phẩm</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead><tbody>
+  @foreach(var item in Model.CHITIETDONHANGs){var qty=item.SoLuong??0;var unit=item.SANPHAM?.Gia??0;<tr><td><div class="product"><img src="@(item.SANPHAM?.Anh??"/images/no-image.png")" alt=""><span class="product-name">@(item.SANPHAM?.TenSanPham??"Sản phẩm")</span></div></td><td>@qty</td><td>@String.Format(vi,"{0:c0}",unit)</td><td><strong>@String.Format(vi,"{0:c0}",qty*unit)</strong></td></tr>}
+  </tbody></table></div></section>
+  <section class="panel"><h3>Thông tin nhận hàng</h3><div class="info-row"><span>Khách hàng</span><strong>@(Model.KHACHHANG?.Ten??"Chưa cập nhật")</strong></div><div class="info-row"><span>Số điện thoại</span><strong>@(Model.KHACHHANG?.SoDienThoai??"Chưa cập nhật")</strong></div><div class="info-row"><span>Địa chỉ giao hàng</span><strong>@Model.DiaChi</strong></div></section>
+ </div><aside>
+  <section class="panel"><h3>Thông tin đơn hàng</h3><div class="info-row"><span>Mã đơn</span><strong>#@Model.MaDonHang</strong></div><div class="info-row"><span>Ngày / giờ đặt</span><strong>@(Model.NgayDat?.ToString("dd/MM/yyyy - HH:mm")??"Chưa cập nhật")</strong></div><div class="info-row"><span>Trạng thái</span><strong>@OrderStatus(Model.TrangThai)</strong></div><div class="info-row"><span>Thanh toán</span><strong>@PaymentStatus(Model.TrangThaiThanhToan)</strong></div><div class="info-row"><span>Phương thức</span><strong>@PaymentMethod(Model.PhuongThucThanhToan)</strong></div><div class="info-row total-row"><span>Tổng thanh toán</span><strong>@String.Format(vi,"{0:c0}",Model.TongTien)</strong></div></section>
+  @if(Model.TrangThai==(int)Constants.StatusOrder.NoInform){<section class="panel cancel-box"><h3>Hủy đơn hàng</h3><p>Bạn chỉ có thể hủy trước khi người bán xác nhận đơn.</p><form method="post" action="@Url.Action("Delete","Order")" onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.MaDonHang"><label for="reason"><strong>Lý do hủy</strong></label><textarea id="reason" name="reason" rows="3" required maxlength="255" placeholder="Nhập lý do hủy đơn..."></textarea><button class="cancel-btn" type="submit"><i class="bi bi-x-circle"></i> Hủy đơn hàng</button></form></section>}
+  else if(Model.TrangThai!=(int)Constants.StatusOrder.Canceled){<div class="locked"><i class="bi bi-lock"></i> Đơn đã được người bán xác nhận nên không thể hủy.</div>}
+ </aside></div>
+</main>
+@functions{
+ string OrderStatus(int? s){switch(s){case 0:return "Chưa xác nhận";case 1:return "Đã xác nhận";case 2:return "Đang giao hàng";case 3:return "Đã giao hàng";case 4:return "Đã hủy";case 5:return "Giao thất bại";case 6:return "Hẹn giao lại";case 7:return "Đang hoàn hàng";case 8:return "Đã hoàn hàng";default:return "Chưa cập nhật";}}
+ string PaymentStatus(int s){switch(s){case 0:return "Chưa thanh toán";case 1:return "Đã thanh toán";case 2:return "Hoàn tiền";default:return "Chưa cập nhật";}}
+ string PaymentMethod(int p){switch(p){case 1:return "Thanh toán khi nhận hàng (COD)";case 2:return "VNPAY";case 3:return "Chuyển khoản / Ví điện tử";default:return "Chưa cập nhật";}}
+}

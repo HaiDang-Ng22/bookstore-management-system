@@ -5,6 +5,7 @@ using BookStoreOnline.Core;
 using BookStoreOnline.Areas.Admin.Constants;
 using System.Linq;
 using System.Net;
+using System.Data.SqlClient;
 
 namespace BookStoreOnline.Controllers
 {
@@ -34,7 +35,10 @@ namespace BookStoreOnline.Controllers
                 return RedirectToAction("Login", "User");
             }
 
-            var orders = db.DONHANGs.Where(o => o.ID == user.MaKH).ToList();
+            var orders = db.DONHANGs
+                .Where(o => o.ID == user.MaKH)
+                .OrderByDescending(o => o.NgayDat)
+                .ToList();
             return View(orders);
         }
 
@@ -42,43 +46,44 @@ namespace BookStoreOnline.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, string reason)
         {
-            var order = db.DONHANGs.Find(id);
+            var user = GetAuthenticatedUser();
+            if (user == null) return RedirectToAction("Login", "User");
 
-            if (order != null && order.TrangThai == (int)Constants.StatusOrder.NoInform) // Chỉ cập nhật trạng thái cho đơn hàng chưa xác nhận
+            // Cập nhật có điều kiện giúp chống bấm hai lần và ngăn hủy sau khi người bán xác nhận.
+            var affected = db.Database.ExecuteSqlCommand(@"
+UPDATE dbo.DONHANG
+SET TrangThai = @canceled,
+    TrangThaiThanhToan = CASE WHEN TrangThaiThanhToan = @paid THEN @refund ELSE TrangThaiThanhToan END
+WHERE MaDonHang = @id AND ID = @customerId AND TrangThai = @notConfirmed",
+                new SqlParameter("@canceled", (int)Constants.StatusOrder.Canceled),
+                new SqlParameter("@paid", (int)Constants.StatusPayment.Paid),
+                new SqlParameter("@refund", (int)Constants.StatusPayment.Refund),
+                new SqlParameter("@id", id),
+                new SqlParameter("@customerId", user.MaKH),
+                new SqlParameter("@notConfirmed", (int)Constants.StatusOrder.NoInform));
+
+            if (affected == 1)
             {
-                order.TrangThai = (int)Constants.StatusOrder.Canceled;
-
-                // Nếu đơn hàng đã được thanh toán, cập nhật trạng thái thanh toán thành Đã Hoàn Tiền
-                if (order.TrangThaiThanhToan == (int)Constants.StatusPayment.Paid)
-                {
-                    order.TrangThaiThanhToan = (int)Constants.StatusPayment.Refund;
-                }
-
-                db.Entry(order).State = EntityState.Modified;
-                db.SaveChanges(); // Lưu thay đổi vào cơ sở dữ liệu
-
-                // Update customer VIP status if order was cancelled
-                if (order.ID.HasValue)
-                {
-                    var customerService = new CustomerTypeService(db);
-                    customerService.UpdateCustomerType(order.ID.Value);
-                }
-
-                TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công và đã hoàn tiền";
+                new CustomerTypeService(db).UpdateCustomerType(user.MaKH);
+                TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công. Khoản thanh toán online (nếu có) đã chuyển sang chờ hoàn tiền.";
             }
             else
             {
-                TempData["ErrorMessage"] = "Vui lòng chọn lý do hủy đơn hoặc đơn hàng không hợp lệ.";
+                TempData["ErrorMessage"] = "Không thể hủy đơn. Đơn hàng không tồn tại hoặc đã được người bán xác nhận.";
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Details", new { id });
         }
 
         public ActionResult Details(int id)
         {
+            var user = GetAuthenticatedUser();
+            if (user == null) return RedirectToAction("Login", "User");
+
             var order = db.DONHANGs
                 .Include(o => o.CHITIETDONHANGs.Select(d => d.SANPHAM)) // Nạp thông tin sản phẩm
-                .FirstOrDefault(o => o.MaDonHang == id);
+                .Include(o => o.KHACHHANG)
+                .FirstOrDefault(o => o.MaDonHang == id && o.ID == user.MaKH);
 
             if (order == null)
             {
