@@ -257,6 +257,7 @@
     <Compile Include="Areas\Admin\Controllers\RolesController.cs" />
     <Compile Include="Areas\Admin\Controllers\ReviewFactory .cs" />
     <Compile Include="Areas\Shipper\ShipperAreaRegistration.cs" />
+    <Compile Include="Areas\Shipper\Models\DeliveryViewModels.cs" />
     <Compile Include="Areas\Shipper\Controllers\OrdersShipperController.cs" />
     <Compile Include="Controllers\CartController.cs" />
     <Compile Include="Controllers\CategoryController.cs" />
@@ -445,6 +446,7 @@
     <Content Include="Areas\Shipper\Views\Shared\_LayoutShipper.cshtml" />
     <Content Include="Areas\Shipper\Views\OrdersShipper\Index.cshtml" />
     <Content Include="Areas\Shipper\Views\OrdersShipper\Details.cshtml" />
+    <Content Include="SQL\UpgradeShipperDelivery.sql" />
     <Content Include="Areas\Admin\Views\ControlUser\DisableAccount.cshtml" />
     <Content Include="Areas\Admin\Views\AdminAccounts\DisableAccount.cshtml" />
     <Content Include="Models\Entities.Context.tt">

@@ -1,104 +1,15 @@
 @model BookStoreOnline.Models.DONHANG
 @using BookStoreOnline.Areas.Admin.Constants
-@{
-    ViewBag.Title = "Chi tiết đơn giao";
-    Layout = "~/Areas/Shipper/Views/Shared/_LayoutShipper.cshtml";
-    var price = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
-}
-
-<style>
-    .detail-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
-    .section-card { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 20px; }
-    .section-header { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; font-weight: 700; }
-    .info-row { display: flex; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid #f8fafc; }
-    .info-label { color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; }
-    .info-value { font-weight: 600; text-align: right; max-width: 60%; }
-    .admin-table { width: 100%; border-collapse: collapse; }
-    .admin-table th { background: #f8fafc; padding: 10px 16px; font-size: 11px; text-transform: uppercase; color: #64748b; }
-    .admin-table td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-    .btn-action { display: block; width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; text-align: center; text-decoration: none; margin-bottom: 10px; border: none; }
-    .btn-success { background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; }
-    .btn-accept { background: linear-gradient(135deg,#3b82f6,#2563eb); color: #fff; }
-    .btn-back { background: #f1f5f9; color: #475569; }
-    .total-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px; text-align: center; margin: 16px 20px; }
-    .total-amount { font-size: 24px; font-weight: 800; color: #2563eb; }
-    @@media (max-width: 992px) { .detail-grid { grid-template-columns: 1fr; } }
-</style>
-
-<div class="mb-3">
-    <a href="@Url.Action("Index", "OrdersShipper", new { area = "Shipper" })" class="text-decoration-none text-secondary">
-        <i class="bi bi-arrow-left"></i> Quay lại
-    </a>
-    <h4 class="fw-bold mt-2">Đơn hàng <span class="text-primary">#@Model.MaDonHang</span></h4>
-</div>
-
-<div class="detail-grid">
-    <div class="section-card">
-        <div class="section-header"><i class="bi bi-bag me-2"></i>Sản phẩm</div>
-        <table class="admin-table">
-            <thead>
-                <tr><th>Tên sách</th><th>SL</th><th>Giá</th></tr>
-            </thead>
-            <tbody>
-                @foreach (var item in ViewBag.Detail)
-                {
-                    <tr>
-                        <td><strong>@item.SANPHAM.TenSanPham</strong></td>
-                        <td>@item.SoLuong</td>
-                        <td style="color:#2563eb; font-weight:700;">@String.Format(price, "{0:c0}", item.SANPHAM.Gia)</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-
-    <div>
-        <div class="section-card">
-            <div class="section-header"><i class="bi bi-geo-alt me-2"></i>Thông tin giao hàng</div>
-            <div class="total-box">
-                <div class="info-label">Tổng tiền</div>
-                <div class="total-amount">@String.Format(price, "{0:c0}", ViewBag.Total)</div>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Khách hàng</span>
-                <span class="info-value">@Model.KHACHHANG.Ten</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">SĐT</span>
-                <span class="info-value">@(Model.KHACHHANG.SoDienThoai ?? "N/A")</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Địa chỉ</span>
-                <span class="info-value">@Model.DiaChi</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Thanh toán</span>
-                <span class="info-value">
-                    @(Model.PhuongThucThanhToan == (int)Constants.TypePayment.COD ? "COD - Thu tiền khi giao" : "Đã thanh toán online")
-                </span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Ngày đặt</span>
-                <span class="info-value">@(Model.NgayDat?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</span>
-            </div>
-        </div>
-
-        <div class="section-card p-3">
-            @if (Model.TrangThai == (int)Constants.StatusOrder.Informed && Model.MaNVXuLy == null)
-            {
-                <a href="@Url.Action("AcceptOrder", "OrdersShipper", new { area = "Shipper", id = Model.MaDonHang })" class="btn-action btn-accept"
-                   onclick="return confirm('Nhận đơn hàng này để giao?');">
-                    <i class="bi bi-check-circle"></i> Nhận đơn & Bắt đầu giao
-                </a>
-            }
-            @if (Model.TrangThai == (int)Constants.StatusOrder.Shipping)
-            {
-                <a href="@Url.Action("DeliverySuccess", "OrdersShipper", new { area = "Shipper", id = Model.MaDonHang })" class="btn-action btn-success"
-                   onclick="return confirm('Xác nhận đã giao hàng thành công cho khách?');">
-                    <i class="bi bi-bag-check"></i> Xác nhận giao thành công
-                </a>
-            }
-            <a href="@Url.Action("Index", "OrdersShipper", new { area = "Shipper" })" class="btn-action btn-back">← Quay lại danh sách</a>
-        </div>
-    </div>
-</div>
+@using BookStoreOnline.Areas.Shipper.Models
+@{ ViewBag.Title="Chi tiết đơn giao"; Layout="~/Areas/Shipper/Views/Shared/_LayoutShipper.cshtml"; var history=ViewBag.History as List<DeliveryHistoryItem>??new List<DeliveryHistoryItem>(); var price=System.Globalization.CultureInfo.GetCultureInfo("vi-VN"); }
+<style>.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px}.card-box{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;margin-bottom:18px}.info{display:flex;justify-content:space-between;border-bottom:1px solid #f1f5f9;padding:9px 0}.action-form{border-top:1px solid #e2e8f0;padding-top:14px;margin-top:14px}.timeline{border-left:2px solid #bfdbfe;padding-left:18px}.event{position:relative;margin-bottom:18px}.event:before{content:'';width:10px;height:10px;background:#2563eb;border-radius:50%;position:absolute;left:-24px;top:5px}.evidence{max-width:160px;max-height:120px;border-radius:8px;margin-top:6px}@@media(max-width:900px){.grid{grid-template-columns:1fr}}</style>
+<a href="@Url.Action("Index")" class="text-decoration-none">← Quay lại</a><h4 class="fw-bold my-3">Đơn hàng #@Model.MaDonHang</h4><div class="grid"><div>
+<div class="card-box"><h6 class="fw-bold">Sản phẩm</h6><table class="table"><thead><tr><th>Tên sách</th><th>SL</th><th>Giá</th></tr></thead><tbody>@foreach(var x in ViewBag.Detail){<tr><td>@x.SANPHAM.TenSanPham</td><td>@x.SoLuong</td><td>@String.Format(price,"{0:c0}",x.SANPHAM.Gia)</td></tr>}</tbody></table></div>
+<div class="card-box"><h6 class="fw-bold mb-3">Lịch sử giao hàng</h6>@if(ViewBag.HistoryWarning!=null){<div class="alert alert-warning">@ViewBag.HistoryWarning</div>}<div class="timeline">@if(!history.Any()){<div class="text-muted">Chưa có lịch sử.</div>}@foreach(var h in history){<div class="event"><strong>@StatusText(h.Status)</strong><div class="small text-muted">@h.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>@if(!String.IsNullOrEmpty(h.Reason)){<div>Lý do: @h.Reason</div>}@if(!String.IsNullOrEmpty(h.Note)){<div>Ghi chú: @h.Note</div>}@if(h.RescheduledAt.HasValue){<div>Hẹn lại: @h.RescheduledAt.Value.ToString("dd/MM/yyyy HH:mm")</div>}@if(!String.IsNullOrEmpty(h.EvidenceImage)){<a href="@h.EvidenceImage" target="_blank"><img class="evidence" src="@h.EvidenceImage" alt="Ảnh bằng chứng"/></a>}</div>}</div></div></div><div>
+<div class="card-box"><h6 class="fw-bold">Thông tin giao hàng</h6><div class="info"><span>Khách hàng</span><strong>@Model.KHACHHANG.Ten</strong></div><div class="info"><span>Số điện thoại</span><strong>@Model.KHACHHANG.SoDienThoai</strong></div><div class="info"><span>Địa chỉ</span><strong>@Model.DiaChi</strong></div><div class="info"><span>Thanh toán</span><strong>@(Model.PhuongThucThanhToan==(int)Constants.TypePayment.COD?"COD":"Online")</strong></div><div class="info"><span>Tổng tiền</span><strong class="text-primary">@String.Format(price,"{0:c0}",Model.TongTien)</strong></div></div>
+<div class="card-box"><h6 class="fw-bold">Thao tác</h6>
+@if(Model.TrangThai==(int)Constants.StatusOrder.Informed&&Model.MaNVXuLy==null){using(Html.BeginForm("AcceptOrder","OrdersShipper",new{id=Model.MaDonHang},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-primary w-100">Nhận đơn</button>}}
+@if(Model.TrangThai==(int)Constants.StatusOrder.Shipping){<form class="action-form" method="post" enctype="multipart/form-data" action="@Url.Action("DeliverySuccess")">@Html.AntiForgeryToken()<input type="hidden" name="OrderId" value="@Model.MaDonHang"/><label class="form-label">Ghi chú giao thành công</label><textarea class="form-control mb-2" name="Note" maxlength="1000"></textarea><label class="form-label">Ảnh bằng chứng (tối đa 5 MB)</label><input class="form-control mb-2" type="file" name="EvidenceImage" accept="image/jpeg,image/png,image/webp"/><button class="btn btn-success w-100" onclick="return confirm('Xác nhận giao thành công?')">Giao thành công</button></form><form class="action-form" method="post" enctype="multipart/form-data" action="@Url.Action("DeliveryFailed")">@Html.AntiForgeryToken()<input type="hidden" name="OrderId" value="@Model.MaDonHang"/><label class="form-label">Lý do thất bại *</label><select class="form-select mb-2" name="Reason" required><option value="">-- Chọn lý do --</option>@foreach(DeliveryFailureReason reason in Enum.GetValues(typeof(DeliveryFailureReason))){<option value="@((int)reason)">@ReasonText(reason)</option>}</select><label class="form-label">Ghi chú *</label><textarea class="form-control mb-2" name="Note" required maxlength="1000"></textarea><input class="form-control mb-2" type="file" name="EvidenceImage" accept="image/jpeg,image/png,image/webp"/><div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="Reschedule" value="true" id="reschedule"><label class="form-check-label" for="reschedule">Hẹn giao lại</label></div><input class="form-control mb-2" type="datetime-local" name="RescheduledAt"/><button class="btn btn-danger w-100">Giao thất bại</button></form>}
+@if(Model.TrangThai==(int)Constants.StatusOrder.DeliveryFailed||Model.TrangThai==(int)Constants.StatusOrder.Rescheduled){using(Html.BeginForm("StartRedelivery","OrdersShipper",new{id=Model.MaDonHang},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-primary w-100 mb-2">Bắt đầu giao lại</button>}using(Html.BeginForm("StartReturning","OrdersShipper",new{id=Model.MaDonHang},FormMethod.Post,null)){@Html.AntiForgeryToken()<textarea class="form-control mb-2" name="note" placeholder="Ghi chú hoàn hàng"></textarea><button class="btn btn-warning w-100">Hoàn hàng về kho</button>}}
+@if(Model.TrangThai==(int)Constants.StatusOrder.Returning){using(Html.BeginForm("ConfirmReturned","OrdersShipper",new{id=Model.MaDonHang},FormMethod.Post,null)){@Html.AntiForgeryToken()<textarea class="form-control mb-2" name="note" placeholder="Ghi chú bàn giao kho"></textarea><button class="btn btn-dark w-100">Xác nhận đã hoàn kho</button>}}</div></div></div>
+@functions{string StatusText(int s){switch(s){case 2:return "Đang giao";case 3:return "Giao thành công";case 5:return "Giao thất bại";case 6:return "Hẹn giao lại";case 7:return "Đang hoàn kho";case 8:return "Đã hoàn kho";default:return "Cập nhật trạng thái";}}string ReasonText(DeliveryFailureReason r){var m=typeof(DeliveryFailureReason).GetMember(r.ToString())[0];var a=(System.ComponentModel.DataAnnotations.DisplayAttribute)m.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute),false)[0];return a.Name;}}

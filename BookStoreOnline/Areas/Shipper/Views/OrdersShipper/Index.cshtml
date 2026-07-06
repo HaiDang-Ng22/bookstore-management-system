@@ -1,114 +1,12 @@
 @model IEnumerable<BookStoreOnline.Models.DONHANG>
 @using BookStoreOnline.Areas.Admin.Constants
-@{
-    ViewBag.Title = "Quản lý giao hàng";
-    Layout = "~/Areas/Shipper/Views/Shared/_LayoutShipper.cshtml";
-    var price = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
-    string currentTab = ViewBag.CurrentTab ?? "delivering";
-    int currentPage = ViewBag.CurrentPage ?? 1;
-    int totalPages = ViewBag.TotalPages ?? 1;
-}
-
-<style>
-    .page-title { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 20px; }
-    .page-title span { color: #2563eb; }
-    .card-table { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
-    .admin-table { width: 100%; border-collapse: collapse; }
-    .admin-table thead th { background: #f8fafc; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; }
-    .admin-table tbody td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-    .btn-sm-action { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
-    .btn-view { background: #eff6ff; color: #2563eb; }
-    .btn-accept { background: #dcfce7; color: #16a34a; }
-    .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-    .status-shipping { background: #dbeafe; color: #1d4ed8; }
-    .status-informed { background: #fef3c7; color: #b45309; }
-    .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
-</style>
-
-<div class="page-title">
-    @if (currentTab == "available")
-    {
-        <span>Đơn hàng</span> //chờ nhận
-    }
-    else
-    {
-        <span>Đơn hàng</span> //đang giao
-    }
-    <small class="text-muted fs-6">(@ViewBag.TotalCount đơn)</small>
-</div>
-
-<div class="card-table">
-    @if (Model != null && Model.Any())
-    {
-        <div class="table-responsive">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Mã đơn</th>
-                        <th>Khách hàng</th>
-                        <th>Địa chỉ giao</th>
-                        <th>Ngày đặt</th>
-                        <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td><strong>#@item.MaDonHang</strong></td>
-                            <td>@(item.KHACHHANG?.Ten ?? "N/A")</td>
-                            <td>@item.DiaChi</td>
-                            <td>@(item.NgayDat?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
-                            <td style="font-weight:700; color:#2563eb;">@String.Format(price, "{0:c0}", item.TongTien)</td>
-                            <td>
-                                @if (item.TrangThai == (int)Constants.StatusOrder.Shipping)
-                                {
-                                    <span class="status-badge status-shipping">Đang giao</span>
-                                }
-                                else
-                                {
-                                    <span class="status-badge status-informed">Chờ nhận</span>
-                                }
-                            </td>
-                            <td>
-                                <a href="@Url.Action("Details", "OrdersShipper", new { area = "Shipper", id = item.MaDonHang })" class="btn-sm-action btn-view">
-                                    <i class="bi bi-eye"></i> Chi tiết
-                                </a>
-                                @if (currentTab == "available")
-                                {
-                                    <a href="@Url.Action("AcceptOrder", "OrdersShipper", new { area = "Shipper", id = item.MaDonHang })" class="btn-sm-action btn-accept ms-1"
-                                       onclick="return confirm('Bạn có chắc muốn nhận đơn hàng này?');">
-                                        <i class="bi bi-check-lg"></i> Nhận đơn
-                                    </a>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
-    else
-    {
-        <div class="empty-state">
-            <i class="bi bi-inbox" style="font-size:48px;"></i>
-            <p class="mt-3 mb-0">Không có đơn hàng nào.</p>
-        </div>
-    }
-</div>
-
-@if (totalPages > 1)
-{
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(i == currentPage ? "active" : "")">
-                    <a class="page-link" href="@Url.Action("Index", "OrdersShipper", new { area = "Shipper", tab = currentTab, page = i })">@i</a>
-                </li>
-            }
-        </ul>
-    </nav>
-}
+@{ ViewBag.Title="Quản lý giao hàng"; Layout="~/Areas/Shipper/Views/Shared/_LayoutShipper.cshtml"; var tab=(string)ViewBag.CurrentTab; var price=System.Globalization.CultureInfo.GetCultureInfo("vi-VN"); }
+<style>.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.tabs a{padding:9px 14px;border-radius:10px;background:#fff;color:#475569;text-decoration:none;font-weight:700;border:1px solid #e2e8f0}.tabs a.active{background:#2563eb;color:#fff}.filter-card,.table-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-bottom:18px}.filters{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.table{font-size:13px}.badge-status{padding:5px 9px;border-radius:7px;font-weight:700;background:#e0e7ff;color:#3730a3}.post-inline{display:inline}.btn-post{border:0;border-radius:8px;padding:6px 10px;background:#dcfce7;color:#15803d;font-weight:700}@@media(max-width:1100px){.filters{grid-template-columns:repeat(2,1fr)}}</style>
+<h4 class="fw-bold mb-3">Quản lý giao hàng <small class="text-muted">(@ViewBag.TotalCount đơn)</small></h4>
+<div class="tabs"><a class="@(tab=="available"?"active":"")" href="@Url.Action("Index",new{tab="available"})">Đơn có thể nhận</a><a class="@(tab=="delivering"?"active":"")" href="@Url.Action("Index",new{tab="delivering"})">Đang giao</a><a class="@(tab=="delivered"?"active":"")" href="@Url.Action("Index",new{tab="delivered"})">Giao thành công</a><a class="@(tab=="failed"?"active":"")" href="@Url.Action("Index",new{tab="failed"})">Giao thất bại</a></div>
+<form method="get" class="filter-card"><input type="hidden" name="tab" value="@tab"/><div class="filters"><input class="form-control" type="date" name="fromDate" value="@Request.QueryString["fromDate"]" title="Từ ngày"/><input class="form-control" type="date" name="toDate" value="@Request.QueryString["toDate"]" title="Đến ngày"/><input class="form-control" type="number" name="orderId" value="@Request.QueryString["orderId"]" placeholder="Mã đơn"/><input class="form-control" name="customerName" value="@Request.QueryString["customerName"]" placeholder="Tên khách hàng"/><input class="form-control" name="phone" value="@Request.QueryString["phone"]" placeholder="Số điện thoại"/><select class="form-select" name="paymentType"><option value="">Mọi thanh toán</option><option value="1">COD</option><option value="2">VNPAY</option><option value="3">Ngân hàng</option></select></div><button class="btn btn-primary mt-3" type="submit">Lọc đơn</button> <a class="btn btn-light mt-3" href="@Url.Action("Index",new{tab=tab})">Xóa lọc</a></form>
+<div class="table-card table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Số điện thoại</th><th>Địa chỉ</th><th>Ngày đặt</th><th>Thanh toán</th><th>Tổng tiền</th><th></th></tr></thead><tbody>
+@if(!Model.Any()){<tr><td colspan="8" class="text-center text-muted py-5">Không có đơn hàng phù hợp.</td></tr>}
+@foreach(var item in Model){<tr><td><strong>#@item.MaDonHang</strong></td><td>@(item.KHACHHANG?.Ten??"N/A")</td><td>@(item.KHACHHANG?.SoDienThoai??"N/A")</td><td>@item.DiaChi</td><td>@(item.NgayDat?.ToString("dd/MM/yyyy HH:mm"))</td><td><span class="badge-status">@(item.PhuongThucThanhToan==(int)Constants.TypePayment.COD?"COD":"Online")</span></td><td>@String.Format(price,"{0:c0}",item.TongTien)</td><td class="text-nowrap"><a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details",new{id=item.MaDonHang})">Chi tiết</a> @if(tab=="available"){using(Html.BeginForm("AcceptOrder","OrdersShipper",new{area="Shipper",id=item.MaDonHang},FormMethod.Post,new{@class="post-inline"})){@Html.AntiForgeryToken()<button class="btn-post" onclick="return confirm('Nhận đơn này?')">Nhận đơn</button>}}</td></tr>}
+</tbody></table></div>
+@if((int)ViewBag.TotalPages>1){<nav><ul class="pagination justify-content-center">@for(var i=1;i<=(int)ViewBag.TotalPages;i++){<li class="page-item @(i==(int)ViewBag.CurrentPage?"active":"")"><a class="page-link" href="@Url.Action("Index",new{tab=tab,page=i,fromDate=Request.QueryString["fromDate"],toDate=Request.QueryString["toDate"],orderId=Request.QueryString["orderId"],customerName=Request.QueryString["customerName"],phone=Request.QueryString["phone"],paymentType=Request.QueryString["paymentType"]})">@i</a></li>}</ul></nav>}
