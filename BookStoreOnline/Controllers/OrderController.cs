@@ -47,34 +47,49 @@ namespace BookStoreOnline.Controllers
         public ActionResult Delete(int id, string reason)
         {
             var user = GetAuthenticatedUser();
-            if (user == null) return RedirectToAction("Login", "User");
+            if (user == null)
+            {
+                return RedirectToAction("Login", "User");
+            }
 
-            // Cập nhật có điều kiện giúp chống bấm hai lần và ngăn hủy sau khi người bán xác nhận.
-            var affected = db.Database.ExecuteSqlCommand(@"
+            int canceled = (int)Constants.StatusOrder.Canceled;
+            int paid = (int)Constants.StatusPayment.Paid;
+            int refund = (int)Constants.StatusPayment.Refund;
+            int notConfirmed = (int)Constants.StatusOrder.NoInform;
+
+            var sql = @"
 UPDATE dbo.DONHANG
 SET TrangThai = @canceled,
-    TrangThaiThanhToan = CASE WHEN TrangThaiThanhToan = @paid THEN @refund ELSE TrangThaiThanhToan END
-WHERE MaDonHang = @id AND ID = @customerId AND TrangThai = @notConfirmed",
-                new SqlParameter("@canceled", (int)Constants.StatusOrder.Canceled),
-                new SqlParameter("@paid", (int)Constants.StatusPayment.Paid),
-                new SqlParameter("@refund", (int)Constants.StatusPayment.Refund),
+    TrangThaiThanhToan = CASE 
+        WHEN TrangThaiThanhToan = @paid THEN @refund 
+        ELSE TrangThaiThanhToan 
+    END
+WHERE MaDonHang = @id 
+  AND ID = @customerId 
+  AND TrangThai = @notConfirmed";
+
+            var affected = db.Database.ExecuteSqlCommand(
+                sql,
+                new SqlParameter("@canceled", canceled),
+                new SqlParameter("@paid", paid),
+                new SqlParameter("@refund", refund),
                 new SqlParameter("@id", id),
                 new SqlParameter("@customerId", user.MaKH),
-                new SqlParameter("@notConfirmed", (int)Constants.StatusOrder.NoInform));
+                new SqlParameter("@notConfirmed", notConfirmed)
+            );
 
             if (affected == 1)
             {
                 new CustomerTypeService(db).UpdateCustomerType(user.MaKH);
-                TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công. Khoản thanh toán online (nếu có) đã chuyển sang chờ hoàn tiền.";
+                TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công. Khoản thanh toán online nếu có đã chuyển sang chờ hoàn tiền.";
             }
             else
             {
                 TempData["ErrorMessage"] = "Không thể hủy đơn. Đơn hàng không tồn tại hoặc đã được người bán xác nhận.";
             }
 
-            return RedirectToAction("Details", new { id });
+            return RedirectToAction("Details", new { id = id });
         }
-
         public ActionResult Details(int id)
         {
             var user = GetAuthenticatedUser();
