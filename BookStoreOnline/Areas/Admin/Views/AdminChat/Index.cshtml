@@ -1,0 +1,549 @@
+@{
+    ViewBag.Title = "Chat Với Khách Hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var admin = Session["TaiKhoan"] as BookStoreOnline.Models.NHANVIEN;
+}
+
+<style>
+    .chat-admin-wrapper {
+        display: flex;
+        height: calc(100vh - 160px);
+        min-height: 500px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* ====== LEFT PANEL - User list ====== */
+    .chat-user-panel {
+        width: 320px;
+        flex-shrink: 0;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        background: #f8fafc;
+    }
+
+    .chat-user-panel-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        background: #fff;
+    }
+
+    .chat-user-panel-header h6 {
+        font-weight: 700;
+        font-size: 14px;
+        color: #0f172a;
+        margin: 0 0 4px 0;
+    }
+
+    .chat-user-panel-header small {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .chat-user-list {
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .chat-user-list::-webkit-scrollbar { width: 5px; }
+    .chat-user-list::-webkit-scrollbar-track { background: #f1f5f9; }
+    .chat-user-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    .chat-user-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.2s;
+        position: relative;
+    }
+
+    .chat-user-item:hover {
+        background: #f1f5f9;
+    }
+
+    .chat-user-item.active {
+        background: #fef2f2;
+        border-left: 3px solid #e8392a;
+    }
+
+    .chat-user-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e8392a, #ff6b5b);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .chat-user-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .chat-user-name {
+        font-weight: 700;
+        font-size: 13px;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .chat-user-last-msg {
+        font-size: 11px;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 2px;
+    }
+
+    .chat-user-time {
+        font-size: 10px;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+
+    .chat-unread-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: #e8392a;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 0 5px;
+        position: absolute;
+        top: 12px;
+        right: 12px;
+    }
+
+    .chat-empty-users {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #94a3b8;
+        text-align: center;
+        padding: 20px;
+    }
+
+    /* ====== RIGHT PANEL - Chat window ====== */
+    .chat-window-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #f8fafc;
+    }
+
+    .chat-window-header {
+        padding: 16px 20px;
+        background: #fff;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .chat-window-header .user-detail-name {
+        font-weight: 700;
+        font-size: 15px;
+        color: #0f172a;
+    }
+
+    .chat-window-header .user-detail-sub {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .chat-messages-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .chat-messages-area::-webkit-scrollbar { width: 6px; }
+    .chat-messages-area::-webkit-scrollbar-track { background: #f1f5f9; }
+    .chat-messages-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    .chat-bubble {
+        max-width: 70%;
+        padding: 10px 14px;
+        border-radius: 16px;
+        margin-bottom: 8px;
+        position: relative;
+        word-wrap: break-word;
+        font-size: 13px;
+        line-height: 1.5;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .chat-bubble-user {
+        background: #fff;
+        color: #374151;
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .chat-bubble-admin {
+        background: linear-gradient(135deg, #e8392a, #ff6b5b);
+        color: #fff;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+    }
+
+    .chat-bubble-sender {
+        font-size: 10px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        opacity: 0.75;
+        display: block;
+    }
+
+    .chat-bubble-user .chat-bubble-sender {
+        color: #e8392a;
+    }
+
+    .chat-time {
+        font-size: 10px;
+        opacity: 0.6;
+        display: block;
+        margin-top: 4px;
+    }
+
+    .chat-bubble-admin .chat-time {
+        color: rgba(255,255,255,0.8);
+        text-align: right;
+    }
+
+    .chat-bubble-user .chat-time {
+        color: #9ca3af;
+    }
+
+    .chat-input-area {
+        padding: 16px 20px;
+        background: #fff;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .chat-input-area .input-group input {
+        border-radius: 20px 0 0 20px !important;
+        border-color: #e2e8f0;
+        font-size: 13px;
+        padding: 10px 16px;
+    }
+
+    .chat-input-area .input-group input:focus {
+        border-color: #e8392a;
+        box-shadow: 0 0 0 3px rgba(232,57,42,0.08);
+    }
+
+    .chat-input-area .btn-send {
+        border-radius: 0 20px 20px 0 !important;
+        background: linear-gradient(135deg, #e8392a, #ff6b5b);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        font-size: 13px;
+        padding: 0 20px;
+        transition: 0.2s;
+    }
+
+    .chat-input-area .btn-send:hover {
+        opacity: 0.9;
+        box-shadow: 0 4px 14px rgba(232,57,42,0.35);
+    }
+
+    .chat-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #94a3b8;
+        text-align: center;
+        padding: 40px;
+    }
+
+    .chat-placeholder i {
+        font-size: 56px;
+        margin-bottom: 16px;
+        color: #e2e8f0;
+    }
+
+    .chat-placeholder p {
+        font-size: 14px;
+        max-width: 260px;
+        line-height: 1.6;
+    }
+</style>
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h4 class="font-weight-bold mb-0" style="color:#0f172a; font-size:20px;">
+            <i class="bi bi-chat-dots-fill mr-2" style="color:#e8392a;"></i> Chat Với Khách Hàng
+        </h4>
+        <p class="text-muted mb-0" style="font-size:13px;">Quản lý và phản hồi tin nhắn từ khách hàng trong vòng 7 ngày gần nhất</p>
+    </div>
+    <span class="badge" style="background:#fef2f2; color:#e8392a; font-size:12px; padding:6px 14px; border-radius:999px; font-weight:600;">
+        <i class="bi bi-clock-history mr-1"></i> Lưu 7 ngày
+    </span>
+</div>
+
+<div class="chat-admin-wrapper">
+
+    <!-- LEFT: User list panel -->
+    <div class="chat-user-panel">
+        <div class="chat-user-panel-header">
+            <h6><i class="bi bi-people-fill mr-2" style="color:#e8392a;"></i>Khách Hàng Đang Chờ</h6>
+            <small>Cập nhật tự động mỗi 3 giây</small>
+        </div>
+        <div class="chat-user-list" id="user-list-container">
+            <div class="chat-empty-users" id="user-list-loading">
+                <div class="spinner-border spinner-border-sm text-danger mb-2" role="status"></div>
+                <small>Đang tải danh sách...</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Chat window panel -->
+    <div class="chat-window-panel">
+        <!-- Placeholder when no user selected -->
+        <div class="chat-placeholder" id="chat-placeholder">
+            <i class="bi bi-chat-square-dots"></i>
+            <p>Chọn một khách hàng bên trái để xem và phản hồi tin nhắn của họ.</p>
+        </div>
+
+        <!-- Chat window (hidden until user is selected) -->
+        <div id="chat-window" style="display:none; display:none; flex-direction:column; height:100%;">
+            <!-- Chat header -->
+            <div class="chat-window-header" id="chat-window-header">
+                <div class="chat-user-avatar" id="chat-header-avatar" style="width:40px;height:40px;font-size:14px;"></div>
+                <div>
+                    <div class="user-detail-name" id="chat-header-name">—</div>
+                    <div class="user-detail-sub" id="chat-header-sub">—</div>
+                </div>
+            </div>
+
+            <!-- Messages area -->
+            <div class="chat-messages-area" id="chat-messages-area">
+            </div>
+
+            <!-- Input -->
+            <div class="chat-input-area">
+                <form id="admin-send-form" onsubmit="adminSendMessage(event)">
+                    <div class="input-group">
+                        <input type="text" id="admin-chat-input" class="form-control" placeholder="Nhập phản hồi cho khách hàng..." autocomplete="off">
+                        <div class="input-group-append">
+                            <button class="btn btn-send" type="submit">
+                                <i class="bi bi-send-fill mr-1"></i> Gửi
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    var currentMaKH = null;
+    var lastMessageId = 0;
+
+    $(document).ready(function () {
+        loadActiveUsers();
+        setInterval(loadActiveUsers, 5000);
+        setInterval(pollNewMessages, 3000);
+    });
+
+    function loadActiveUsers() {
+        $.ajax({
+            url: '@Url.Action("GetActiveUsers", "AdminChat", new { area = "Admin" })',
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                var container = $('#user-list-container');
+                container.empty();
+
+                if (!res.success || res.users.length === 0) {
+                    container.html('<div class="chat-empty-users"><i class="bi bi-inbox" style="font-size:36px; color:#e2e8f0; display:block; margin-bottom:10px;"></i><small class="text-muted">Chưa có khách hàng nào nhắn tin.</small></div>');
+                    return;
+                }
+
+                res.users.forEach(function (u) {
+                    var initials = (u.Ten || 'U').charAt(0).toUpperCase();
+                    var isActive = (currentMaKH === u.MaKH) ? 'active' : '';
+                    var unreadHtml = u.UnreadCount > 0
+                        ? '<span class="chat-unread-badge">' + u.UnreadCount + '</span>'
+                        : '';
+
+                    var html = '<div class="chat-user-item ' + isActive + '" onclick="selectUser(' + u.MaKH + ', \'' + escapeJs(u.Ten) + '\', \'' + escapeJs(u.Email) + '\')" data-makH="' + u.MaKH + '">' +
+                        '<div class="chat-user-avatar">' + initials + '</div>' +
+                        '<div class="chat-user-info">' +
+                        '<div class="chat-user-name">' + escapeHtml(u.Ten) + '</div>' +
+                        '<div class="chat-user-last-msg">' + escapeHtml(u.LastMessage || '') + '</div>' +
+                        '</div>' +
+                        '<div class="d-flex flex-column align-items-end">' +
+                        '<span class="chat-user-time">' + u.LastMessageTimeFormatted + '</span>' +
+                        '</div>' +
+                        unreadHtml +
+                        '</div>';
+
+                    container.append(html);
+                });
+            }
+        });
+    }
+
+    function selectUser(maKH, ten, email) {
+        currentMaKH = maKH;
+        lastMessageId = 0;
+
+        // Update active UI
+        $('.chat-user-item').removeClass('active');
+        $('[data-makH="' + maKH + '"]').addClass('active');
+
+        // Show chat window, hide placeholder
+        $('#chat-placeholder').hide();
+        var win = $('#chat-window');
+        win.css('display', 'flex');
+
+        // Set header info
+        var initials = (ten || 'U').charAt(0).toUpperCase();
+        $('#chat-header-avatar').text(initials);
+        $('#chat-header-name').text(ten);
+        $('#chat-header-sub').text(email);
+
+        // Clear and load messages
+        $('#chat-messages-area').empty();
+        loadChatHistory(maKH);
+    }
+
+    function loadChatHistory(maKH) {
+        $.ajax({
+            url: '@Url.Action("GetHistory", "AdminChat", new { area = "Admin" })',
+            type: 'GET',
+            data: { maKH: maKH },
+            dataType: 'json',
+            success: function (res) {
+                if (res.success) {
+                    $('#chat-messages-area').empty();
+                    lastMessageId = 0;
+                    if (res.messages.length === 0) {
+                        $('#chat-messages-area').html('<div class="text-center text-muted my-4" style="font-size:13px;">Chưa có tin nhắn nào.</div>');
+                    } else {
+                        res.messages.forEach(function (msg) {
+                            appendAdminMessage(msg);
+                        });
+                        scrollChatToBottom();
+                    }
+                }
+            }
+        });
+    }
+
+    function appendAdminMessage(msg) {
+        var isAdmin = msg.SenderRole === 'Admin';
+        var bubbleClass = isAdmin ? 'chat-bubble-admin' : 'chat-bubble-user';
+        var alignClass = isAdmin ? 'align-self-end' : 'align-self-start';
+        var senderLabel = isAdmin
+            ? '<span class="chat-bubble-sender">Bạn (' + escapeHtml(msg.SenderName) + ')</span>'
+            : '<span class="chat-bubble-sender" style="color:#e8392a;">Khách: ' + escapeHtml(msg.SenderName) + '</span>';
+
+        var html = '<div class="chat-bubble ' + bubbleClass + ' ' + alignClass + '">' +
+            senderLabel +
+            '<div>' + escapeHtml(msg.Message) + '</div>' +
+            '<span class="chat-time">' + msg.CreatedAtFormatted + '</span>' +
+            '</div>';
+
+        $('#chat-messages-area').append(html);
+        if (msg.Id > lastMessageId) {
+            lastMessageId = msg.Id;
+        }
+    }
+
+    function adminSendMessage(e) {
+        e.preventDefault();
+        if (!currentMaKH) return;
+
+        var text = $('#admin-chat-input').val().trim();
+        if (!text) return;
+
+        $('#admin-chat-input').val('');
+
+        $.ajax({
+            url: '@Url.Action("Send", "AdminChat", new { area = "Admin" })',
+            type: 'POST',
+            data: { maKH: currentMaKH, message: text },
+            dataType: 'json',
+            success: function (res) {
+                if (res.success) {
+                    pollNewMessages();
+                } else {
+                    alert(res.message || 'Không thể gửi tin nhắn.');
+                }
+            }
+        });
+    }
+
+    function pollNewMessages() {
+        if (!currentMaKH) return;
+
+        $.ajax({
+            url: '@Url.Action("GetNewMessages", "AdminChat", new { area = "Admin" })',
+            type: 'GET',
+            data: { maKH: currentMaKH, lastId: lastMessageId },
+            dataType: 'json',
+            success: function (res) {
+                if (res.success && res.messages.length > 0) {
+                    res.messages.forEach(function (msg) {
+                        appendAdminMessage(msg);
+                    });
+                    scrollChatToBottom();
+                }
+            }
+        });
+    }
+
+    function scrollChatToBottom() {
+        var area = $('#chat-messages-area');
+        area.animate({ scrollTop: area.prop('scrollHeight') }, 300);
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function escapeJs(text) {
+        if (!text) return '';
+        return String(text).replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+</script>
+}

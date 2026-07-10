@@ -1,0 +1,241 @@
+@{
+    ViewBag.Title = "Trợ giúp & Hỗ trợ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var user = ViewBag.User as BookStoreOnline.Models.KHACHHANG;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-lg overflow-hidden">
+                <!-- Header -->
+                <div class="card-header bg-gradient-brand text-white p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-support mr-3 bg-white text-danger d-flex align-items-center justify-content-center rounded-circle" style="width: 44px; height: 44px;">
+                            <i class="bi bi-headset" style="font-size: 20px;"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 font-weight-bold" style="font-size: 16px;">Hỗ Trợ Trực Tuyến</h5>
+                            <span class="badge badge-light-success p-1" style="font-size: 11px; background-color: rgba(40,167,69,0.1); color: #28a745;">
+                                <i class="bi bi-circle-fill mr-1" style="font-size: 7px;"></i> Admin đang hoạt động
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat history area -->
+                <div class="card-body bg-light p-3" id="chat-messages-container" style="height: 450px; overflow-y: auto;">
+                    <!-- Messages will be loaded here dynamically -->
+                    <div class="text-center text-muted my-5" id="chat-loading">
+                        <div class="spinner-border spinner-border-sm text-danger mr-2" role="status"></div>
+                        Đang tải lịch sử cuộc trò chuyện...
+                    </div>
+                </div>
+
+                <!-- Input area -->
+                <div class="card-footer bg-white border-0 p-3">
+                    <form id="chat-send-form" onsubmit="sendMessage(event)">
+                        <div class="input-group">
+                            <input type="text" id="chat-input" class="form-control border-1 p-3" placeholder="Nhập câu hỏi, khiếu nại của bạn..." style="border-radius: 20px 0 0 20px; font-size: 14px;" autocomplete="off">
+                            <div class="input-group-append">
+                                <button class="btn btn-danger px-4" type="submit" style="border-radius: 0 20px 20px 0; background: linear-gradient(135deg, #e8392a, #ff6b5b); border: none;">
+                                    <i class="bi bi-send-fill"></i> Gửi
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section styles {
+    <style>
+        .bg-gradient-brand {
+            background: linear-gradient(135deg, #e8392a 0%, #ff6b5b 100%);
+        }
+        
+        .chat-bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            word-wrap: break-word;
+            font-size: 14px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .chat-bubble-user {
+            background: linear-gradient(135deg, #e8392a, #ff6b5b);
+            color: #fff;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-bubble-admin {
+            background: #fff;
+            color: #374151;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .chat-time {
+            font-size: 10px;
+            opacity: 0.65;
+            display: block;
+            margin-top: 4px;
+            text-align: right;
+        }
+        
+        .chat-bubble-admin .chat-time {
+            text-align: left;
+            color: #9ca3af;
+        }
+
+        .chat-bubble-user .chat-time {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .card-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .card-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .card-body::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .card-body::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+}
+
+@section scripts {
+    <script>
+        var lastMessageId = 0;
+        var chatContainer = $('#chat-messages-container');
+        var chatInput = $('#chat-input');
+
+        $(document).ready(function () {
+            loadChatHistory();
+            
+            // Poll for new messages every 3 seconds
+            setInterval(pollNewMessages, 3000);
+        });
+
+        function loadChatHistory() {
+            $.ajax({
+                url: '@Url.Action("GetHistory", "UserChat")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (res) {
+                    if (res.success) {
+                        $('#chat-loading').remove();
+                        chatContainer.empty();
+                        lastMessageId = 0;
+                        
+                        if (res.messages.length === 0) {
+                            chatContainer.append('<div class="text-center text-muted my-5" id="chat-empty"><i class="bi bi-chat-left-dots" style="font-size: 40px; display:block; color:#cbd5e1;"></i>Chào bạn! Hãy gửi câu hỏi hoặc khiếu nại của bạn ở đây, Admin sẽ phản hồi sớm nhất có thể.</div>');
+                        } else {
+                            res.messages.forEach(function (msg) {
+                                appendMessage(msg);
+                            });
+                            scrollToBottom();
+                        }
+                    } else {
+                        alert(res.message || "Không thể tải lịch sử chat.");
+                    }
+                },
+                error: function () {
+                    alert("Lỗi kết nối máy chủ.");
+                }
+            });
+        }
+
+        function appendMessage(msg) {
+            var isUser = msg.SenderRole === 'User';
+            var bubbleClass = isUser ? 'chat-bubble-user' : 'chat-bubble-admin';
+            var senderNameHtml = !isUser ? '<strong class="d-block mb-1" style="font-size:11px; color:#c0281c;"><i class="bi bi-shield-check mr-1"></i>' + msg.SenderName + ' (QTV)</strong>' : '';
+            
+            var msgHtml = '<div class="chat-bubble ' + bubbleClass + '">' +
+                            senderNameHtml +
+                            '<div>' + escapeHtml(msg.Message) + '</div>' +
+                            '<span class="chat-time">' + msg.CreatedAtFormatted + '</span>' +
+                          '</div>';
+            
+            chatContainer.append(msgHtml);
+            
+            // Track the last message ID for polling
+            if (msg.Id > lastMessageId) {
+                lastMessageId = msg.Id;
+            }
+        }
+
+        function sendMessage(e) {
+            e.preventDefault();
+            var text = chatInput.val().trim();
+            if (!text) return;
+
+            // Clear input first for instant feel
+            chatInput.val('');
+            $('#chat-empty').remove();
+
+            $.ajax({
+                url: '@Url.Action("Send", "UserChat")',
+                type: 'POST',
+                data: { message: text },
+                dataType: 'json',
+                success: function (res) {
+                    if (res.success) {
+                        // Poll immediately to show user's sent message
+                        pollNewMessages();
+                    } else {
+                        alert(res.message || "Không thể gửi tin nhắn.");
+                    }
+                },
+                error: function () {
+                    alert("Lỗi kết nối máy chủ.");
+                }
+            });
+        }
+
+        function pollNewMessages() {
+            $.ajax({
+                url: '@Url.Action("GetNewMessages", "UserChat")',
+                type: 'GET',
+                data: { lastId: lastMessageId },
+                dataType: 'json',
+                success: function (res) {
+                    if (res.success && res.messages.length > 0) {
+                        $('#chat-empty').remove();
+                        res.messages.forEach(function (msg) {
+                            appendMessage(msg);
+                        });
+                        scrollToBottom();
+                    }
+                }
+            });
+        }
+
+        function scrollToBottom() {
+            chatContainer.animate({ scrollTop: chatContainer.prop("scrollHeight") }, 300);
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+}
