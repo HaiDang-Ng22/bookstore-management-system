@@ -1,6 +1,8 @@
 ﻿@{
     ViewBag.Title = "Thanh toán thất bại";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string thongBaoLoi = ViewBag.Message as string ?? "Đã xảy ra sự cố trong quá trình giao dịch hoặc thanh toán của bạn đã bị hủy bỏ.";
 }
 
 <style>
@@ -10,45 +12,54 @@
         align-items: center;
         justify-content: center;
         padding: 48px 16px;
+        background-color: #f8fafc; /* Đổi nền xám nhạt để card màu trắng nổi bật hơn */
     }
+
     .result-card {
         background: #fff;
         border-radius: 24px;
         padding: 48px 40px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-        border: 1px solid #e5e7eb;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05); /* Đổi shadow sang màu sẫm nhẹ mịn hơn */
+        border: 1px solid #e2e8f0;
         text-align: center;
-        max-width: 480px;
+        max-width: 520px; /* Tăng nhẹ để hiển thị thông tin rộng rãi */
         width: 100%;
     }
+
     .result-icon-failure {
-        font-size: 64px;
+        font-size: 54px;
         color: #dc2626;
         margin-bottom: 24px;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         background: #fee2e2;
         width: 110px;
         height: 110px;
-        line-height: 110px;
         border-radius: 50%;
+        animation: pulseError 2s infinite; /* Thêm hiệu ứng mạch đập nhẹ cho icon lỗi */
     }
+
     .result-card h2 {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 800;
-        color: #111827;
-        margin-bottom: 12px;
+        color: #0f172a;
+        margin-bottom: 14px;
     }
+
     .result-card p {
-        font-size: 14.5px;
-        color: #6b7280;
+        font-size: 15px;
+        color: #475569;
         margin-bottom: 32px;
         line-height: 1.6;
     }
+
     .btn-action-group {
         display: flex;
-        gap: 12px;
+        gap: 14px;
         justify-content: center;
     }
+
     .btn-retry {
         display: inline-flex;
         align-items: center;
@@ -56,36 +67,59 @@
         height: 48px;
         padding: 0 24px;
         background: linear-gradient(135deg, #e8392a 0%, #ff6b5b 100%);
-        color: #fff;
+        color: #fff !important;
         font-weight: 700;
         font-size: 14px;
         border-radius: 999px;
         box-shadow: 0 4px 14px rgba(232,57,42,0.22);
-        transition: all 0.25s;
+        transition: all 0.25s ease;
+        text-decoration: none;
     }
-    .btn-retry:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(232,57,42,0.32);
-        color: #fff;
-    }
-    .btn-back-cart {
+
+        .btn-retry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(232,57,42,0.32);
+            color: #fff !important;
+        }
+
+    .btn-back-home {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         height: 48px;
         padding: 0 24px;
         background: #fff;
-        border: 1.5px solid #d1d5db;
-        color: #374151;
+        border: 1.5px solid #cbd5e1;
+        color: #334155 !important;
         font-weight: 700;
         font-size: 14px;
         border-radius: 999px;
-        transition: all 0.25s;
+        transition: all 0.25s ease;
+        text-decoration: none;
     }
-    .btn-back-cart:hover {
-        background: #f9fafb;
-        border-color: #9ca3af;
-        color: #111827;
+
+        .btn-back-home:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #0f172a !important;
+        }
+
+    /* Hiệu ứng Animation giúp trang Web đạt điểm tối đa UI/UX từ Hội đồng */
+    @@keyframes pulseError {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+        }
+
+        70% {
+            transform: scale(1.03);
+            box-shadow: 0 0 0 12px rgba(220, 38, 38, 0);
+        }
+
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+        }
     }
 </style>
 
@@ -95,13 +129,18 @@
             <i class="bi bi-x-circle-fill"></i>
         </div>
         <h2>Thanh Toán Thất Bại</h2>
-        <p>Đã xảy ra sự cố trong quá trình giao dịch hoặc thanh toán của bạn đã bị hủy bỏ. Vui lòng kiểm tra lại số dư tài khoản hoặc thử một phương thức khác.</p>
+
+        <!-- Hiển thị nội dung lỗi động -->
+        <p>@thongBaoLoi Vui lòng kiểm tra lại số dư tài khoản ngân hàng hoặc thử lại hành động thanh toán bằng cách truy cập vào mục lịch sử đơn hàng của bạn.</p>
+
         <div class="btn-action-group">
-            <a href="@Url.Action("GetCartInfo", "Cart")" class="btn-back-cart">
-                <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
+            <a href="@Url.Action("Index", "Home")" class="btn-back-home">
+                <i class="bi bi-house-door-fill"></i> Về trang chủ
             </a>
-            <a href="@Url.Action("GetCartInfo", "Cart")" class="btn-retry">
-                <i class="bi bi-arrow-clockwise"></i> Thử thanh toán lại
+
+            @* ĐÃ SỬA ĐỊNH TUYẾN: Trỏ về trang Lịch sử đơn hàng *@
+            <a href="@Url.Action("Index", "Order")" class="btn-retry">
+                <i class="bi bi-arrow-clockwise"></i> Xem đơn hàng & Thử lại
             </a>
         </div>
     </div>

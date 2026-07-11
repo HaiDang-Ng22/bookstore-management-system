@@ -223,5 +223,42 @@ namespace BookStoreOnline.Services
                 $"💰 Tổng tiền: {order.TongTien:N0} VNĐ\n" +
                 $"🚚 Trạng thái: {trangThai}";
         }
+
+        public string GetBookCard(string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return "❌ Vui lòng nhập từ khóa để tìm sách.";
+
+            string cleanKeyword = RemoveVietnamese(keyword);
+
+            // Sử dụng chính xác thực thể db.SANPHAMs và hàm khử dấu của em
+            var book = db.SANPHAMs
+                .ToList()
+                .FirstOrDefault(x => RemoveVietnamese(x.TenSanPham ?? "").Contains(cleanKeyword));
+
+            if (book == null)
+                return $"❌ Chatbot không tìm thấy cuốn sách nào khớp với từ khóa '{keyword}'.";
+
+            System.Text.StringBuilder html = new System.Text.StringBuilder();
+            html.Append($@"
+<div class='card mb-3 shadow-sm' style='max-width: 280px; margin: 0 auto;'>
+    <img src='{book.Anh}' 
+         class='card-img-top' 
+         style='height:180px; object-fit:cover;' alt='{book.TenSanPham}'>
+    <div class='card-body' style='text-align: center;'>
+        <h6 class='card-title' style='font-weight: bold;'>{book.TenSanPham}</h6>
+        <p class='card-text' style='font-size: 13px; color: #555; margin-bottom: 5px;'>👤 Tác giả: {book.TacGia}</p>
+        <p class='text-danger fw-bold' style='font-size: 16px; margin-bottom: 10px;'>
+            {book.Gia:N0} VNĐ
+        </p>
+        <a href='/ProductDetail/Index/{book.MaSanPham}' 
+           class='btn btn-danger btn-sm' style='width: 100%; border-radius: 4px;'>
+            Xem chi tiết sách
+        </a>
+    </div>
+</div>");
+
+            return html.ToString();
+        }
     }
 }

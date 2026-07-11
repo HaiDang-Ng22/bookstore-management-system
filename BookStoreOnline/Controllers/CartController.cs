@@ -1,20 +1,29 @@
+using BookStoreOnline.Models;
+using Newtonsoft.Json;
+using PayPal.Api;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using PayPal.Api;
-using BookStoreOnline.Models;
 using System.Web.Util;
-using System.Threading.Tasks;
 
 namespace BookStoreOnline.Controllers
 {
     public class CartController : Controller
     {
         private readonly NhaSachEntities3 db = new NhaSachEntities3();
+
+        public const int PAYMENT_COD = 1;      // Tiền mặt khi nhận hàng
+        public const int PAYMENT_PAYPAL = 2;   // Cổng PayPal API (Quốc tế)
+        public const int PAYMENT_MOMO = 3;     // Mã dự phòng MoMo cũ
+        public const int PAYMENT_VIETQR = 4;   // Chuyển khoản VietQR (Popup AJAX tại chỗ)
+        public const int PAYMENT_VNPAY = 5;    // Cổng VNPAY (Chuyển trang Sandbox)
 
         private class DbCartItem
         {
@@ -26,14 +35,10 @@ namespace BookStoreOnline.Controllers
         {
             using (var dbContext = new NhaSachEntities3())
             {
-                // 1. Get cart items currently in session
                 var sessionCart = context.Session["GioHang"] as List<CartItem> ?? new List<CartItem>();
-
-                // 2. Get cart items from database
                 var dbCartItems = dbContext.Database.SqlQuery<DbCartItem>(
                     "SELECT MaSanPham, SoLuong FROM GIOHANG WHERE MaKH = @p0", customerId).ToList();
 
-                // 3. Merge session cart into database
                 foreach (var item in sessionCart)
                 {
                     var existingDbItem = dbCartItems.FirstOrDefault(d => d.MaSanPham == item.ProductID);
@@ -50,12 +55,11 @@ namespace BookStoreOnline.Controllers
                     else
                     {
                         dbContext.Database.ExecuteSqlCommand(
-                            "INSERT INTO GIOHANG (MaKH, MaSanPham, SoLuong) VALUES (@p0, @p1, @p2)",
+                            "INSERT GIOHANG (MaKH, MaSanPham, SoLuong) VALUES (@p0, @p1, @p2)",
                             customerId, item.ProductID, item.Number);
                     }
                 }
 
-                // 4. Reload combined cart from database to session
                 var finalDbCartItems = dbContext.Database.SqlQuery<DbCartItem>(
                     "SELECT MaSanPham, SoLuong FROM GIOHANG WHERE MaKH = @p0", customerId).ToList();
 
@@ -85,7 +89,6 @@ namespace BookStoreOnline.Controllers
             return View();
         }
 
-        // Get the current cart from session or create a new one if it doesn't exist
         private List<CartItem> GetCart()
         {
             if (Session["GioHang"] is List<CartItem> cart)
@@ -93,19 +96,16 @@ namespace BookStoreOnline.Controllers
                 return cart;
             }
 
-
             cart = new List<CartItem>();
             Session["GioHang"] = cart;
             return cart;
         }
 
-        // Save the cart to the session
         private void SaveCart(List<CartItem> cart)
         {
             Session["GioHang"] = cart;
         }
 
-        // Add product to cart
         [HttpPost]
         public ActionResult AddToCart(FormCollection product)
         {
@@ -131,7 +131,6 @@ namespace BookStoreOnline.Controllers
 
             var cartItem = cart.FirstOrDefault(p => p.ProductID == productId && p.VolumeID == volumeId);
 
-            // Temporary workaround for maxQty since we can't compile Volume entity yet without edmx update
             int maxQty = productInDb.SoLuong;
             if (volumeId.HasValue)
             {
@@ -162,7 +161,6 @@ namespace BookStoreOnline.Controllers
             }
             SaveCart(cart);
 
-            // Sync to DB
             var customer = Session["TaiKhoan"] as KHACHHANG;
             if (customer != null)
             {
@@ -170,14 +168,13 @@ namespace BookStoreOnline.Controllers
                     IF EXISTS (SELECT 1 FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1 AND MaTap = @p3)
                         UPDATE GIOHANG SET SoLuong = @p2 WHERE MaKH = @p0 AND MaSanPham = @p1 AND MaTap = @p3
                     ELSE
-                        INSERT INTO GIOHANG (MaKH, MaSanPham, SoLuong, MaTap) VALUES (@p0, @p1, @p2, @p3)",
+                        INSERT GIOHANG (MaKH, MaSanPham, SoLuong, MaTap) VALUES (@p0, @p1, @p2, @p3)",
                     customer.MaKH, productId, cartItem.Number, volumeId ?? 0);
             }
 
             return RedirectToAction("GetCartInfo");
         }
 
-        // Add a single product to the cart
         public ActionResult AddSingleProduct(int id)
         {
             var cart = GetCart();
@@ -226,7 +223,6 @@ namespace BookStoreOnline.Controllers
             }
             SaveCart(cart);
 
-            // Sync to DB
             var customer = Session["TaiKhoan"] as KHACHHANG;
             if (customer != null)
             {
@@ -234,7 +230,7 @@ namespace BookStoreOnline.Controllers
                     IF EXISTS (SELECT 1 FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1)
                         UPDATE GIOHANG SET SoLuong = @p2 WHERE MaKH = @p0 AND MaSanPham = @p1
                     ELSE
-                        INSERT INTO GIOHANG (MaKH, MaSanPham, SoLuong) VALUES (@p0, @p1, @p2)",
+                        INSERT GIOHANG (MaKH, MaSanPham, SoLuong) VALUES (@p0, @p1, @p2)",
                     customer.MaKH, id, cartItem.Number);
             }
 
@@ -245,7 +241,6 @@ namespace BookStoreOnline.Controllers
             return RedirectToAction("GetCartInfo");
         }
 
-        // Remove a product from the cart
         public ActionResult Remove(int id, int? volumeId = null)
         {
             var cart = GetCart();
@@ -255,7 +250,6 @@ namespace BookStoreOnline.Controllers
                 cart.Remove(cartItem);
                 SaveCart(cart);
 
-                // Sync to DB
                 var customer = Session["TaiKhoan"] as KHACHHANG;
                 if (customer != null)
                 {
@@ -267,21 +261,18 @@ namespace BookStoreOnline.Controllers
             return RedirectToAction("GetCartInfo");
         }
 
-        // Get total number of items in the cart
         private int GetTotalNumber()
         {
             var cart = GetCart();
             return cart.Sum(sp => sp.Number);
         }
 
-        // Get total price of items in the cart
         private decimal GetTotalPrice()
         {
             var cart = GetCart();
             return cart.Sum(sp => sp.FinalPrice());
         }
 
-        // Display cart information
         public ActionResult GetCartInfo()
         {
             var cart = GetCart();
@@ -296,47 +287,39 @@ namespace BookStoreOnline.Controllers
             return View(cart);
         }
 
-        // Update the quantity of a product in the cart
         [HttpPost]
         public ActionResult Update(int productId, int quantity, int? volumeId = null)
         {
-            // Kiểm tra nếu số lượng không hợp lệ
             if (quantity <= 0)
             {
                 return Json(new { success = false, message = "Invalid quantity." }, JsonRequestBehavior.AllowGet);
             }
 
-            // Tìm kiếm sản phẩm trong cơ sở dữ liệu
             var product = db.SANPHAMs.Find(productId);
             if (product == null)
             {
                 return Json(new { success = false, message = "Product not found." }, JsonRequestBehavior.AllowGet);
             }
 
-            // Temporary workaround for maxQty since we can't compile Volume entity yet without edmx update
             int maxQty = product.SoLuong;
             if (volumeId.HasValue)
             {
                 maxQty = db.Database.SqlQuery<int>("SELECT SoLuong FROM TAP_SANPHAM WHERE MaTap = @p0", volumeId.Value).FirstOrDefault();
             }
 
-            // Kiểm tra nếu số lượng yêu cầu lớn hơn số lượng tồn kho
             if (quantity > maxQty)
             {
                 return Json(new { success = false, message = "Quá số lượng tồn trong kho", validQuantity = 1 }, JsonRequestBehavior.AllowGet);
             }
 
-            // Lấy giỏ hàng từ session
             var cart = GetCart();
             var cartItem = cart.FirstOrDefault(item => item.ProductID == productId && item.VolumeID == volumeId);
 
             if (cartItem != null)
             {
-                // Cập nhật số lượng của sản phẩm trong giỏ hàng
                 cartItem.Number = quantity;
-                SaveCart(cart); // Lưu giỏ hàng vào session hoặc cơ sở dữ liệu
+                SaveCart(cart);
 
-                // Sync to DB
                 var customer = Session["TaiKhoan"] as KHACHHANG;
                 if (customer != null)
                 {
@@ -345,7 +328,13 @@ namespace BookStoreOnline.Controllers
                         quantity, customer.MaKH, productId, volumeId ?? 0);
                 }
 
-                return Json(new { success = true }, JsonRequestBehavior.AllowGet);
+                // NÂNG CẤP: Tính toán và trả thêm tổng tiền mới để Front-end đồng bộ giá trị thô lên ảnh QR động
+                decimal newTotalPrice = GetTotalPrice();
+                var discountAmount = Session["DiscountAmount"] as decimal? ?? 0;
+                newTotalPrice -= discountAmount;
+                if (newTotalPrice < 0) newTotalPrice = 0;
+
+                return Json(new { success = true, newTotalPrice = (int)Math.Round(newTotalPrice) }, JsonRequestBehavior.AllowGet);
             }
             else
             {
@@ -353,18 +342,17 @@ namespace BookStoreOnline.Controllers
             }
         }
 
-        // Partial view for cart summary
         public ActionResult CartPartial()
         {
             ViewBag.TotalNumber = GetTotalNumber();
             return PartialView();
         }
 
-        // View for empty cart
         public ActionResult NullCart()
         {
             return View();
         }
+
         [HttpPost]
         public ActionResult CheckStock(int productId, int quantity, int? volumeId = null)
         {
@@ -387,38 +375,37 @@ namespace BookStoreOnline.Controllers
 
             return Json(new { success = true });
         }
+
         [HttpPost]
-        public ActionResult InsertOrder(string address, string paymentMethod1)
+        public ActionResult InsertOrder(FormCollection form)
         {
             var cartItems = GetCart();
             if (cartItems == null || !cartItems.Any())
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Empty cart.");
+                return Json(new { success = false, message = "Giỏ hàng của bạn đang rỗng." });
             }
 
             var customer = Session["TaiKhoan"] as KHACHHANG;
             if (customer == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Not logged in.");
+                return Json(new { success = false, message = "Chưa đăng nhập hệ thống." });
             }
+
+            string address = form["address"] ?? form["DiaChi"];
+            string inputPaymentMethod = form["paymentMethod1"] ?? form["paymentMethod"];
 
             var discountAmount = Session["DiscountAmount"] as decimal? ?? 0;
             var finalPrice = Session["FinalPrice"] as decimal? ?? GetTotalPrice();
             var roundedFinalPrice = (int)Math.Round(finalPrice);
 
-            // Xử lý phương thức thanh toán
-            int trangThaiThanhToan = 0;  // Mặc định là chưa thanh toán (COD)
-            int phuongThucThanhToan = 0; // Mặc định là COD
-            if (paymentMethod1 == "paypal")
-            {
-                phuongThucThanhToan = 2;  // PayPal
-                trangThaiThanhToan = 1;   // Đã thanh toán
-            }
-            else if (paymentMethod1 == "cod")
-            {
-                phuongThucThanhToan = 1;  // Tiền mặt (COD)
-                trangThaiThanhToan = 0;   // Chưa thanh toán
-            }
+            int trangThaiThanhToan = 0;
+            int phuongThucThanhToan = PAYMENT_COD;
+
+            string selectedMethod = (inputPaymentMethod ?? "").ToLower().Trim();
+
+            if (selectedMethod == "vietqr") phuongThucThanhToan = PAYMENT_VIETQR;
+            else if (selectedMethod == "vnpay") phuongThucThanhToan = PAYMENT_VNPAY;
+            else if (selectedMethod == "paypal") phuongThucThanhToan = PAYMENT_PAYPAL;
 
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -429,7 +416,7 @@ namespace BookStoreOnline.Controllers
                         ID = customer.MaKH,
                         NgayDat = DateTime.Now,
                         DiaChi = address,
-                        TrangThai = 0, // Chờ xác nhận
+                        TrangThai = 0,
                         TrangThaiThanhToan = trangThaiThanhToan,
                         PhuongThucThanhToan = phuongThucThanhToan,
                         TongTien = roundedFinalPrice,
@@ -444,425 +431,12 @@ namespace BookStoreOnline.Controllers
                         var product = db.SANPHAMs.Find(item.ProductID);
                         if (product == null)
                         {
-                            return HttpNotFound("Product not found.");
+                            return Json(new { success = false, message = "Không tìm thấy sản phẩm trong hệ thống." });
                         }
 
                         if (item.Number > product.SoLuong)
                         {
-                            return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Quá số lượng tồn trong kho.");
-                        }
-
-                        var orderDetail = new CHITIETDONHANG
-                        {
-                            MaDonHang = order.MaDonHang,
-                            MaSanPham = item.ProductID,
-                            SoLuong = item.Number
-                        };
-                        db.CHITIETDONHANGs.Add(orderDetail);
-                        db.SaveChanges(); // Lấy ID vừa được tạo
-
-                        if (item.VolumeID.HasValue)
-                        {
-                            db.Database.ExecuteSqlCommand("UPDATE CHITIETDONHANG SET MaTap = @p0 WHERE ID = @p1", item.VolumeID.Value, orderDetail.ID);
-                        }
-
-                        if (item.VolumeID.HasValue)
-                        {
-                            db.Database.ExecuteSqlCommand("UPDATE TAP_SANPHAM SET SoLuong = SoLuong - @p0 WHERE MaTap = @p1", item.Number, item.VolumeID.Value);
-                        }
-                        else
-                        {
-                            product.SoLuong -= item.Number;
-                            product.SoLuongBan += item.Number;
-                            db.Entry(product).State = EntityState.Modified;
-                        }
-
-                    }
-
-                    db.SaveChanges();
-
-                    // Clear database cart
-                    if (customer != null)
-                    {
-                        db.Database.ExecuteSqlCommand("DELETE FROM GIOHANG WHERE MaKH = @p0", customer.MaKH);
-                    }
-
-                    Session["GioHang"] = null;
-                    Session["DiscountAmount"] = null;
-                    Session["FinalPrice"] = null;
-                    Session["MaKM"] = null;
-
-                    transaction.Commit();
-
-                    return RedirectToAction("SuccessView");
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, "Order processing error: " + ex.Message);
-                }
-            }
-        }
-        [HttpPost]
-        public ActionResult InsertOrder1(string address, string paymentMethod1)
-        {
-            var cartItems = GetCart();
-            if (cartItems == null || !cartItems.Any())
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Empty cart.");
-            }
-
-            var customer = Session["TaiKhoan"] as KHACHHANG;
-            if (customer == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Not logged in.");
-            }
-
-            var discountAmount = Session["DiscountAmount"] as decimal? ?? 0;
-            var finalPrice = Session["FinalPrice"] as decimal? ?? GetTotalPrice();
-            var roundedFinalPrice = (int)Math.Round(finalPrice);
-
-            // Xử lý phương thức thanh toán
-            int trangThaiThanhToan = 0;  // Mặc định là chưa thanh toán (COD)
-            int phuongThucThanhToan = 0; // Mặc định là COD
-            if (paymentMethod1 == "paypal")
-            {
-                phuongThucThanhToan = 2;  // Ngân hàng
-                trangThaiThanhToan = 1;   // Đã thanh toán
-            }
-            else if (paymentMethod1 == "cod") //tienmat
-            {
-                phuongThucThanhToan = 1;
-                trangThaiThanhToan = 1;
-            }
-
-            using (var transaction = db.Database.BeginTransaction())
-            {
-                try
-                {
-                    var order = new DONHANG
-                    {
-                        ID = customer.MaKH,
-                        NgayDat = DateTime.Now,
-                        DiaChi = address,
-                        TrangThai = 0, // Not confirmed
-                        TrangThaiThanhToan = trangThaiThanhToan, // Cập nhật trạng thái thanh toán
-                        PhuongThucThanhToan = phuongThucThanhToan,  // Lưu phương thức thanh toán
-                        TongTien = roundedFinalPrice,
-                        MaKM = Session["MaKM"] as string
-                    };
-
-                    db.DONHANGs.Add(order);
-                    db.SaveChanges();
-
-                    foreach (var item in cartItems)
-                    {
-                        var product = db.SANPHAMs.Find(item.ProductID);
-                        if (product == null)
-                        {
-                            return HttpNotFound("Product not found.");
-                        }
-
-                        if (item.Number > product.SoLuong)
-                        {
-                            return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Quá số lượng tồn trong kho.");
-                        }
-
-                        var orderDetail = new CHITIETDONHANG
-                        {
-                            MaDonHang = order.MaDonHang,
-                            MaSanPham = item.ProductID,
-                            SoLuong = item.Number
-                        };
-                        db.CHITIETDONHANGs.Add(orderDetail);
-                        db.SaveChanges(); // Lấy ID vừa được tạo
-
-                        if (item.VolumeID.HasValue)
-                        {
-                            db.Database.ExecuteSqlCommand("UPDATE CHITIETDONHANG SET MaTap = @p0 WHERE ID = @p1", item.VolumeID.Value, orderDetail.ID);
-                        }
-
-                        if (item.VolumeID.HasValue)
-                        {
-                            db.Database.ExecuteSqlCommand("UPDATE TAP_SANPHAM SET SoLuong = SoLuong - @p0 WHERE MaTap = @p1", item.Number, item.VolumeID.Value);
-                        }
-                        else
-                        {
-                            product.SoLuong -= item.Number;
-                            product.SoLuongBan += item.Number;
-                            db.Entry(product).State = EntityState.Modified;
-                        }
-                    }
-
-                    db.SaveChanges();
-                    // Do not clear cart until PayPal payment is confirmed
-                    // Clear database cart
-                    if (customer != null)
-                    {
-                        db.Database.ExecuteSqlCommand("DELETE FROM GIOHANG WHERE MaKH = @p0", customer.MaKH);
-                    }
-
-                    Session["GioHang"] = null;
-                    Session["DiscountAmount"] = null;
-                    Session["FinalPrice"] = null;
-                    Session["MaKM"] = null;
-
-                    transaction.Commit();
-
-                    return RedirectToAction("momo", "Cart", new { id = order.MaDonHang });
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, "Order processing error.");
-                }
-            }
-        }
-
-        [HttpPost]
-        public JsonResult ApplyDiscount(string discountCode)
-        {
-            var discount = db.KHUYENMAIs.FirstOrDefault(d => d.MaKM == discountCode && d.KichHoat == true);
-            decimal discountAmount = 0;
-            decimal totalPrice = GetTotalPrice(); // Get the current total price before discount
-
-            if (discount != null)
-            {
-                if (totalPrice >= discount.SoTienMuaHangToiThieu)
-                {
-                    discountAmount = discount.SoTienKM;
-                    totalPrice -= discountAmount; // Apply discount
-                    Session["DiscountAmount"] = discountAmount;
-                    Session["FinalPrice"] = totalPrice;
-                    Session["MaKM"] = discount.MaKM; // Lưu mã khuyến mãi
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Không đạt yêu cầu tối thiểu để áp dụng mã khuyến mãi." });
-                }
-            }
-            else
-            {
-                return Json(new { success = false, message = "Mã khuyến mãi không hợp lệ hoặc đã hết hạn" });
-            }
-
-            return Json(new { success = true, discountAmount = discountAmount, finalPrice = totalPrice });
-        }
-        public ActionResult FailureView()
-        {
-            return View();
-        }
-        public ActionResult SuccessView()
-        {
-            return View();
-        }
-
-        public ActionResult PaymentWithPaypal(string Cancel = null)
-        {
-            //getting the apiContext  
-            APIContext apiContext = PaypalConfiguration.GetAPIContext();
-            try
-            {
-
-                string payerId = Request.Params["PayerID"];
-                if (string.IsNullOrEmpty(payerId))
-                {
-
-                    string baseURI = Request.Url.Scheme + "://" + Request.Url.Authority + "/cart/PaymentWithPayPal?";
-
-                    var guid = Convert.ToString((new Random()).Next(100000));
-
-                    var createdPayment = this.CreatePayment(apiContext, baseURI + "guid=" + guid);
-                    var links = createdPayment.links.GetEnumerator();
-                    string paypalRedirectUrl = null;
-                    while (links.MoveNext())
-                    {
-                        Links lnk = links.Current;
-                        if (lnk.rel.ToLower().Trim().Equals("approval_url"))
-                        {
-                            paypalRedirectUrl = lnk.href;
-                        }
-                    }
-                    // saving the paymentID in the key guid  
-                    Session.Add(guid, createdPayment.id);
-                    return Redirect(paypalRedirectUrl);
-                }
-                else
-                {
-                    // This function exectues after receving all parameters for the payment  
-                    var guid = Request.Params["guid"];
-                    var executedPayment = ExecutePayment(apiContext, payerId, Session[guid] as string);
-                    //If executed payment failed then we will show payment failure message to user  
-                    if (executedPayment.state.ToLower() != "approved")
-                    {
-                        return View("FailureView");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return View("FailureView");
-            }
-            //on successful payment, show success page to user.  
-            return View("SuccessView");
-        }
-        private PayPal.Api.Payment payment;
-        private Payment ExecutePayment(APIContext apiContext, string payerId, string paymentId)
-        {
-            var paymentExecution = new PaymentExecution()
-            {
-                payer_id = payerId
-            };
-            this.payment = new Payment()
-            {
-                id = paymentId
-            };
-            return this.payment.Execute(apiContext, paymentExecution);
-        }
-
-        private Payment CreatePayment(APIContext apiContext, string redirectUrl)
-        {
-            List<CartItem> listSanPham = Session["GioHang"] as List<CartItem>;
-            var itemList = new ItemList()
-            {
-                items = new List<Item>()
-            };
-
-            decimal subtotal = 0;
-            if (listSanPham != null)
-            {
-                foreach (var item in listSanPham)
-                {
-                    itemList.items.Add(new Item()
-                    {
-                        name = item.NamePro,
-                        currency = "USD",
-                        price = Math.Round(item.Price / 25000, 2).ToString("0.00"), // Assume VND to USD ~25000
-                        quantity = item.Number.ToString(),
-                        sku = item.ProductID.ToString(),
-                    });
-                    subtotal += Math.Round(item.Price / 25000, 2) * item.Number;
-                }
-            }
-
-            var payer = new Payer()
-            {
-                payment_method = "paypal"
-            };
-            var redirUrls = new RedirectUrls()
-            {
-                cancel_url = redirectUrl + "&Cancel=true",
-                return_url = redirectUrl
-            };
-            var details = new Details()
-            {
-                tax = "0",
-                shipping = "0",
-                subtotal = subtotal.ToString("0.00")
-            };
-            var amount = new Amount()
-            {
-                currency = "USD",
-                total = subtotal.ToString("0.00"),
-                details = details
-            };
-            var transactionList = new List<Transaction>();
-            var paypalOrderId = DateTime.Now.Ticks;
-            transactionList.Add(new Transaction()
-            {
-                description = $"Invoice #{paypalOrderId}",
-                invoice_number = paypalOrderId.ToString(),
-                amount = amount,
-                item_list = itemList
-            });
-
-            this.payment = new Payment()
-            {
-                intent = "sale",
-                payer = payer,
-                transactions = transactionList,
-                redirect_urls = redirUrls
-            };
-            // Create a payment using a APIContext  
-            return this.payment.Create(apiContext);
-        }
-        public async Task<ActionResult> momo(int id)
-        {
-
-            var checkid = db.DONHANGs.Where(s => s.MaDonHang == id).FirstOrDefault();
-            var tongtien = checkid.TongTien;
-            var paymentService = new PaymentService();
-            string orderInfo = $"ma kac hasnh - {id}";
-            string redirectUrl = Url.Action("callback", "cart", new { id = id }, Request.Url.Scheme);
-            string callbackUrl = Url.Action("PremiumFailure", "truyen", null, Request.Url.Scheme);
-            string paymentUrl = await paymentService.CreateMoMoPaymentAsync(tongtien, orderInfo, redirectUrl, callbackUrl);
-
-            if (string.IsNullOrEmpty(paymentUrl))
-            {
-                throw new Exception("Failed to create MoMo payment URL");
-            }
-            return Redirect(paymentUrl);
-        }
-        public ActionResult callback(int id)
-        {
-            var checkid = db.DONHANGs.Where(s => s.MaDonHang == id).FirstOrDefault();
-            if (checkid == null)
-            {
-                return HttpNotFound();
-            }
-            // Add momo validation logic here if needed
-            return RedirectToAction("Index", "Order");
-        }
-
-        [HttpPost]
-        public ActionResult InsertOrderVietQR(string address, string paymentMethod1)
-        {
-            var cartItems = GetCart();
-            if (cartItems == null || !cartItems.Any())
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Empty cart.");
-            }
-
-            var customer = Session["TaiKhoan"] as KHACHHANG;
-            if (customer == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Not logged in.");
-            }
-
-            var discountAmount = Session["DiscountAmount"] as decimal? ?? 0;
-            var finalPrice = Session["FinalPrice"] as decimal? ?? GetTotalPrice();
-            var roundedFinalPrice = (int)Math.Round(finalPrice);
-
-            using (var transaction = db.Database.BeginTransaction())
-            {
-                try
-                {
-                    var order = new DONHANG
-                    {
-                        ID = customer.MaKH,
-                        NgayDat = DateTime.Now,
-                        DiaChi = address,
-                        TrangThai = 0, // 0: Đơn hàng mới chờ duyệt
-                        TrangThaiThanhToan = 0, // 0: CHƯA THANH TOÁN (Chờ bạn kiểm tra tài khoản ngân hàng rồi duyệt sau)
-                        PhuongThucThanhToan = 3, // 3: Định nghĩa riêng cho hình thức VietQR
-                        TongTien = roundedFinalPrice,
-                        MaKM = Session["MaKM"] as string
-                    };
-
-                    db.DONHANGs.Add(order);
-                    db.SaveChanges();
-
-                    foreach (var item in cartItems)
-                    {
-                        var product = db.SANPHAMs.Find(item.ProductID);
-                        if (product == null)
-                        {
-                            return HttpNotFound("Product not found.");
-                        }
-
-                        if (item.Number > product.SoLuong)
-                        {
-                            return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Quá số lượng tồn trong kho.");
+                            return Json(new { success = false, message = $"Sách '{product.TenSanPham}' đã hết hàng hoặc vượt tồn kho." });
                         }
 
                         var orderDetail = new CHITIETDONHANG
@@ -889,11 +463,7 @@ namespace BookStoreOnline.Controllers
 
                     db.SaveChanges();
 
-                    // Xóa sạch giỏ hàng trong Database sau khi đặt thành công
-                    if (customer != null)
-                    {
-                        db.Database.ExecuteSqlCommand("DELETE FROM GIOHANG WHERE MaKH = @p0", customer.MaKH);
-                    }
+                    db.Database.ExecuteSqlCommand("DELETE FROM GIOHANG WHERE MaKH = @p0", customer.MaKH);
 
                     Session["GioHang"] = null;
                     Session["DiscountAmount"] = null;
@@ -902,15 +472,121 @@ namespace BookStoreOnline.Controllers
 
                     transaction.Commit();
 
-                    // Chuyển hướng về trang báo thành công
-                    return RedirectToAction("SuccessView");
+                    if (selectedMethod == "vnpay")
+                    {
+                        string vnpayUrl = Url.Action("PaymentWithVnPay", "Cart", new { id = order.MaDonHang });
+                        return Json(new { success = true, paymentMethod = "vnpay", redirectUrl = vnpayUrl });
+                    }
+                    else if (selectedMethod == "vietqr")
+                    {
+                        return Json(new { success = true, paymentMethod = "vietqr", orderId = order.MaDonHang });
+                    }
+
+                    return Json(new { success = true, paymentMethod = "cod", redirectUrl = Url.Action("SuccessView", "Cart") });
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, "Order processing error: " + ex.Message);
+                    return Json(new { success = false, message = "Lỗi Database: " + (ex.InnerException?.InnerException?.Message ?? ex.Message) });
                 }
             }
+        }
+
+        // CHỨC NĂNG: GỌI API ĐỐI SOÁT BIẾN ĐỘNG SỐ DƯ TỰ ĐỘNG 
+        [HttpGet]
+        public async Task<JsonResult> CheckOrderStatus(int orderId)
+        {
+            try
+            {
+                if (orderId <= 0)
+                {
+                    return Json(new { success = false, status = -1, message = "Mã đơn hàng không hợp lệ." }, JsonRequestBehavior.AllowGet);
+                }
+
+                // 1. Kiểm tra trạng thái đơn hàng nội bộ trong Database trước để tối ưu hiệu năng
+                var order = await db.DONHANGs.FirstOrDefaultAsync(o => o.MaDonHang == orderId);
+                if (order == null)
+                {
+                    return Json(new { success = false, status = -1, message = "Không tìm thấy đơn hàng." }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Nếu đơn hàng đã được cập nhật thành công từ lượt quét trước đó
+                if (order.TrangThaiThanhToan == 1)
+                {
+                    return Json(new { success = true, status = 1 }, JsonRequestBehavior.AllowGet);
+                }
+
+                // 2. ĐÃ SỬA: Đọc động các tham số cấu hình ngân hàng ACB bảo mật từ file Web.config
+                string apiKey = System.Configuration.ConfigurationManager.AppSettings["SePay_ApiKey"];
+                string accountNo = System.Configuration.ConfigurationManager.AppSettings["SePay_AccountNo"]; // Tự động đọc ra số 48735517
+
+                if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(accountNo))
+                {
+                    return Json(new { success = false, status = 0, message = "Hệ thống chưa cấu hình đầy đủ thông số kết nối SePay." }, JsonRequestBehavior.AllowGet);
+                }
+
+                string apiUrl = $"https://my.sepay.vn/userapi/transactions/list?account_number={accountNo}&limit=10";
+
+                // 3. Khởi tạo HttpClient để kết nối Outbound an toàn lên Server SePay đối soát dòng tiền
+                using (HttpClient client = new HttpClient())
+                {
+                    // Đính kèm Token xác thực vào Header ẩn bảo mật
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+                    HttpResponseMessage response = await client.GetAsync(apiUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string rawJson = await response.Content.ReadAsStringAsync();
+                        dynamic apiData = JsonConvert.DeserializeObject(rawJson);
+
+                        if (apiData != null && apiData.transactions != null)
+                        {
+                            // Chuỗi cú pháp nội dung cần tìm kiếm trong nội dung chuyển tiền, ví dụ: "DH65"
+                            string chuoiCanQuet = "DH" + orderId;
+
+                            foreach (var item in apiData.transactions)
+                            {
+                                string transactionContent = (string)item.transaction_content;
+
+                                if (!string.IsNullOrEmpty(transactionContent))
+                                {
+                                    // Chuẩn hóa chuỗi (chuyển chữ hoa và xóa khoảng trắng) để đối soát khớp 100%
+                                    transactionContent = transactionContent.ToUpper().Replace(" ", "");
+
+                                    if (transactionContent.Contains(chuoiCanQuet))
+                                    {
+                                        // CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG THÀNH CÔNG XUỐNG SQL SERVER
+                                        order.TrangThaiThanhToan = 1;
+                                        db.Entry(order).State = EntityState.Modified;
+                                        await db.SaveChangesAsync();
+
+                                        return Json(new { success = true, status = 1 }, JsonRequestBehavior.AllowGet);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Tiền chưa về tài khoản ngân hàng, trả về trạng thái cũ (0) để Client tiếp tục đợi quét tiếp
+                return Json(new { success = true, status = order.TrangThaiThanhToan }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, status = -1, message = "Lỗi hệ thống C#: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // ĐIỀU HƯỚNG HIỂN THỊ TRANG THÀNH CÔNG/THẤT BẠI CHUẨN KIẾN TRÚC MVC
+        public ActionResult SuccessView()
+        {
+            // Chỉ định rõ ràng chuỗi ký tự tên View để hệ thống Render đúng file SuccessView.cshtml
+            return View("SuccessView");
+        }
+
+        public ActionResult FailureView()
+        {
+            return View("FailureView");
         }
     }
 }

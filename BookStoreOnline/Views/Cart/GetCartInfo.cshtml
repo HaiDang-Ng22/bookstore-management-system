@@ -8,6 +8,9 @@
 @{
     var price = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
     var user = Session["TaiKhoan"] as BookStoreOnline.Models.KHACHHANG;
+    string bankCode = System.Configuration.ConfigurationManager.AppSettings["SePay_BankCode"] ?? "ACB";
+    string bankAccountNo = System.Configuration.ConfigurationManager.AppSettings["SePay_AccountNo"] ?? "48735517";
+    string bankAccountName = System.Configuration.ConfigurationManager.AppSettings["SePay_AccountName"] ?? "BANG KHAI TAN";
 }
 
 <style>
@@ -264,7 +267,6 @@
     @using (Html.BeginForm("InsertOrder", "Cart", FormMethod.Post, new { id = "checkoutForm", @class = "checkout-form" }))
     {
         <div class="row">
-            <!-- Left Column: Products -->
             <div class="col-lg-8">
                 <div class="cart-card">
                     <div class="table-responsive">
@@ -340,7 +342,7 @@
 
                     <div class="summary-group">
                         <label>Số nhà, tên đường</label>
-                        <input type="text" id="streetAddress" class="form-control" placeholder="Ví dụ: 123 Đường Lê Lợi" required />
+                        <input type="text" id="streetAddress" class="form-control" placeholder="Ví dụ: 62 Lê Thị Hà" required />
                     </div>
 
                     <input type="hidden" id="address" name="address" />
@@ -350,8 +352,8 @@
                         <select id="paymentMethod1" name="paymentMethod1" class="form-control" required>
                             <option value="">-- Chọn phương thức thanh toán --</option>
                             <option value="cod">Thanh toán khi nhận hàng (COD)</option>
-                            <option value="paypal">Thanh toán bằng tài khoản ngân hàng</option>
-                            <option value="momo">Thanh toán bằng MoMo</option>
+                            <option value="vietqr">Thanh toán bằng tài khoản ngân hàng </option>
+                            <option value="vnpay">Thanh toán bằng cổng VNPAY </option>
                         </select>
                     </div>
 
@@ -372,7 +374,7 @@
                         </tr>
                         <tr>
                             <td class="align-middle">Tổng thanh toán:</td>
-                            <td class="text-right"><h4 class="total-price-text" id="total-price">@String.Format(price, "{0:c0}", ViewBag.TotalPrice)</h4></td>
+                            <td class="text-right"><h4 class="total-price-text" id="total-price" data-raw-price="@((int)Math.Round((decimal)ViewBag.TotalPrice))">@String.Format(price, "{0:c0}", ViewBag.TotalPrice)</h4></td>
                         </tr>
                     </table>
 
@@ -384,67 +386,120 @@
         </div>
     }
 </div>
-<div id="vietqrModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center;">
-    <div style="background: #ffffff; padding: 28px; border-radius: 20px; width: 390px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); position: relative; animation: zoomInModal 0.3s ease-in-out; box-sizing: border-box;">
+<div id="vietqrModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;">
+    <div style="background: #ffffff; padding: 0; border-radius: 20px; width: 880px; max-width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; animation: zoomInModal 0.3s ease-in-out; overflow: hidden; box-sizing: border-box;">
 
-        <button type="button" onclick="closeVietqrModal()" style="position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; font-weight: bold; padding: 0; line-height: 1;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">&times;</button>
+        <button type="button" onclick="closeVietqrModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 26px; color: #94a3b8; cursor: pointer; font-weight: bold; z-index: 10;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">&times;</button>
 
-        <div id="step-input-stk" style="display: block;">
-            <h3 style="margin-top: 10px; color: #0f172a; font-size: 19px; font-weight: 800; margin-bottom: 8px;">Thông Tin Tài Khoản Đối Soát</h3>
-            <p style="color: #64748b; font-size: 13px; margin-bottom: 22px; line-height: 1.5;">Vui lòng nhập Số tài khoản ngân hàng của bạn để hệ thống ghi nhận đối soát khi kế toán kiểm tra lịch sử số dư đơn hàng.</p>
+        <div class="row g-0">
+            <div class="col-md-5 bg-white p-4 text-center border-end" style="box-sizing: border-box;">
 
-            <div style="text-align: left; margin-bottom: 22px;">
-                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 8px;">Số tài khoản của bạn *</label>
-                <input type="text" id="customerSTK" placeholder="Nhập số tài khoản của bạn..." style="width: 100%; border-radius: 10px; border: 1.5px solid #d1d5db; padding: 12px 14px; font-size: 14px; outline: none; box-sizing: border-box;" />
-                <span id="stkError" style="color: #ef4444; font-size: 12px; display: none; margin-top: 6px; font-weight: 600;">Vui lòng nhập đầy đủ thông tin!</span>
-            </div>
-
-            <button type="button" onclick="goToQRStep()" style="width: 100%; background: linear-gradient(135deg, #005baa, #0072ce); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 91, 170, 0.3);">
-                Tiếp tục thanh toán
-            </button>
-        </div>
-
-        <div id="step-show-qr" style="display: none;">
-            <h3 style="margin-top: 10px; color: #005baa; font-size: 21px; font-weight: 800; margin-bottom: 6px;">Thanh Toán Đơn Hàng</h3>
-            <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">Vui lòng mở ứng dụng Ngân hàng quét mã VietQR</p>
-
-            <div style="border: 2px dashed #005baa; padding: 12px; border-radius: 16px; display: inline-block; background: #f8fafc; margin-bottom: 18px;">
-                <img id="dynamicVietQR" src="" alt="Đang tải mã VietQR..." style="width: 240px; height: 240px; display: block; border-radius: 12px;" />
-            </div>
-
-            <div style="background: #f1f5f9; padding: 14px; border-radius: 12px; text-align: left; margin-bottom: 22px; font-size: 13.5px; color: #334155; line-height: 1.6;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                    <span style="color: #64748b;">Số tiền:</span>
-                    <strong id="modalTotalAmount" style="color: #ef4444; font-size: 16px; font-weight: 800;">0 đ</strong>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+                    <span style="font-size: 12.5px; font-weight: 700; color: #16a34a; display: flex; align-items: center; gap: 4px;">
+                        <i class="bi bi-qr-code-scan"></i> Quét mã thanh toán
+                    </span>
+                    <span style="font-size: 11.5px; font-weight: 600; color: #d97706; background: #fffbeb; padding: 2px 8px; border-radius: 6px; border: 1px solid #fef3c7;">
+                        Tự động hủy sau: <strong id="checkout-timer" style="color: #dc2626; font-weight: 800;">05:00</strong>
+                    </span>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: #64748b;">Nội dung:</span>
-                    <strong style="color: #0f172a;">THANH TOAN DON HANG</strong>
+
+                <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; background: #f1f5f9; padding: 6px 16px; border-radius: 999px;">
+                    <i class="bi bi-qr-code text-primary" style="font-size: 20px;"></i>
+                    <span style="font-weight: 800; color: #0f172a; font-size: 15px; letter-spacing: 0.5px;">VietQR</span>
+                </div>
+
+                <h4 style="color: #0f172a; font-size: 16px; font-weight: 800; margin-bottom: 4px;">Quét mã qua ứng dụng ngân hàng</h4>
+                <p style="color: #64748b; font-size: 11.5px; margin-bottom: 12px;">Mở ứng dụng ngân hàng bất kỳ để quét mã</p>
+
+                <div id="qr-image-container" style="border: 2px dashed #005baa; padding: 8px; border-radius: 16px; display: inline-block; background: #f8fafc; margin-bottom: 15px; transition: all 0.3s ease;">
+                    <img id="dynamicVietQR" src="" alt="Đang khởi tạo mã QR..." style="width: 230px; height: 230px; display: block; border-radius: 12px;" />
+                </div>
+
+                <div id="payment-status-box" style="background: #fff8ec; border: 1px solid #ffe2b7; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <div class="spinner-border text-warning spinner-border-sm" id="status-spinner" role="status" style="width: 1rem; height: 1rem;"></div>
+                    <span style="color: #b45309; font-size: 13px; font-weight: 700;" id="status-text">Đang kiểm tra trạng thái thanh toán...</span>
                 </div>
             </div>
 
-            <button type="button" onclick="submitFormAfterPayment()" style="width: 100%; background: linear-gradient(135deg, #16a34a, #15803d); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.3);">
-                Tôi đã chuyển khoản thành công
-            </button>
+            <div class="col-md-7 p-4 bg-light d-flex flex-column justify-content-between" style="box-sizing: border-box; background-color: #f8fafc !important;">
+                <div>
+                    <h5 style="color: #1e293b; font-weight: 800; font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Thông tin đơn hàng
+                    </h5>
+
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="color: #64748b; font-size: 13.5px;">Số tiền thanh toán:</span>
+                            <strong id="modalTotalAmount" style="color: #2563eb; font-size: 18px; font-weight: 800;">0 đ</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                            <span style="color: #64748b; font-size: 13.5px;">Ngân hàng:</span>
+                            <span style="font-weight: 700; color: #1e293b; font-size: 13.5px;">Ngân hàng TMCP Á Châu (ACB)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                            <span style="color: #64748b; font-size: 13.5px;">Số tài khoản:</span>
+                            <strong style="font-weight: 800; color: #1e293b; font-size: 14px; letter-spacing: 0.5px;">@bankAccountNo</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                            <span style="color: #64748b; font-size: 13.5px;">Chủ tài khoản:</span>
+                            <strong style="font-weight: 700; color: #1e293b; font-size: 13.5px; text-transform: uppercase;">@bankAccountName</strong>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                            <span style="color: #64748b; font-size: 13.5px;">Nội dung chuyển khoản:</span>
+                            <strong id="modalTotalMemo" style="font-weight: 800; color: #dc2626; font-size: 14px; background-color: #fef2f2; padding: 2px 8px; border-radius: 6px; border: 1px dashed #fca5a5;">DH0000</strong>
+                        </div>
+                    </div>
+
+                    <h6 style="font-weight: 700; color: #475569; font-size: 13px; margin-bottom: 8px;"><i class="bi bi-book-half text-secondary"></i> Sách trong giỏ đơn:</h6>
+                    <div style="max-height: 110px; overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 5px 10px; margin-bottom: 15px;">
+                        <table class="table table-sm table-borderless align-middle mb-0">
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                                        <td style="font-size: 13px; font-weight: 700; color: #334155; py-1">
+                                            @item.NamePro @(string.IsNullOrEmpty(item.VolumeName) ? "" : "- " + item.VolumeName)
+                                        </td>
+                                        <td class="text-center fw-bold text-muted" style="font-size: 12.5px; width: 60px;">x @item.Number</td>
+                                        <td class="text-end fw-bold text-secondary" style="font-size: 13px; width: 100px;">
+                                            @String.Format(price, "{0:c0}", item.FinalPrice() * item.Number)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 12px; font-size: 13px; color: #475569; line-height: 1.5; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+                        <h6 style="font-weight: 700; color: #1e293b; margin-bottom: 4px; font-size: 13px;"><i class="bi bi-geo-alt-fill text-danger"></i> Địa chỉ giao nhận hàng:</h6>
+                        <p id="modal-display-address" style="margin: 0; font-weight: 600; color: #475569; word-break: break-word;">Chưa cấu hình địa chỉ</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
 </div>
-    <style>
-        @@keyframes zoomInModal {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
 
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+<style>
+    @@keyframes zoomInModal {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
         }
-    </style>
 
-    <script>
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>
+
+<script>
+    var paymentPollingInterval = null;
+    var countdownTimerInterval = null;
+
     document.addEventListener("DOMContentLoaded", function () {
         var priceFormat = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
 
@@ -500,6 +555,11 @@
                     var newPrice = originalPrice * newQuantity;
                     priceCell.textContent = priceFormat.format(newPrice);
                     input.value = newQuantity;
+
+                    // Đồng bộ lại giá trị thô nhận về từ Server
+                    if(data.newTotalPrice) {
+                        totalPriceElement.dataset.rawPrice = data.newTotalPrice;
+                    }
                     updateTotalPriceAndQuantity();
                 } else {
                     alert(data.message);
@@ -509,7 +569,6 @@
             })
             .catch(error => {
                 console.error('Có lỗi xảy ra:', error);
-                alert('Có lỗi xảy ra khi cập nhật số lượng!');
             });
         }
 
@@ -528,11 +587,10 @@
             var discountAmount = parseFloat(discountAmountText) || 0;
             totalPrice -= discountAmount;
 
-            if (totalPrice < 0) {
-                totalPrice = 0;
-            }
+            if (totalPrice < 0) { totalPrice = 0; }
 
             totalPriceElement.textContent = priceFormat.format(totalPrice);
+            totalPriceElement.dataset.rawPrice = totalPrice; // Giữ giá trị thô để gán trực tiếp lên ảnh QR động
             totalQuantityElement.textContent = totalQuantity;
         }
 
@@ -562,156 +620,225 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Có lỗi xảy ra khi áp dụng mã giảm giá:', error);
+                    console.error('Có lỗi xảy ra:', error);
                 });
             });
         }
+
+        // LUỒNG XỬ LÝ CLICK ĐẶT HÀNG NGAY KHÔNG RELOAD TRANG
         window.validateAndShowQR = function (event) {
+            event.preventDefault();
+
             var totalPriceElement = document.getElementById('total-price');
             var fullAddress = document.getElementById("address").value;
+
             if (!fullAddress || fullAddress.trim() === "") {
-                alert("Vui lòng chọn và điền đầy đủ thông tin địa chỉ giao hàng!");
+                alert("Vui lòng điền và chọn đầy đủ thông tin địa chỉ giao hàng!");
                 return;
             }
 
             var selectedMethod = document.getElementById("paymentMethod1").value;
-
-            if (selectedMethod === "paypal" || selectedMethod === "Chuyển khoản" || selectedMethod.includes("ngân hàng")) {
-                if (totalPriceElement) {
-                    document.getElementById("modalTotalAmount").innerText = totalPriceElement.textContent;
-                }
-
-                var myBankCode = "TCB";
-                var mySTK = "3038384869";
-                var myAccountName = "BANG KHAI TAN";
-
-                var rawAmount = totalPriceElement.textContent.replace(/[^\d]/g, '');
-                var orderMemo = "THANH TOAN DON HANG";
-
-                var qrUrl = `https://img.vietqr.io/image/${myBankCode}-${mySTK}-compact2.png?amount=${rawAmount}&addInfo=${encodeURIComponent(orderMemo)}&accountName=${encodeURIComponent(myAccountName)}`;
-
-                var qrImg = document.getElementById("dynamicVietQR");
-                if (qrImg) {
-                    qrImg.src = qrUrl;
-                }
-                var stepInputSTK = document.getElementById("step-input-stk");
-                if (stepInputSTK) {
-                    stepInputSTK.style.display = "none";
-                }
-
-                var stepShowQR = document.getElementById("step-show-qr");
-                if (stepShowQR) {
-                    stepShowQR.style.display = "block";
-                }
-
-                document.getElementById("vietqrModal").style.display = "flex";
-
-            } else {
-                var targetForm = document.getElementById("checkoutForm");
-                if (targetForm) {
-                    targetForm.submit();
-                }
+            if (!selectedMethod) {
+                alert("Vui lòng chọn phương thức thanh toán!");
+                return;
             }
+
+            document.getElementById("modal-display-address").innerText = fullAddress;
+
+            var formData = new FormData(document.getElementById("checkoutForm"));
+
+            fetch('/Cart/InsertOrder', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.paymentMethod === "vietqr") {
+                        var rawAmount = totalPriceElement.dataset.rawPrice || totalPriceElement.textContent.replace(/[^\d]/g, '');
+                        startVietQRPopupFlow(data.orderId, rawAmount, totalPriceElement.textContent);
+                    } else {
+                        window.location.href = data.redirectUrl;
+                    }
+                } else {
+                    alert("Lỗi hệ thống lưu hóa đơn: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi Fetch AJAX:", error);
+                alert("Không thể kết nối đến máy chủ C#! Vui lòng kiểm tra lại tiến trình IIS Express.");
+            });
         };
+
+        // ĐỒNG BỘ THAM SỐ GỌI TÀI KHOẢN NGÂN HÀNG ACB CỦA TẤN
+        function startVietQRPopupFlow(orderId, rawAmount, formattedAmount) {
+            var myBankCode = "@bankCode";
+            var mySTK = "@bankAccountNo";
+            var myAccountName = "@bankAccountName";
+            var orderMemo = "DH" + orderId;
+
+            // Đổ dữ liệu vào khung thông tin chi tiết ngân hàng bên phải
+            document.getElementById("modalTotalAmount").innerText = formattedAmount;
+            document.getElementById("modalTotalMemo").innerText = orderMemo;
+
+            // Đồng bộ sang danh mục compact2 sinh Logo ngân hàng Á Châu
+            var qrUrl = `https://img.vietqr.io/image/${myBankCode}-${mySTK}-compact2.png?amount=${rawAmount}&addInfo=${encodeURIComponent(orderMemo)}&accountName=${encodeURIComponent(myAccountName)}`;
+            document.getElementById("dynamicVietQR").src = qrUrl;
+
+            document.getElementById("qr-image-container").style.opacity = "1";
+            document.getElementById("qr-image-container").style.filter = "none";
+
+            // Bật hiển thị Popup Modal hiển thị
+            document.getElementById("vietqrModal").style.display = "flex";
+
+            // DỌN SẠCH CÁC BỘ ĐẾM CHẠY CŨ NẾU CÓ TRÁNH NGHẼN MẠNG
+            if (paymentPollingInterval) { clearInterval(paymentPollingInterval); }
+            if (countdownTimerInterval) { clearInterval(countdownTimerInterval); }
+
+            // --- CÀI ĐẶT BỘ ĐẾM NGƯỢC THỜI GIAN THỰC 5 PHÚT (300 GIÂY) ---
+            var totalSeconds = 300;
+            var timerElement = document.getElementById("checkout-timer");
+
+            countdownTimerInterval = setInterval(function () {
+                totalSeconds--;
+
+                var minutes = Math.floor(totalSeconds / 60);
+                var seconds = totalSeconds % 60;
+
+                // Định dạng chuỗi hiển thị thêm số 0 phía trước nếu < 10 (Ví dụ: 04:09)
+                timerElement.innerText = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+
+                // Xử lý tình huống KHI HẾT THỜI GIAN ĐẾM NGƯỢC (VỀ 00:00)
+                if (totalSeconds <= 0) {
+                    clearInterval(countdownTimerInterval);
+                    clearInterval(paymentPollingInterval); // Ngắt kết nối ping database ngầm bảo vệ RAM
+
+                    // Làm mờ mã QR bằng hiệu ứng Blur CSS để báo hiệu hết phiên
+                    document.getElementById("qr-image-container").style.opacity = "0.15";
+                    document.getElementById("qr-image-container").style.filter = "blur(3px)";
+
+                    // Cập nhật hộp thông báo lỗi hết hạn
+                    document.getElementById('status-spinner').style.display = "none";
+                    document.getElementById('payment-status-box').style.background = "#fde8e8";
+                    document.getElementById('payment-status-box').style.borderColor = "#f8b4b4";
+                    document.getElementById('status-text').style.color = "#9b1c1c";
+                    document.getElementById('status-text').innerHTML = '<i class="bi bi-x-circle-fill"></i> Phiên thanh toán đã hết hạn! Vui lòng đóng và đặt lại đơn.';
+                }
+            }, 1000); // 1 giây quét 1 lần
+
+            // Chạy ngầm định kỳ 3 giây/lần quét DB đối soát biến động số dư bằng API Key mới
+            paymentPollingInterval = setInterval(function () {
+                fetch('/Cart/CheckOrderStatus?orderId=' + orderId)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.status === 1) {
+                            // Nhận được tiền thành công -> Xóa sạch các bộ đếm thời gian
+                            clearInterval(paymentPollingInterval);
+                            clearInterval(countdownTimerInterval);
+
+                            document.getElementById('payment-status-box').style.background = "#def7ec";
+                            document.getElementById('payment-status-box').style.borderColor = "#31c48d";
+                            document.getElementById('payment-status-box').innerHTML = '<span style="color: #03543f; font-size: 13px; font-weight: bold;"><i class="bi bi-check-circle-fill me-1"></i> Hệ thống đã nhận tiền thành công! Đang xử lý...</span>';
+
+                            setTimeout(function () {
+                                window.location.href = '/Cart/SuccessView';
+                            }, 1500);
+                        }
+                    }
+                })
+                .catch(err => console.error("Lỗi Polling cơ sở dữ liệu ngầm:", err));
+            }, 3000);
+        }
 
         window.closeVietqrModal = function () {
             document.getElementById("vietqrModal").style.display = "none";
-        };
+            if (paymentPollingInterval) { clearInterval(paymentPollingInterval); }
+            if (countdownTimerInterval) { clearInterval(countdownTimerInterval); } // Hủy đồng hồ đếm ngược khi đóng Popup
 
-        window.submitFormAfterPayment = function () {
-            document.getElementById("vietqrModal").style.display = "none";
-            var finalForm = document.getElementById("checkoutForm");
-            if (finalForm) {
-                finalForm.action = '@Url.Action("InsertOrderVietQR", "Cart")';
-                finalForm.submit();
-            }
+            alert("Đơn hàng của bạn đã được ghi nhận ở trạng thái [Chưa thanh toán]. Bạn có thể kiểm tra lại trong mục Lịch sử đơn hàng.");
+            window.location.href = '/Home/Index';
         };
     });
-    </script>
+</script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const apiHost = "https://provinces.open-api.vn/api/";
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const apiHost = "https://provinces.open-api.vn/api/";
 
-            // 1. Tự động tải danh sách Tỉnh / Thành phố từ API khi load trang
-            fetch(apiHost + "?depth=1")
-                .then(res => res.json())
-                .then(data => {
-                    const pSelect = document.getElementById("province");
-                    if (pSelect) {
-                        data.forEach(item => {
-                            pSelect.innerHTML += `<option value="${item.code}">${item.name}</option>`;
-                        });
-                    }
-                }).catch(err => console.error("Lỗi kết nối API tỉnh thành:", err));
-
-            // 2. Khi người dùng chọn Tỉnh -> Tự động load danh sách Quận / Huyện tương ứng
-            document.getElementById("province").addEventListener("change", function () {
-                const pCode = this.value;
-                const dSelect = document.getElementById("district");
-                const wSelect = document.getElementById("ward");
-
-                dSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
-                dSelect.disabled = true;
-                wSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
-                wSelect.disabled = true;
-
-                if (pCode) {
-                    fetch(`${apiHost}p/${pCode}?depth=2`)
-                        .then(res => res.json())
-                        .then(data => {
-                            dSelect.disabled = false;
-                            data.districts.forEach(item => {
-                                dSelect.innerHTML += `<option value="${item.code}">${item.name}</option>`;
-                            });
-                        });
-                }
-                gopDiaChiFull();
-            });
-
-            // 3. Khi người dùng chọn Quận -> Tự động load danh sách Phường / Xã tương ứng
-            document.getElementById("district").addEventListener("change", function () {
-                const dCode = this.value;
-                const wSelect = document.getElementById("ward");
-
-                wSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
-                wSelect.disabled = true;
-
-                if (dCode) {
-                    fetch(`${apiHost}d/${dCode}?depth=2`)
-                        .then(res => res.json())
-                        .then(data => {
-                            wSelect.disabled = false;
-                            data.wards.forEach(item => {
-                                wSelect.innerHTML += `<option value="${item.code}">${item.name}</option>`;
-                            });
-                        });
-                }
-                gopDiaChiFull();
-            });
-
-            // 4. Lắng nghe sự kiện khi chọn Phường hoặc gõ Số nhà để gộp chuỗi địa chỉ
-            document.getElementById("ward").addEventListener("change", gopDiaChiFull);
-            document.getElementById("streetAddress").addEventListener("input", gopDiaChiFull);
-
-            // Hàm tự động gộp chuỗi thành: "Số nhà, Phường ..., Quận ..., Tỉnh ..." để ném vào Database
-            function gopDiaChiFull() {
+        fetch(apiHost + "?depth=1")
+            .then(res => res.json())
+            .then(data => {
                 const pSelect = document.getElementById("province");
-                const dSelect = document.getElementById("district");
-                const wSelect = document.getElementById("ward");
-                const streetInput = document.getElementById("streetAddress");
-
-                const pText = pSelect.selectedIndex > 0 ? pSelect.options[pSelect.selectedIndex].text : "";
-                const dText = dSelect.selectedIndex > 0 ? dSelect.options[dSelect.selectedIndex].text : "";
-                const wText = wSelect.selectedIndex > 0 ? wSelect.options[wSelect.selectedIndex].text : "";
-                const street = streetInput ? streetInput.value.trim() : "";
-
-                // Nếu điền đầy đủ cả 4 trường thì mới gộp chuỗi hoàn chỉnh để lưu
-                if (pText && dText && wText && street) {
-                    document.getElementById("address").value = `${street}, ${wText}, ${dText}, ${pText}`;
-                } else {
-                    document.getElementById("address").value = "";
+                if (pSelect) {
+                    data.forEach(item => {
+                        pSelect.innerHTML += `<option value="${item.code}">${item.name}</option>`;
+                    });
                 }
+            }).catch(err => console.error("Lỗi kết nối API tỉnh thành:", err));
+
+        document.getElementById("province").addEventListener("change", function () {
+            const pCode = this.value;
+            const dSelect = document.getElementById("district");
+            const wSelect = document.getElementById("ward");
+
+            dSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+            dSelect.disabled = true;
+            wSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+            wSelect.disabled = true;
+
+            if (pCode) {
+                fetch(`${apiHost}p/${pCode}?depth=2`)
+                    .then(res => res.json())
+                    .then(data => {
+                        dSelect.disabled = false;
+                        data.districts.forEach(item => {
+                            dSelect.innerHTML += `<option value="${item.code}">${item.name}</option>`;
+                        });
+                    });
             }
+            gopDiaChiFull();
         });
-    </script>
+
+        document.getElementById("district").addEventListener("change", function () {
+            const dCode = this.value;
+            const wSelect = document.getElementById("ward");
+
+            wSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+            wSelect.disabled = true;
+
+            if (dCode) {
+                fetch(`${apiHost}d/${dCode}?depth=2`)
+                    .then(res => res.json())
+                    .then(data => {
+                        wSelect.disabled = false;
+                        data.wards.forEach(item => {
+                            wSelect.innerHTML += `<option value="${item.code}">${item.name}</option>`;
+                        });
+                    });
+            }
+            gopDiaChiFull();
+        });
+
+        document.getElementById("ward").addEventListener("change", gopDiaChiFull);
+        document.getElementById("streetAddress").addEventListener("input", gopDiaChiFull);
+
+        function gopDiaChiFull() {
+            const pSelect = document.getElementById("province");
+            const dSelect = document.getElementById("district");
+            const wSelect = document.getElementById("ward");
+            const streetInput = document.getElementById("streetAddress");
+
+            const pText = pSelect.selectedIndex > 0 ? pSelect.options[pSelect.selectedIndex].text : "";
+            const dText = dSelect.selectedIndex > 0 ? dSelect.options[dSelect.selectedIndex].text : "";
+            const wText = wSelect.selectedIndex > 0 ? wSelect.options[wSelect.selectedIndex].text : "";
+            const street = streetInput ? streetInput.value.trim() : "";
+
+            if (pText && dText && wText && street) {
+                document.getElementById("address").value = `${street}, ${wText}, ${dText}, ${pText}`;
+            } else {
+                document.getElementById("address").value = "";
+            }
+        }
+    });
+</script>
