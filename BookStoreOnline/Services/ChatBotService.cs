@@ -1,79 +1,186 @@
 ﻿using BookStoreOnline.Models;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Globalization;
+using System.Text;
 
 namespace BookStoreOnline.Services
 {
     public class ChatBotService
     {
         private readonly NhaSachEntities3 db = new NhaSachEntities3();
-
-        public string GetBook(string keyword)
+        private string RemoveVietnamese(string text)
         {
-            var books = db.SANPHAMs
-                .Where(x => x.TenSanPham.Contains(keyword))
-                .Take(5)
-                .ToList();
+            if (string.IsNullOrWhiteSpace(text))
+                return "";
 
+            text = text.ToLower();
+
+            string normalized = text.Normalize(NormalizationForm.FormD);
+
+            StringBuilder sb = new StringBuilder();
+
+            foreach (char c in normalized)
+            {
+                UnicodeCategory uc = CharUnicodeInfo.GetUnicodeCategory(c);
+
+                if (uc != UnicodeCategory.NonSpacingMark)
+                    sb.Append(c);
+            }
+
+            return sb.ToString()
+                     .Normalize(NormalizationForm.FormC)
+                     .Replace('đ', 'd');
+        }
+        //=====================================================
+        // HÀM CHUNG BUILD CARD
+        //=====================================================
+        private string BuildBookCards(List<SANPHAM> books)
+        {
             if (!books.Any())
                 return null;
 
-            string result = "📚 Các sách tìm được:\n\n";
+            StringBuilder html = new StringBuilder();
 
             foreach (var item in books)
             {
-                result +=
-                    $"• {item.TenSanPham}\n" +
-                    $"Giá: {item.Gia:#,##0} VNĐ\n\n";
+                html.Append($@"
+<div class='card mb-3 shadow-sm'>
+
+    <img src='{item.Anh}'
+         class='card-img-top'
+         style='height:180px;object-fit:cover;'>
+
+    <div class='card-body'>
+
+        <h6>{item.TenSanPham}</h6>
+
+        <p>👤 {item.TacGia}</p>
+
+        <p class='text-danger fw-bold'>
+            {item.Gia:N0} VNĐ
+        </p>
+
+        <a href='/ProductDetail/Index/{item.MaSanPham}'
+           class='btn btn-danger btn-sm'>
+            Xem chi tiết
+        </a>
+
+    </div>
+</div>");
             }
 
-            return result;
+            return html.ToString();
         }
+
+        //=====================================================
+        // SEARCH (Tên → Tác giả → Thể loại)
+        //=====================================================
+        public string SearchBook(string keyword)
+        {
+            keyword = RemoveVietnamese(keyword);
+
+            var words = keyword
+                .Split(' ')
+                .Where(x => x.Length > 1)
+                .Distinct()
+                .ToList();
+
+            var books = db.SANPHAMs
+                .ToList()
+                .Select(x =>
+                {
+                    int score = 0;
+
+                    string ten = RemoveVietnamese(x.TenSanPham ?? "");
+                    string tg = RemoveVietnamese(x.TacGia ?? "");
+                    string loai = RemoveVietnamese(x.LOAI?.Tenloai ?? "");
+
+                    foreach (var w in words)
+                    {
+                        if (ten.Contains(w))
+                            score += 5;
+
+                        if (tg.Contains(w))
+                            score += 3;
+
+                        if (loai.Contains(w))
+                            score += 2;
+                    }
+
+                    return new
+                    {
+                        Book = x,
+                        Score = score
+                    };
+                })
+                .Where(x => x.Score > 0)
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.Book.SoLuongBan)
+                .Take(6)
+                .Select(x => x.Book)
+                .ToList();
+
+            return BuildBookCards(books);
+        }
+
+        //=====================================================
+        // GIÁ
+        //=====================================================
         public string GetBookByPrice(int maxPrice)
         {
             var books = db.SANPHAMs
-                .Where(x => x.Gia != null && x.Gia <= maxPrice)
+                .Where(x => x.Gia <= maxPrice)
                 .OrderBy(x => x.Gia)
-                .Take(5)
+                .Take(6)
                 .ToList();
 
-            if (!books.Any())
-                return null;
-
-            string result = $"📚 Các sách dưới {maxPrice:N0} VNĐ\n\n";
-
-            foreach (var item in books)
-            {
-                result += $"📖 {item.TenSanPham}\n";
-                result += $"💰 {item.Gia:N0} VNĐ\n\n";
-            }
-
-            return result;
+            return BuildBookCards(books);
         }
+
+        //=====================================================
+        // BEST SELLER
+        //=====================================================
         public string GetBestSeller()
         {
             var books = db.SANPHAMs
                 .OrderByDescending(x => x.SoLuongBan)
-                .Take(5)
+                .Take(6)
                 .ToList();
 
-            if (!books.Any())
-                return null;
-
-            string result = "🔥 TOP 5 SÁCH BÁN CHẠY\n\n";
-
-            int i = 1;
-
-            foreach (var item in books)
-            {
-                result += $"{i}. {item.TenSanPham}\n";
-                result += $"Đã bán: {item.SoLuongBan}\n";
-                result += $"Giá: {item.Gia:N0} VNĐ\n\n";
-
-                i++;
-            }
-
-            return result;
+            return BuildBookCards(books);
         }
+
+        //=====================================================
+        // THỂ LOẠI
+        //=====================================================
+        public string GetBookByCategory(string category)
+        {
+            var books = db.SANPHAMs
+                .Where(x => x.LOAI.Tenloai.Contains(category))
+                .Take(6)
+                .ToList();
+
+            return BuildBookCards(books);
+        }
+
+        //=====================================================
+        // TÁC GIẢ
+        //=====================================================
+        public string GetBookByAuthor(string author)
+        {
+            var books = db.SANPHAMs
+                .Where(x => x.TacGia.Contains(author))
+                .Take(6)
+                .ToList();
+
+            return BuildBookCards(books);
+        }
+        //=========================================================
+        // TRA CỨU ĐƠN HÀNG
+        //=========================================================
+
         public string GetOrder(int maDonHang)
         {
             var order = db.DONHANGs.FirstOrDefault(x => x.MaDonHang == maDonHang);
@@ -115,69 +222,6 @@ namespace BookStoreOnline.Services
                 $"📅 Ngày đặt: {order.NgayDat:dd/MM/yyyy}\n" +
                 $"💰 Tổng tiền: {order.TongTien:N0} VNĐ\n" +
                 $"🚚 Trạng thái: {trangThai}";
-        }
-        public string GetBookByCategory(string category)
-        {
-            var books = db.SANPHAMs
-                .Where(x => x.LOAI.Tenloai.Contains(category))
-                .Take(5)
-                .ToList();
-
-            if (!books.Any())
-                return null;
-
-            string result = $"📚 Sách thuộc thể loại {category}\n\n";
-
-            foreach (var item in books)
-            {
-                result += $"{item.TenSanPham}\n";
-                result += $"{item.Gia:N0} VNĐ\n\n";
-            }
-
-            return result;
-        }
-        public string GetBookCard(string keyword)
-        {
-            var books = db.SANPHAMs
-                .Where(x => x.TenSanPham.Contains(keyword))
-                .Take(4)
-                .ToList();
-
-            if (!books.Any())
-                return null;
-
-            string html = "";
-
-            foreach (var item in books)
-            {
-                html += $@"
-<div class='card mb-2' style='width:100%'>
-
-<img src='/Images/{item.Anh}'
-class='card-img-top'
-style='height:180px;object-fit:cover'>
-
-<div class='card-body'>
-
-<h6>{item.TenSanPham}</h6>
-
-<p class='text-danger fw-bold'>
-{item.Gia:N0} VNĐ
-</p>
-
-<a href='/Category/Details/{item.MaSanPham}'
-class='btn btn-danger btn-sm'>
-
-Xem chi tiết
-
-</a>
-
-</div>
-
-</div>";
-            }
-
-            return html;
         }
     }
 }
