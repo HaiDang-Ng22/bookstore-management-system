@@ -2,7 +2,11 @@
 
 Dự án thực hành môn học Thương mại điện tử: Xây dựng website bán sách trực tuyến sử dụng ASP.NET MVC 5 và Entity Framework.
 ---
-
+## Thành Viên Thực Hiện Dự Án
+- **Trưởng Nhóm**: Nguyễn Hải Đăng
+- **Thành Viên**: Đặng Duy An
+- **Thành Viên**: Bàng Khải Tấn
+- **Thành Viên**: Nguyễn Đức Thành
 ## 🛠️ Công nghệ sử dụng
 - **Backend:** C# (.NET Framework 4.8), ASP.NET MVC 5.
 - **ORM:** Entity Framework 6 (Database First).
