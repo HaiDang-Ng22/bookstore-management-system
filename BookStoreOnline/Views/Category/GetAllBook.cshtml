@@ -117,7 +117,7 @@
                 @foreach (var item in Model)
                 {
                     var soldQuantity = item.SoLuongBan;
-                    var totalQuantity = item.SoLuong;
+                    var totalQuantity = item.SoLuong + 100;
                     var percentageSold = totalQuantity > 0 ? (soldQuantity / (float)totalQuantity) * 100 : 0;
                     var roundedPercentageSold = Math.Round(percentageSold);
                     var progressBarColor = roundedPercentageSold >= 100 ? "#ef4444" :

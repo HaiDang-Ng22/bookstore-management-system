@@ -283,14 +283,39 @@
 
 <div class="container search-section">
     <div class="row">
-        <div class="col-12">
+        <!-- Sidebar bộ lọc khoảng giá thông minh bên trái -->
+        <div class="col-lg-3 col-md-4">
+            <div class="filter-sidebar">
+                <h3 class="filter-title"><i class="fas fa-filter text-danger mr-1"></i> Bộ lọc theo giá</h3>
+                <form action="@Url.Action("Search", "Category")" method="get">
+                    <!-- Giữ lại từ khóa tìm kiếm khi khách thực hiện bấm lọc giá -->
+                    <input type="hidden" name="inputString" value="@Html.Raw(ViewBag.TextSearch)" />
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #475569;">Giá từ (đ)</label>
+                        <input type="number" name="minPrice" class="form-control" value="@ViewBag.MinPrice" placeholder="0" min="0" style="border-radius: 8px;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #475569;">Đến giá (đ)</label>
+                        <input type="number" name="maxPrice" class="form-control" value="@ViewBag.MaxPrice" placeholder="500,000" min="0" style="border-radius: 8px;" />
+                    </div>
+
+                    <button type="submit" class="btn-buy-card" style="width: 100%; border: none;">
+                        <i class="fas fa-check mr-1"></i> Áp dụng bộ lọc
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lưới hiển thị danh sách sách kết quả tìm kiếm bên phải -->
+        <div class="col-lg-9 col-md-8">
             <h3 class="list-title">Kết quả tìm kiếm cho: "<span class="text-danger">@ViewBag.TextSearch</span>"</h3>
 
             @if (Model == null || !Model.Any())
             {
                 <div class="no-result">
-                    <i class="fas fa-search mb-3" style="font-size: 32px; color: #cbd5e1;"></i>
-                    <p>Không tìm thấy sách nào khớp với từ khóa tìm kiếm.</p>
+                    <i class="fas fa-search mb-3" style="font-size: 32px; color: #cbd5e1; display: block; margin: 0 auto 15px;"></i>
+                    <p>Không tìm thấy cuốn sách nào khớp với từ khóa và khoảng giá của bạn.</p>
                 </div>
             }
             else
@@ -299,7 +324,8 @@
                     @foreach (var item in Model)
                     {
                         var soldQuantity = item.SoLuongBan;
-                        var totalQuantity = item.SoLuong;
+                        // Nâng cấp: Đồng bộ chỉ số ảo hóa tổng kho hàng +100 giống hệt trang chủ Index
+                        var totalQuantity = item.SoLuong + 100;
                         var percentageSold = totalQuantity > 0 ? (soldQuantity / (float)totalQuantity) * 100 : 0;
                         var roundedPercentageSold = Math.Round(percentageSold);
 
@@ -308,9 +334,11 @@
                                                "#16a34a";
 
                         <div class="product-card">
-                            <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })" class="product-img-wrap">
-                                <img src="@item.Anh" alt="@item.TenSanPham" loading="lazy">
-                            </a>
+                            <div class="product-img-wrap">
+                                <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })">
+                                    <img src="@item.Anh" alt="@item.TenSanPham" loading="lazy">
+                                </a>
+                            </div>
 
                             <div class="product-body">
                                 <div class="product-title">
@@ -321,15 +349,15 @@
 
                                 <div class="price-row">
                                     <span class="product-price">@String.Format(price, "{0:c0}", item.Gia)</span>
-                                    <span class="discount-badge">-@(new Random(item.MaSanPham).Next(10, 20))%</span>
+                                    <span class="discount-badge">-@(new Random(item.MaSanPham).Next(10, 25))%</span>
                                 </div>
 
                                 <div class="stars-row">
                                     @for (int i = 1; i <= 5; i++)
                                     {
-                                        <i class="fas fa-star star-icon @(i <= 4 ? "on" : "")"></i>
+                                        <i class="fas fa-star star-icon @(i <= 5 ? "on" : "")"></i>
                                     }
-                                    <span class="rating-count">(0)</span>
+                                    <span class="rating-count">(@item.DANHGIAs.Count.ToString())</span>
                                 </div>
 
                                 <div class="sold-bar-wrap">
@@ -339,15 +367,11 @@
 
                                 @if (user != null)
                                 {
-                                    <a href="@Url.Action("AddSingleProduct", "Cart", new { id = item.MaSanPham })" class="btn-buy-card">
-                                        Mua
-                                    </a>
+                                    <a href="@Url.Action("AddSingleProduct", "Cart", new { id = item.MaSanPham })" class="btn-buy-card">Mua</a>
                                 }
                                 else
                                 {
-                                    <a href="@Url.Action("Login", "User")" class="btn-buy-card">
-                                        Mua
-                                    </a>
+                                    <a href="@Url.Action("Login", "User")" class="btn-buy-card">Mua</a>
                                 }
                             </div>
                         </div>
@@ -366,7 +390,7 @@
     }
     else
     {
-        var words = title.Split(' ');
+        var words = title.Trim().Split(' ').Where(w => !string.IsNullOrEmpty(w)).ToArray();
         if (words.Length > 5)
         {
             string shortTitle = string.Join(" ", words.Take(5)) + "...";

@@ -446,7 +446,8 @@
                 @using (Html.BeginForm("Search", "Category", FormMethod.Post))
                 {
                     <div style="position:relative;">
-                        <input type="text" name="inputString" placeholder="Tìm kiếm sách, tác giả..." class="search-input">
+                        <!-- Đổi từ autocomplete="off" thành autocomplete="new-password" hoặc autocomplete="disabled" -->
+                        <input type="text" id="inputSearchSmart" name="inputString" placeholder="Tìm kiếm sách, tác giả..." class="search-input" autocomplete="new-password">
                         <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
                     </div>
                 }
@@ -598,7 +599,75 @@
 
     @RenderSection("scripts", required: false)
 
-    <script src="~/Scripts/chatbot.js"></script>
+    <script src="~/Scripts/chatbot.js">
+    </script>
 
+    <!-- SCRIPT ĐỘC QUYỀN: AUTO-SUGGEST TÌM KIẾM THÔNG MINH -->
+    <script>
+        $(document).ready(function () {
+            var $input = $("#inputSearchSmart");
+
+            // Tự động nhúng hộp Dropdown vào bên trong div relative của form để khớp khít tọa độ 100%
+            if ($("#suggestBoxSmart").length === 0) {
+                $input.parent().append('<div id="suggestBoxSmart" style="position: absolute; top: 100%; left: 0; width: 100%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 99999; display: none; overflow: hidden; margin-top: 5px;"></div>');
+            }
+            var $box = $("#suggestBoxSmart");
+
+            // Bắt sự kiện mỗi khi người dùng gõ phím
+            $input.on("input", function () {
+                var val = $(this).val().trim();
+
+                // Nếu gõ dưới 1 ký tự hoặc xóa trắng thì ẩn hộp đi
+                if (val.length < 1) {
+                    $box.hide().empty();
+                    return;
+                }
+
+                // Kích hoạt luồng chạy Ajax ngầm gọi về Endpoint nội bộ
+                $.ajax({
+                    url: '/Category/GetSuggestions',
+                    type: 'GET',
+                    data: { term: val },
+                    dataType: 'json',
+                    success: function (data) {
+                        $box.empty();
+                        // Nếu database báo không có sách khớp thì giấu hộp đi
+                        if (!data || data.length === 0) {
+                            $box.hide();
+                            return;
+                        }
+
+                        // Duyệt mảng JSON để vẽ giao diện từng dòng gợi ý
+                        data.forEach(function (item) {
+                            var htmlItem = `
+                                    <a href="/ProductDetail/Index/${item.id}" style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-bottom: 1px solid #f1f5f9; text-decoration: none; color: #1e293b; transition: background 0.2s; box-sizing: border-box;">
+                                        <img src="${item.img}" style="width: 36px; height: 48px; object-fit: contain; border-radius: 4px; background: #f8fafc;" />
+                                        <div style="flex: 1; min-width: 0;">
+                                            <div style="font-weight: 700; font-size: 13.5px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0f172a;">${item.title}</div>
+                                            <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">👤 Tác giả: ${item.author}</div>
+                                        </div>
+                                        <div style="font-weight: 800; color: #e8392a; font-size: 14px; white-space: nowrap;">${item.price}</div>
+                                    </a>
+                                `;
+                            $box.append(htmlItem);
+                        });
+
+                        // Render đổ bóng hiển thị hộp thoại
+                        $box.css("display", "block");
+                    },
+                    error: function (err) {
+                        console.log("Lỗi kết nối API GetSuggestions:", err);
+                    }
+                });
+            });
+
+            // Tự động đóng hộp gợi ý khi click chuột ra ngoài nền web
+            $(document).on("click", function (e) {
+                if (!$(e.target).closest("#inputSearchSmart, #suggestBoxSmart").length) {
+                    $box.hide();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
