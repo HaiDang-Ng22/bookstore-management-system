@@ -26,6 +26,7 @@ namespace BookStoreOnline.Controllers
         {
             public int MaSanPham { get; set; }
             public int SoLuong { get; set; }
+            public int MaTap { get; set; } // SỬA: Thêm MaTap vào class map để phân biệt tập của sách trong DB
         }
 
         public static void SyncCartOnLogin(int customerId, HttpContextBase context)
@@ -34,42 +35,48 @@ namespace BookStoreOnline.Controllers
             {
                 var sessionCart = context.Session["GioHang"] as List<CartItem> ?? new List<CartItem>();
 
-                // ĐÃ SỬA: Lấy thêm điều kiện MaTap = 0 hoặc lấy đúng theo cấu trúc DB mới
+                // SỬA: Lấy cả cột MaTap từ database lên để đối chiếu chính xác
                 var dbCartItems = dbContext.Database.SqlQuery<DbCartItem>(
-                    "SELECT MaSanPham, SoLuong FROM GIOHANG WHERE MaKH = @p0", customerId).ToList();
+                    "SELECT MaSanPham, SoLuong, MaTap FROM GIOHANG WHERE MaKH = @p0", customerId).ToList();
 
                 foreach (var item in sessionCart)
                 {
-                    var existingDbItem = dbCartItems.FirstOrDefault(d => d.MaSanPham == item.ProductID);
+                    int currentVolumeId = item.VolumeID ?? 0; // Quy ước chuẩn: không có tập = 0
+
+                    // SỬA: So sánh trùng phải khớp cả MaSanPham lẫn MaTap
+                    var existingDbItem = dbCartItems.FirstOrDefault(d => d.MaSanPham == item.ProductID && d.MaTap == currentVolumeId);
+
                     if (existingDbItem != null)
                     {
                         var productInDb = dbContext.SANPHAMs.Find(item.ProductID);
                         int maxQty = productInDb?.SoLuong ?? 999;
                         int newQty = Math.Min(existingDbItem.SoLuong + item.Number, maxQty);
 
+                        // SỬA: Cập nhật chỉ định đích danh theo MaTap
                         dbContext.Database.ExecuteSqlCommand(
-                            "UPDATE GIOHANG SET SoLuong = @p0 WHERE MaKH = @p1 AND MaSanPham = @p2",
-                            newQty, customerId, item.ProductID);
+                            "UPDATE GIOHANG SET SoLuong = @p0 WHERE MaKH = @p1 AND MaSanPham = @p2 AND MaTap = @p3",
+                            newQty, customerId, item.ProductID, currentVolumeId);
                     }
                     else
                     {
-                        // ĐÃ SỬA: Thêm cột MaTap và gán giá trị mặc định là 0 (hoặc item.VolumeID nếu CartItem có lưu)
-                        int insertVolumeId = item.VolumeID ?? 0;
                         dbContext.Database.ExecuteSqlCommand(
                             "INSERT GIOHANG (MaKH, MaSanPham, SoLuong, MaTap) VALUES (@p0, @p1, @p2, @p3)",
-                            customerId, item.ProductID, item.Number, insertVolumeId);
+                            customerId, item.ProductID, item.Number, currentVolumeId);
                     }
                 }
 
+                // Lấy lại giỏ hàng cuối cùng sau khi đồng bộ để nạp ngược vào Session
                 var finalDbCartItems = dbContext.Database.SqlQuery<DbCartItem>(
-                    "SELECT MaSanPham, SoLuong FROM GIOHANG WHERE MaKH = @p0", customerId).ToList();
+                    "SELECT MaSanPham, SoLuong, MaTap FROM GIOHANG WHERE MaKH = @p0", customerId).ToList();
 
                 var newSessionCart = new List<CartItem>();
                 foreach (var dbItem in finalDbCartItems)
                 {
                     try
                     {
-                        var cartItem = new CartItem(dbItem.MaSanPham)
+                        // Giả định CartItem constructor nhận (productId, volumeId)
+                        int? volId = dbItem.MaTap == 0 ? (int?)null : dbItem.MaTap;
+                        var cartItem = new CartItem(dbItem.MaSanPham, volId)
                         {
                             Number = dbItem.SoLuong
                         };
@@ -77,7 +84,7 @@ namespace BookStoreOnline.Controllers
                     }
                     catch
                     {
-                        // Bỏ qua nếu sản phẩm bị xóa khỏi hệ thống
+                        // Bỏ qua nếu sản phẩm lỗi hoặc bị xóa khỏi hệ thống
                     }
                 }
                 context.Session["GioHang"] = newSessionCart;
@@ -130,7 +137,6 @@ namespace BookStoreOnline.Controllers
                 {
                     return Json(new { success = false, message = "Sản phẩm không tồn tại." });
                 }
-                return HttpNotFound("Product not found");
                 return HttpNotFound("Sản phẩm không tồn tại");
             }
 
@@ -174,8 +180,7 @@ namespace BookStoreOnline.Controllers
             var customer = Session["TaiKhoan"] as KHACHHANG;
             if (customer != null)
             {
-                // Nếu không có tập (null), ta thay bằng giá trị số 0 (hoặc ID mặc định của hệ thống) để không bị lỗi NOT NULL trong DB
-                object dbVolumeId = volumeId.HasValue ? (object)volumeId.Value : 0;
+                int dbVolumeId = volumeId ?? 0; // Chuẩn hóa NULL về 0
 
                 db.Database.ExecuteSqlCommand(@"
                 IF EXISTS (SELECT 1 FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1 AND MaTap = @p3)
@@ -228,7 +233,7 @@ namespace BookStoreOnline.Controllers
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Quá số lượng tồn trong kho.");
                 }
 
-                cartItem = new CartItem(id) { Number = quantity };
+                cartItem = new CartItem(id, null) { Number = quantity };
                 cart.Add(cartItem);
             }
             else
@@ -249,12 +254,12 @@ namespace BookStoreOnline.Controllers
             var customer = Session["TaiKhoan"] as KHACHHANG;
             if (customer != null)
             {
-                // ĐÃ SỬA: Thay thế toàn bộ check IS NULL và giá trị chèn NULL bằng 0 để tránh lỗi NOT NULL của DB
+                // SỬA: Đồng bộ hóa đồng nhất sử dụng MaTap = 0 thay vì IS NULL lung tung
                 db.Database.ExecuteSqlCommand(@"
-            IF EXISTS (SELECT 1 FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1 AND MaTap = 0)
-                UPDATE GIOHANG SET SoLuong = @p2 WHERE MaKH = @p0 AND MaSanPham = @p1 AND MaTap = 0
-            ELSE
-                INSERT GIOHANG (MaKH, MaSanPham, SoLuong, MaTap) VALUES (@p0, @p1, @p2, 0)",
+                IF EXISTS (SELECT 1 FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1 AND MaTap = 0)
+                    UPDATE GIOHANG SET SoLuong = @p2 WHERE MaKH = @p0 AND MaSanPham = @p1 AND MaTap = 0
+                ELSE
+                    INSERT GIOHANG (MaKH, MaSanPham, SoLuong, MaTap) VALUES (@p0, @p1, @p2, 0)",
                     customer.MaKH, id, cartItem.Number);
 
                 HomeController.TargetInteraction(customer.MaKH, id, 3, db);
@@ -285,19 +290,11 @@ namespace BookStoreOnline.Controllers
                 var customer = Session["TaiKhoan"] as KHACHHANG;
                 if (customer != null)
                 {
-                    // ĐÃ SỬA: Xóa chính xác theo trạng thái NULL của MaTap
-                    if (volumeId.HasValue)
-                    {
-                        db.Database.ExecuteSqlCommand(
-                            "DELETE FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1 AND MaTap = @p2",
-                            customer.MaKH, id, volumeId.Value);
-                    }
-                    else
-                    {
-                        db.Database.ExecuteSqlCommand(
-                            "DELETE FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1 AND MaTap IS NULL",
-                            customer.MaKH, id);
-                    }
+                    // SỬA: Chuyển đổi linh hoạt giá trị null về 0 để đồng bộ mệnh đề WHERE dưới DB
+                    int dbVolumeId = volumeId ?? 0;
+                    db.Database.ExecuteSqlCommand(
+                        "DELETE FROM GIOHANG WHERE MaKH = @p0 AND MaSanPham = @p1 AND MaTap = @p2",
+                        customer.MaKH, id, dbVolumeId);
                 }
             }
             return RedirectToAction("GetCartInfo");
@@ -365,19 +362,11 @@ namespace BookStoreOnline.Controllers
                 var customer = Session["TaiKhoan"] as KHACHHANG;
                 if (customer != null)
                 {
-                    // ĐÃ SỬA: Đồng bộ chuẩn xuống DB khi nhấn tăng giảm số lượng ở giao diện giỏ hàng
-                    if (volumeId.HasValue)
-                    {
-                        db.Database.ExecuteSqlCommand(
-                            "UPDATE GIOHANG SET SoLuong = @p0 WHERE MaKH = @p1 AND MaSanPham = @p2 AND MaTap = @p3",
-                            quantity, customer.MaKH, productId, volumeId.Value);
-                    }
-                    else
-                    {
-                        db.Database.ExecuteSqlCommand(
-                            "UPDATE GIOHANG SET SoLuong = @p0 WHERE MaKH = @p1 AND MaSanPham = @p2 AND MaTap IS NULL",
-                            quantity, customer.MaKH, productId);
-                    }
+                    // SỬA: Khớp chuẩn cơ chế MaTap = 0 nếu volumeId nhận giá trị null
+                    int dbVolumeId = volumeId ?? 0;
+                    db.Database.ExecuteSqlCommand(
+                        "UPDATE GIOHANG SET SoLuong = @p0 WHERE MaKH = @p1 AND MaSanPham = @p2 AND MaTap = @p3",
+                        quantity, customer.MaKH, productId, dbVolumeId);
                 }
 
                 decimal newTotalPrice = GetTotalPrice();
@@ -513,7 +502,7 @@ namespace BookStoreOnline.Controllers
 
                     db.SaveChanges();
 
-                    // Xóa giỏ hàng người dùng trong DB
+                    // Xóa sạch giỏ hàng người dùng trong DB sau khi đặt hàng
                     db.Database.ExecuteSqlCommand("DELETE FROM GIOHANG WHERE MaKH = @p0", customer.MaKH);
 
                     Session["GioHang"] = null;
