@@ -104,6 +104,7 @@
             margin: 20px 0 32px;
             flex-wrap: wrap;
         }
+
         .feature-item {
             flex: 1;
             min-width: 160px;
@@ -279,127 +280,150 @@
             line-height: 1.4;
             margin-bottom: 8px;
         }
-    /* More btn */
-    .more-wrap { display: flex; justify-content: center; margin: 36px 0 56px; }
-    .btn-see-more {
-        display: flex; align-items: center; gap: 8px;
-        padding: 0 32px; height: 46px; border-radius: 999px;
-        border: 1.5px solid #e8392a; color: #e8392a;
-        background: #fff; font-size: 14px; font-weight: 700;
-        cursor: pointer; transition: .25s; text-decoration: none;
-    }
-    .btn-see-more:hover { background: linear-gradient(135deg,#e8392a,#ff6b5b); color: #fff !important; border-color: transparent; box-shadow: 0 6px 20px rgba(232,57,42,.25); transform: translateY(-2px); text-decoration: none; }
-
-    /* Top 5 selling books */
-    .top-books-title {
-        font-size: 24px;
-        font-weight: 800;
-        color: #111827;
-        text-align: center;
-        margin: 50px 0 32px 0;
-    }
-
-    .champion-book-card {
-        background: #fff;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-        border: 1px solid #e5e7eb;
-        padding: 30px;
-        max-width: 500px;
-        margin: 0 auto 40px auto;
-        text-align: center;
-        position: relative;
-    }
-
-    .champion-badge {
-        position: absolute;
-        top: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-        color: #fff;
-        font-weight: 800;
-        font-size: 12px;
-        text-transform: uppercase;
-        padding: 6px 16px;
-        border-radius: 999px;
-        box-shadow: 0 4px 12px rgba(245,158,11,0.3);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .champion-book-card img {
-        max-height: 220px;
-        object-fit: contain;
-        margin: 10px auto 20px auto;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        border-radius: 8px;
-    }
-
-    .champion-book-card h3 {
-        font-size: 18px;
-        font-weight: 800;
-        color: #111827;
-        margin-bottom: 6px;
-    }
-
-    .champion-book-card .author {
-        font-size: 14px;
-        color: #6b7280;
-        margin-bottom: 10px;
-    }
-
-    .champion-book-card .price {
-        font-size: 18px;
-        font-weight: 800;
-        color: #e8392a;
-        margin-bottom: 0;
-    }
-
-    .sub-book-card {
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-        border: 1px solid #e5e7eb;
-        padding: 20px;
-        text-align: center;
-        height: 100%;
-        transition: transform 0.25s;
-    }
-
-        .sub-book-card:hover {
-            transform: translateY(-4px);
+        /* More btn */
+        .more-wrap {
+            display: flex;
+            justify-content: center;
+            margin: 36px 0 56px;
         }
 
-        .sub-book-card img {
-            height: 140px;
-            object-fit: contain;
-            margin: 0 auto 16px auto;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-            border-radius: 6px;
-        }
-
-        .sub-book-card h4 {
+        .btn-see-more {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 32px;
+            height: 46px;
+            border-radius: 999px;
+            border: 1.5px solid #e8392a;
+            color: #e8392a;
+            background: #fff;
             font-size: 14px;
             font-weight: 700;
-            color: #111827;
-            line-height: 1.4;
-            margin-bottom: 6px;
-            height: 38px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            cursor: pointer;
+            transition: .25s;
+            text-decoration: none;
         }
-            .product-title a {
-                color: inherit;
+
+            .btn-see-more:hover {
+                background: linear-gradient(135deg,#e8392a,#ff6b5b);
+                color: #fff !important;
+                border-color: transparent;
+                box-shadow: 0 6px 20px rgba(232,57,42,.25);
+                transform: translateY(-2px);
                 text-decoration: none;
             }
 
-                .product-title a:hover {
-                    color: #e8392a;
-                }
+        /* Top 5 selling books */
+        .top-books-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #111827;
+            text-align: center;
+            margin: 50px 0 32px 0;
+        }
+
+        .champion-book-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            border: 1px solid #e5e7eb;
+            padding: 30px;
+            max-width: 500px;
+            margin: 0 auto 40px auto;
+            text-align: center;
+            position: relative;
+        }
+
+        .champion-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #fff;
+            font-weight: 800;
+            font-size: 12px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 999px;
+            box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .champion-book-card img {
+            max-height: 220px;
+            object-fit: contain;
+            margin: 10px auto 20px auto;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .champion-book-card h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        .champion-book-card .author {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .champion-book-card .price {
+            font-size: 18px;
+            font-weight: 800;
+            color: #e8392a;
+            margin-bottom: 0;
+        }
+
+        .sub-book-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            text-align: center;
+            height: 100%;
+            transition: transform 0.25s;
+        }
+
+            .sub-book-card:hover {
+                transform: translateY(-4px);
+            }
+
+            .sub-book-card img {
+                height: 140px;
+                object-fit: contain;
+                margin: 0 auto 16px auto;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+                border-radius: 6px;
+            }
+
+            .sub-book-card h4 {
+                font-size: 14px;
+                font-weight: 700;
+                color: #111827;
+                line-height: 1.4;
+                margin-bottom: 6px;
+                height: 38px;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+        .product-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+            .product-title a:hover {
+                color: #e8392a;
+            }
 
         .product-price {
             font-size: 17px;
@@ -524,6 +548,7 @@
                 transform: translateY(-2px);
                 text-decoration: none;
             }
+
         .sub-book-card .author {
             font-size: 12px;
             color: #6b7280;
@@ -537,34 +562,34 @@
             margin: 0;
         }
 
-    .cta-container {
-        text-align: center;
-        margin-top: 50px;
-    }
-
-    .btn-explore {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        height: 50px;
-        padding: 0 36px;
-        border-radius: 999px;
-        background: linear-gradient(135deg, #e8392a 0%, #ff6b5b 100%);
-        color: #fff;
-        font-weight: 700;
-        font-size: 15px;
-        box-shadow: 0 4px 14px rgba(232,57,42,0.22);
-        transition: all 0.25s;
+        .cta-container {
+            text-align: center;
+            margin-top: 50px;
         }
 
-        .btn-explore:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(232,57,42,0.32);
+        .btn-explore {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 50px;
+            padding: 0 36px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #e8392a 0%, #ff6b5b 100%);
             color: #fff;
-            text-decoration: none;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 4px 14px rgba(232,57,42,0.22);
+            transition: all 0.25s;
         }
-</style>
-    }
+
+            .btn-explore:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(232,57,42,0.32);
+                color: #fff;
+                text-decoration: none;
+            }
+    </style>
+}
 
 <div class="container hero-section">
     <!-- Slideshow -->
@@ -779,7 +804,7 @@
         <h2>🎯 Dành cho bạn</h2>
     </div>
 
-    <div id="recommend-area" class="row g-3">
+    <div id="recommend-area" class="products-grid">
         <!-- AJAX sẽ render sản phẩm gợi ý vào đây -->
     </div>
 
@@ -794,94 +819,106 @@
     </div>
 </div>
 
-    @section scripts {
-        <script>
-            $(function () {
+@section scripts {
+    <script>
+        $(function () {
+            // Thực hiện gọi AJAX để lấy danh sách sản phẩm gợi ý "Dành cho bạn"
+            $.get('@Url.Action("GetRecommend", "Home")', function (data) {
+                let html = "";
 
-                $.get("/Recommendation/GetRecommend", function (data) {
+                data.forEach(function (item) {
+                    // Định dạng giá tiền theo kiểu VNĐ (ví dụ: 50.000 đ)
+                    let formattedPrice = item.Gia.toLocaleString('vi-VN') + " đ";
 
-                    let html = "";
+                    // Tạo một tỷ lệ giảm giá ngẫu nhiên giả lập từ 10% đến 35% tương tự như phần Sách Hot
+                    let randomDiscount = Math.floor(Math.random() * (35 - 10 + 1)) + 10;
 
-                    data.forEach(function (item) {
+                    // Hàm xử lý cắt ngắn tiêu đề sách trực tiếp bằng JavaScript nếu vượt quá 5 từ
+                    let words = item.TenSanPham.split(' ');
+                    let shortTitle = words.length > 5 ? words.slice(0, 5).join(' ') + '…' : item.TenSanPham;
 
-                        html += `
-        <div class="col-lg-2 col-md-3 col-sm-6 mb-3">
+                    // Tạo chuỗi HTML đồng bộ cấu trúc CSS với class .product-card
+                    // Thay đổi đoạn nối chuỗi HTML trong vòng lặp data.forEach:
+                    html += `
+                            <div class="product-card">
+                                <!-- Link hình ảnh chi tiết sản phẩm -->
+                                <a href="/ProductDetail/Index/${item.MaSanPham}" class="product-img-wrap">
+                                    <img src="${item.Anh}" alt="${item.TenSanPham}" loading="lazy">
+                                </a>
 
-            <div class="card h-100 shadow-sm">
+                                <div class="product-body">
+                                    <!-- Tiêu đề sách đã được rút gọn -->
+                                    <div class="product-title">
+                                        <a href="/ProductDetail/Index/${item.MaSanPham}">
+                                            Sách - ${shortTitle}
+                                        </a>
+                                    </div>
 
-                <img src="${item.Anh}"
-                     class="card-img-top"
-                     style="height:220px;object-fit:cover;"
-                     alt="${item.TenSanPham}">
+                                    <!-- Giá tiền & Nhãn giảm giá -->
+                                    <div class="product-price" style="display:flex;align-items:center;gap:6px;">
+                                        ${formattedPrice}
+                                        <span style="background:#ffeae9;color:#e8392a;font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;">
+                                            -${randomDiscount}%
+                                        </span>
+                                    </div>
 
-                <div class="card-body d-flex flex-column">
-
-                    <h6>${item.TenSanPham}</h6>
-
-                    <p class="text-danger fw-bold">
-                        ${item.Gia.toLocaleString()} VNĐ
-                    </p>
-
-                    <a href="/ProductDetail/Index/${item.MaSanPham}"
-                       class="btn btn-danger btn-sm mt-auto">
-                        Xem chi tiết
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>`;
-                    });
-
-                    $("#recommend-area").html(html);
-
+                                    <!-- Nút hành động thêm vào giỏ hàng nhanh -->
+                                    <a href="/Cart/AddSingleProduct/${item.MaSanPham}" class="btn-buy-card mt-2">
+                                        <i class="bi bi-bag-plus me-1"></i>
+                                        Thêm vào giỏ
+                                    </a>
+                                </div>
+                          </div>`;
                 });
 
+                // Render chuỗi HTML mới vào vùng hiển thị gợi ý
+                $("#recommend-area").html(html);
             });
-            (function () {
-                const track = document.getElementById('slideTrack');
-                const dotsWrap = document.getElementById('slideDots');
-                const imgs = track.querySelectorAll('img');
-                let cur = 0;
-                const total = imgs.length;
+        });
 
-                // Create dots
-                imgs.forEach((_, i) => {
-                    const d = document.createElement('button');
-                    d.className = 'slide-dot' + (i === 0 ? ' active' : '');
-                    d.addEventListener('click', () => goTo(i));
-                    dotsWrap.appendChild(d);
-                });
+        // Luồng xử lý hiệu ứng Banner Slideshow giữ nguyên không thay đổi
+        (function () {
+            const track = document.getElementById('slideTrack');
+            const dotsWrap = document.getElementById('slideDots');
+            const imgs = track.querySelectorAll('img');
+            let cur = 0;
+            const total = imgs.length;
 
-                function goTo(n) {
-                    cur = (n + total) % total;
-                    track.style.transform = `translateX(-${cur * 100}%)`;
-                    dotsWrap.querySelectorAll('.slide-dot').forEach((d, i) =>
-                        d.classList.toggle('active', i === cur));
-                }
+            imgs.forEach((_, i) => {
+                const d = document.createElement('button');
+                d.className = 'slide-dot' + (i === 0 ? ' active' : '');
+                d.addEventListener('click', () => goTo(i));
+                dotsWrap.appendChild(d);
+            });
 
-                document.getElementById('slidePrev').addEventListener('click', () => goTo(cur - 1));
-                document.getElementById('slideNext').addEventListener('click', () => goTo(cur + 1));
+            function goTo(n) {
+                cur = (n + total) % total;
+                track.style.transform = `translateX(-${cur * 100}%)`;
+                dotsWrap.querySelectorAll('.slide-dot').forEach((d, i) =>
+                    d.classList.toggle('active', i === cur));
+            }
 
-                let timer = setInterval(() => goTo(cur + 1), 4500);
-                document.getElementById('heroSlider').addEventListener('mouseenter', () => clearInterval(timer));
-                document.getElementById('heroSlider').addEventListener('mouseleave', () => {
-                    timer = setInterval(() => goTo(cur + 1), 4500);
-                });
-            })();
-        </script>
-    }
+            document.getElementById('slidePrev').addEventListener('click', () => goTo(cur - 1));
+            document.getElementById('slideNext').addEventListener('click', () => goTo(cur + 1));
 
-    @helper GetShortTitle(string title)
+            let timer = setInterval(() => goTo(cur + 1), 4500);
+            document.getElementById('heroSlider').addEventListener('mouseenter', () => clearInterval(timer));
+            document.getElementById('heroSlider').addEventListener('mouseleave', () => {
+                timer = setInterval(() => goTo(cur + 1), 4500);
+            });
+        })();
+    </script>
+}
+
+@helper GetShortTitle(string title)
+{
+    var words = title.Split(' ');
+    if (words.Length > 5)
     {
-        var words = title.Split(' ');
-        if (words.Length > 5)
-        {
-            @(string.Join(" ", words.Take(5)) + "…")
-        }
-        else
-        {
-            @title
-        }
+        @(string.Join(" ", words.Take(5)) + "…")
     }
+    else
+    {
+        @title
+    }
+}

@@ -35,6 +35,12 @@ namespace BookStoreOnline.Controllers
             ViewBag.Volumes = _db.Database.SqlQuery<VolumeDto>("SELECT MaTap, TenTap, SoLuong FROM TAP_SANPHAM WHERE MaSanPham = @p0", id).ToList();
             ViewBag.Categories = _db.Database.SqlQuery<string>("SELECT l.TenLoai FROM SANPHAM_LOAI sl JOIN LOAI l ON sl.MaLoai = l.MaLoai WHERE sl.MaSanPham = @p0", id).ToList();
 
+            var user = Session["TaiKhoan"] as KHACHHANG;
+            if (user != null)
+            {
+                // Gọi hàm tích lũy điểm xem sản phẩm (1 điểm)
+                HomeController.TargetInteraction(user.MaKH, id, 1, _db);
+            }
             return View(product);
         }
 
