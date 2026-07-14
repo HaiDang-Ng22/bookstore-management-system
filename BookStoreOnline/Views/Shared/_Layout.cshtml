@@ -536,6 +536,28 @@
 
     <!-- Page content -->
     <main>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 12px; border: none; background: #e6f4ea; color: #137333; font-weight: 500;">
+                    <i class="bi bi-check-circle-fill mr-2" style="font-size: 16px;"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="color: #137333; opacity: 0.8;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 12px; border: none; background: #fce8e6; color: #c5221f; font-weight: 500;">
+                    <i class="bi bi-exclamation-triangle-fill mr-2" style="font-size: 16px;"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="color: #c5221f; opacity: 0.8;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        }
         @RenderBody()
     </main>
 
@@ -605,6 +627,122 @@
     <!-- SCRIPT ĐỘC QUYỀN: AUTO-SUGGEST TÌM KIẾM THÔNG MINH -->
     <script>
         $(document).ready(function () {
+            // Tự động inject CSS cho Toast nếu chưa có
+            if ($("#toast-style").length === 0) {
+                $('head').append(`
+                    <style id="toast-style">
+                        @@keyframes slideIn {
+                            to { opacity: 1; transform: translateX(0); }
+                        }
+                        @@keyframes fadeOut {
+                            to { opacity: 0; transform: translateY(-20px); }
+                        }
+                    </style>
+                `);
+            }
+
+            // Hàm hiển thị thông báo Toast đẹp mắt
+            function showToastNotification(title, message, isError = false) {
+                var $container = $('#toast-container');
+                if ($container.length === 0) {
+                    $('body').append('<div id="toast-container" style="position: fixed; top: 80px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;"></div>');
+                    $container = $('#toast-container');
+                }
+                var iconClass = isError ? 'bi-exclamation-triangle-fill text-danger' : 'bi-check-circle-fill text-success';
+                var borderStyle = isError ? 'error' : '';
+                
+                var toastId = 'toast-' + Date.now();
+                var html = `
+                    <div id="${toastId}" class="custom-toast ${borderStyle}" style="min-width: 280px; background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 16px; display: flex; align-items: center; gap: 12px; border-left: 5px solid #10b981; animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; transform: translateX(50px);">
+                        <i class="bi ${iconClass}" style="font-size: 20px;"></i>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 700; font-size: 14px; color: #1e293b;">${title}</div>
+                            <div style="font-size: 13px; color: #64748b; margin-top: 2px;">${message}</div>
+                        </div>
+                        <i class="bi bi-x" style="cursor: pointer; color: #9ca3af; font-size: 16px;" onclick="closeToast('${toastId}')"></i>
+                    </div>
+                `;
+                
+                if (isError) {
+                    html = html.replace('border-left: 5px solid #10b981;', 'border-left: 5px solid #ef4444;');
+                }
+                
+                $container.append(html);
+                
+                setTimeout(function() {
+                    closeToast(toastId);
+                }, 4000);
+            }
+
+            window.closeToast = function(id) {
+                var $toast = $('#' + id);
+                if ($toast.length) {
+                    $toast.css('animation', 'fadeOut 0.3s forwards');
+                    setTimeout(function() {
+                        $toast.remove();
+                    }, 300);
+                }
+            }
+
+            // Đánh chặn click nút "Mua" nhanh để thêm vào giỏ hàng bằng AJAX
+            $(document).on('click', 'a[href*="/Cart/AddSingleProduct"], a[href*="/Cart/AddSingleProduct/"]', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                var btn = $(this);
+                
+                btn.css('pointer-events', 'none').css('opacity', '0.7');
+                
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        btn.css('pointer-events', 'auto').css('opacity', '1');
+                        if (response.success) {
+                            $('.quantity-prod-cart').text(response.totalNumber);
+                            showToastNotification("Thành công", "Đã thêm sản phẩm vào giỏ hàng!");
+                        } else {
+                            showToastNotification("Thất bại", response.message || "Không thể thêm sản phẩm.", true);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        btn.css('pointer-events', 'auto').css('opacity', '1');
+                        showToastNotification("Lỗi", "Không thể thêm vào giỏ hàng hoặc chưa đăng nhập.", true);
+                    }
+                });
+            });
+
+            // Đánh chặn submit form "Thêm vào giỏ hàng" ở trang chi tiết sản phẩm bằng AJAX
+            $(document).on('submit', 'form[action*="/Cart/AddToCart"]', function (e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                var formData = form.serialize();
+                var submitBtn = form.find('.btn-add-to-cart');
+                
+                submitBtn.prop('disabled', true).css('opacity', '0.7');
+                
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function (response) {
+                        submitBtn.prop('disabled', false).css('opacity', '1');
+                        if (response.success) {
+                            $('.quantity-prod-cart').text(response.totalNumber);
+                            showToastNotification("Thành công", "Đã thêm sản phẩm vào giỏ hàng!");
+                        } else {
+                            showToastNotification("Thất bại", response.message || "Không thể thêm sản phẩm.", true);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        submitBtn.prop('disabled', false).css('opacity', '1');
+                        showToastNotification("Lỗi", "Vượt quá số lượng tồn kho hoặc lỗi kết nối.", true);
+                    }
+                });
+            });
+
             var $input = $("#inputSearchSmart");
 
             // Tự động nhúng hộp Dropdown vào bên trong div relative của form để khớp khít tọa độ 100%

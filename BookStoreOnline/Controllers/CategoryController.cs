@@ -1,4 +1,4 @@
-﻿using BookStoreOnline.Models;
+using BookStoreOnline.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -37,22 +37,65 @@ namespace BookStoreOnline.Controllers
         }
 
         // Hiển thị sách theo loại
-        public ActionResult Index(int id)
+        public ActionResult Index(int id, int? minPrice, int? maxPrice, string sortOrder)
         {
             ViewBag.CategoryName = db.LOAIs
                 .FirstOrDefault(x => x.Maloai == id)?.Tenloai;
 
-            var products = db.SANPHAMs
-                .Where(x => x.MaLoai == id)
-                .ToList();
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+            ViewBag.CategoryId = id;
+            ViewBag.SortOrder = sortOrder;
+
+            var query = db.SANPHAMs.Where(x => x.MaLoai == id).AsQueryable();
+
+            if (minPrice.HasValue) query = query.Where(x => x.Gia >= minPrice.Value);
+            if (maxPrice.HasValue) query = query.Where(x => x.Gia <= maxPrice.Value);
+
+            if (sortOrder == "price_asc")
+            {
+                query = query.OrderBy(x => x.Gia);
+            }
+            else if (sortOrder == "price_desc")
+            {
+                query = query.OrderByDescending(x => x.Gia);
+            }
+            else
+            {
+                query = query.OrderByDescending(x => x.MaSanPham);
+            }
+
+            var products = query.ToList();
 
             return View(products);
         }
 
         // Hiển thị tất cả sách
-        public ActionResult GetAllBook()
+        public ActionResult GetAllBook(int? minPrice, int? maxPrice, string sortOrder)
         {
-            return View(db.SANPHAMs.ToList());
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+            ViewBag.SortOrder = sortOrder;
+
+            var query = db.SANPHAMs.AsQueryable();
+
+            if (minPrice.HasValue) query = query.Where(x => x.Gia >= minPrice.Value);
+            if (maxPrice.HasValue) query = query.Where(x => x.Gia <= maxPrice.Value);
+
+            if (sortOrder == "price_asc")
+            {
+                query = query.OrderBy(x => x.Gia);
+            }
+            else if (sortOrder == "price_desc")
+            {
+                query = query.OrderByDescending(x => x.Gia);
+            }
+            else
+            {
+                query = query.OrderByDescending(x => x.MaSanPham);
+            }
+
+            return View(query.ToList());
         }
 
         // 1. CẢI TIẾN: TÌM KIẾM THÔNG MINH ĐA ĐIỀU KIỆN (CHẤP NHẬN TỪ KHÓA NGẮN)

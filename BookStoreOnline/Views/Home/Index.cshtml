@@ -650,109 +650,129 @@
             Xem tất cả <i class="bi bi-arrow-right"></i>
         </a>
     </div>
-    <div class="products-grid">
-        @foreach (var item in Model)
-        {
-            var soldQty = item.SoLuongBan;
-            var totalQty = item.SoLuong + 100;
-            var soldPct = totalQty > 0 ? (soldQty / (float)totalQty) * 100 : 0;
-            var soldPctR = Math.Round(soldPct);
-            var barColor = soldPct == 100 ? "#dc2626" : soldPct >= 50 ? "#d97706" : "#16a34a";
 
-            var reviews = item.DANHGIAs;
-            var avgRating = reviews.Any() ? reviews.Average(r => r.SoSao) : 0;
-            var roundRating = (int)Math.Round(avgRating);
-
-            <div class="product-card">
-
-                @if (totalQty == 0)
+    <!-- Thanh bộ lọc và sắp xếp ngang ở trang chủ -->
+    <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 18px; background: #fff; height: auto !important;">
+        <form action="@Url.Action("Index", "Home")" method="get" class="row align-items-end">
+            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                <label style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Giá từ (đ)</label>
+                <input type="number" name="minPrice" class="form-control" value="@ViewBag.MinPrice" placeholder="0" min="0" style="border-radius: 8px; font-size: 14px; height: 42px;" />
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                <label style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Đến giá (đ)</label>
+                <input type="number" name="maxPrice" class="form-control" value="@ViewBag.MaxPrice" placeholder="500,000" min="0" style="border-radius: 8px; font-size: 14px; height: 42px;" />
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                <label style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Sắp xếp theo giá</label>
+                <select name="sortOrder" class="form-control" style="border-radius: 8px; font-size: 14px; height: 42px;">
+                    <option value="" @(ViewBag.SortOrder == "" ? "selected" : "")>Mặc định</option>
+                    <option value="price_asc" @(ViewBag.SortOrder == "price_asc" ? "selected" : "")>Giá: Thấp đến Cao</option>
+                    <option value="price_desc" @(ViewBag.SortOrder == "price_desc" ? "selected" : "")>Giá: Cao đến Thấp</option>
+                </select>
+            </div>
+            <div class="col-md-3 col-sm-6 d-flex">
+                <button type="submit" class="btn-buy-card border-0 w-100" style="height: 42px; border-radius: 8px; margin: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+                    <i class="fas fa-check mr-1"></i> Lọc & Sắp xếp
+                </button>
+                @if (ViewBag.MinPrice != null || ViewBag.MaxPrice != null || !string.IsNullOrEmpty(ViewBag.SortOrder))
                 {
-                    <span class="product-badge">Hết hàng</span>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="border-radius: 8px; font-size: 14px; font-weight: 700; height: 42px; width: 60px; border: 1.5px solid #cbd5e1; color: #475569; background: #fff; margin-left: 8px;">
+                        <i class="fas fa-times"></i>
+                    </a>
                 }
+            </div>
+        </form>
+    </div>
 
-                <a href="@Url.Action("Index","ProductDetail",new { id = item.MaSanPham })"
-                   class="product-img-wrap">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5 shadow-sm mb-5" style="background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; padding: 40px 15px; height: auto !important;">
+            <i class="fas fa-search mb-3" style="font-size: 32px; color: #cbd5e1; display: block; margin: 0 auto 15px;"></i>
+            <p style="color: #64748b; font-size: 15px; margin: 0;">Không tìm thấy cuốn sách nào khớp với khoảng giá của bạn.</p>
+        </div>
+    }
+    else
+    {
+        <div class="products-grid">
+            @foreach (var item in Model)
+            {
+                var soldQty = item.SoLuongBan;
+                var totalQty = item.SoLuong + 100;
+                var soldPct = totalQty > 0 ? (soldQty / (float)totalQty) * 100 : 0;
+                var soldPctR = Math.Round(soldPct);
+                var barColor = soldPct == 100 ? "#dc2626" : soldPct >= 50 ? "#d97706" : "#16a34a";
 
-                    <img src="@item.Anh"
-                         alt="@item.TenSanPham"
-                         loading="lazy">
+                var reviews = item.DANHGIAs;
+                var avgRating = reviews.Any() ? reviews.Average(r => r.SoSao) : 0;
+                var roundRating = (int)Math.Round(avgRating);
 
-                </a>
-
-                <div class="product-body">
-
-                    <div class="product-title">
-                        <a href="@Url.Action("Index","ProductDetail",new { id = item.MaSanPham })">
-                            Sách - @Html.Raw(GetShortTitle(item.TenSanPham))
-                        </a>
-                    </div>
-
-                    <div class="product-price" style="display:flex;align-items:center;gap:6px;">
-                        @String.Format(price, "{0:c0}", item.Gia)
-
-                        <span style="background:#ffeae9;color:#e8392a;font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;">
-                            -@(new Random(item.MaSanPham).Next(10,35))%
-                        </span>
-                    </div>
-
-                    <div class="stars-row">
-                        @for (int i = 1; i <= 5; i++)
-                        {
-                            <i class="fas fa-star star-icon @(i <= roundRating ? "on" : "")"></i>
-                        }
-
-                        <span class="rating-count">
-                            (@reviews.Count())
-                        </span>
-                    </div>
-
-                    <div class="sold-bar-wrap">
-
-                        <div class="sold-bar-fill"
-                             style="width:@soldPctR%;background:@barColor;">
-                        </div>
-
-                        <div class="sold-bar-text">
-                            Đã bán @soldQty / @totalQty
-                        </div>
-
-                    </div>
-
-                    @if (totalQty > 0)
+                <div class="product-card" style="height: auto !important;">
+                    @if (totalQty == 0)
                     {
-                        if (user != null)
-                        {
-                            <a href="@Url.Action("AddSingleProduct","Cart",new { id = item.MaSanPham })"
-                               class="btn-buy-card mt-2">
+                        <span class="product-badge">Hết hàng</span>
+                    }
 
-                                <i class="bi bi-bag-plus me-1"></i>
-                                Thêm vào giỏ
+                    <a href="@Url.Action("Index","ProductDetail",new { id = item.MaSanPham })" class="product-img-wrap">
+                        <img src="@item.Anh" alt="@item.TenSanPham" loading="lazy">
+                    </a>
 
+                    <div class="product-body">
+                        <div class="product-title">
+                            <a href="@Url.Action("Index","ProductDetail",new { id = item.MaSanPham })">
+                                Sách - @Html.Raw(GetShortTitle(item.TenSanPham))
                             </a>
+                        </div>
+
+                        <div class="product-price" style="display:flex;align-items:center;gap:6px;">
+                            @String.Format(price, "{0:c0}", item.Gia)
+                            <span style="background:#ffeae9;color:#e8392a;font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;">
+                                -@(new Random(item.MaSanPham).Next(10,35))%
+                            </span>
+                        </div>
+
+                        <div class="stars-row">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="fas fa-star star-icon @(i <= roundRating ? "on" : "")"></i>
+                            }
+                            <span class="rating-count">
+                                (@reviews.Count())
+                            </span>
+                        </div>
+
+                        <div class="sold-bar-wrap">
+                            <div class="sold-bar-fill" style="width:@soldPctR%;background:@barColor;"></div>
+                            <div class="sold-bar-text">
+                                Đã bán @soldQty / @totalQty
+                            </div>
+                        </div>
+
+                        @if (totalQty > 0)
+                        {
+                            if (user != null)
+                            {
+                                <a href="@Url.Action("AddSingleProduct","Cart",new { id = item.MaSanPham })" class="btn-buy-card mt-2">
+                                    <i class="bi bi-bag-plus me-1"></i> Thêm vào giỏ
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Login","User")" class="btn-buy-card mt-2">
+                                    <i class="bi bi-bag-plus me-1"></i> Thêm vào giỏ
+                                </a>
+                            }
                         }
                         else
                         {
-                            <a href="@Url.Action("Login","User")"
-                               class="btn-buy-card mt-2">
-
-                                <i class="bi bi-bag-plus me-1"></i>
-                                Thêm vào giỏ
-
-                            </a>
+                            <span class="btn-buy-card disabled-btn mt-2">
+                                Hết hàng
+                            </span>
                         }
-                    }
-                    else
-                    {
-                        <span class="btn-buy-card disabled-btn mt-2">
-                            Hết hàng
-                        </span>
-                    }
-
+                    </div>
                 </div>
-
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
 
     <!-- DÀNH CHO BẠN -->
     <div class="section-head mt-5">

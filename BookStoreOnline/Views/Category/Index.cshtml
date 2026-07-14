@@ -104,8 +104,42 @@
     <div class="row">
         <!-- Sidebar Navigation -->
         <div class="col-lg-3 col-md-4 mb-4">
-            <div class="card border-0 shadow-sm" style="border-radius:16px; overflow:hidden;">
+            <div class="card border-0 shadow-sm mb-4" style="border-radius:16px; overflow:hidden; height: auto !important;">
                 @{ Html.RenderAction("GetCategorySelection", "CategoryPartial"); }
+            </div>
+
+            <!-- Bộ lọc khoảng giá & Sắp xếp -->
+            <div class="card border-0 shadow-sm p-4" style="border-radius:16px; background: #fff; height: auto !important;">
+                <h5 class="font-weight-bold mb-3" style="color: #111827; font-size: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                    <i class="fas fa-filter text-danger mr-1"></i> Bộ lọc & Sắp xếp
+                </h5>
+                <form action="@Url.Action("Index", "Category", new { id = ViewBag.CategoryId })" method="get">
+                    <div class="form-group mb-3">
+                        <label style="font-size: 12px; font-weight: 600; color: #475569;">Giá từ (đ)</label>
+                        <input type="number" name="minPrice" class="form-control" value="@ViewBag.MinPrice" placeholder="0" min="0" style="border-radius: 8px; font-size: 14px;" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label style="font-size: 12px; font-weight: 600; color: #475569;">Đến giá (đ)</label>
+                        <input type="number" name="maxPrice" class="form-control" value="@ViewBag.MaxPrice" placeholder="500,000" min="0" style="border-radius: 8px; font-size: 14px;" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label style="font-size: 12px; font-weight: 600; color: #475569;">Sắp xếp theo giá</label>
+                        <select name="sortOrder" class="form-control" style="border-radius: 8px; font-size: 14px; height: 38px;">
+                            <option value="" @(ViewBag.SortOrder == "" ? "selected" : "")>Mặc định</option>
+                            <option value="price_asc" @(ViewBag.SortOrder == "price_asc" ? "selected" : "")>Giá: Thấp đến Cao</option>
+                            <option value="price_desc" @(ViewBag.SortOrder == "price_desc" ? "selected" : "")>Giá: Cao đến Thấp</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-buy-card w-100 border-0" style="height: 38px; border-radius: 8px;">
+                        <i class="fas fa-check mr-1"></i> Áp dụng bộ lọc
+                    </button>
+                    @if (ViewBag.MinPrice != null || ViewBag.MaxPrice != null || !string.IsNullOrEmpty(ViewBag.SortOrder))
+                    {
+                        <a href="@Url.Action("Index", "Category", new { id = ViewBag.CategoryId })" class="btn btn-outline-secondary w-100 mt-2" style="border-radius: 8px; font-size: 13px; font-weight: 700; height: 38px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #cbd5e1; color: #475569; background: #fff;">
+                            Xóa bộ lọc
+                        </a>
+                    }
+                </form>
             </div>
         </div>
 
@@ -113,61 +147,71 @@
         <div class="col-lg-9 col-md-8">
             <h3 class="list-title">@ViewBag.CategoryName</h3>
             
-            <div class="products-grid">
-                @foreach (var item in Model)
-                {
-                    var soldQuantity = item.SoLuongBan;
-                    var totalQuantity = item.SoLuong;
-                    var percentageSold = totalQuantity > 0 ? (soldQuantity / (float)totalQuantity) * 100 : 0;
-                    var roundedPercentageSold = Math.Round(percentageSold);
-                    var progressBarColor = roundedPercentageSold >= 100 ? "#ef4444" :
-                                           roundedPercentageSold >= 50 ? "#f59e0b" :
-                                           "#10b981";
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-center py-5 shadow-sm" style="background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; padding: 40px 15px;">
+                    <i class="fas fa-search mb-3" style="font-size: 32px; color: #cbd5e1; display: block; margin: 0 auto 15px;"></i>
+                    <p style="color: #64748b; font-size: 15px; margin: 0;">Không tìm thấy cuốn sách nào khớp với khoảng giá của bạn.</p>
+                </div>
+            }
+            else
+            {
+                <div class="products-grid">
+                    @foreach (var item in Model)
+                    {
+                        var soldQuantity = item.SoLuongBan;
+                        var totalQuantity = item.SoLuong;
+                        var percentageSold = totalQuantity > 0 ? (soldQuantity / (float)totalQuantity) * 100 : 0;
+                        var roundedPercentageSold = Math.Round(percentageSold);
+                        var progressBarColor = roundedPercentageSold >= 100 ? "#ef4444" :
+                                               roundedPercentageSold >= 50 ? "#f59e0b" :
+                                               "#10b981";
 
-                    <div class="product-card">
-                        <div class="product-img-wrap">
-                            <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })">
-                                <img src="@item.Anh" alt="@item.TenSanPham">
-                            </a>
-                        </div>
-                        <div class="product-body">
-                            <h5 class="product-title">
-                                <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })">Sách - @item.TenSanPham</a>
-                            </h5>
-                            
-                            <div class="stars-row">
-                                <i class="fas fa-star star-icon on"></i>
-                                <i class="fas fa-star star-icon on"></i>
-                                <i class="fas fa-star star-icon on"></i>
-                                <i class="fas fa-star star-icon on"></i>
-                                <i class="fas fa-star star-icon on"></i>
-                                <span class="rating-count">(@item.DANHGIAs.Count.ToString())</span>
+                        <div class="product-card">
+                            <div class="product-img-wrap">
+                                <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })">
+                                    <img src="@item.Anh" alt="@item.TenSanPham">
+                                </a>
                             </div>
+                            <div class="product-body">
+                                <h5 class="product-title">
+                                    <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })">Sách - @item.TenSanPham</a>
+                                </h5>
+                                
+                                <div class="stars-row">
+                                    <i class="fas fa-star star-icon on"></i>
+                                    <i class="fas fa-star star-icon on"></i>
+                                    <i class="fas fa-star star-icon on"></i>
+                                    <i class="fas fa-star star-icon on"></i>
+                                    <i class="fas fa-star star-icon on"></i>
+                                    <span class="rating-count">(@item.DANHGIAs.Count.ToString())</span>
+                                </div>
 
-                            <p class="product-price">
-                                @String.Format(price, "{0:c0}", item.Gia)
-                                <span style="background-color: #ffeae9; color: #e8392a; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(232, 57, 42, 0.2); margin-left: 6px; display: inline-block; vertical-align: middle;">
-                                    -@(new Random(item.MaSanPham).Next(10, 35))%
-                                </span>
-                            </p>
+                                <p class="product-price">
+                                    @String.Format(price, "{0:c0}", item.Gia)
+                                    <span style="background-color: #ffeae9; color: #e8392a; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(232, 57, 42, 0.2); margin-left: 6px; display: inline-block; vertical-align: middle;">
+                                        -@(new Random(item.MaSanPham).Next(10, 35))%
+                                    </span>
+                                </p>
 
-                            <div class="sold-bar-wrap">
-                                <div class="sold-bar-fill" style="width: @roundedPercentageSold%; background-color: @progressBarColor;"></div>
-                                <div class="sold-bar-text">Đã bán @soldQuantity/@totalQuantity</div>
+                                <div class="sold-bar-wrap">
+                                    <div class="sold-bar-fill" style="width: @roundedPercentageSold%; background-color: @progressBarColor;"></div>
+                                    <div class="sold-bar-text">Đã bán @soldQuantity/@totalQuantity</div>
+                                </div>
+
+                                @if (user != null)
+                                {
+                                    <a href="@Url.Action("AddSingleProduct", "Cart", new { id = item.MaSanPham })" class="btn-buy-card">Mua</a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Login", "User")" class="btn-buy-card">Mua</a>
+                                }
                             </div>
-
-                            @if (user != null)
-                            {
-                                <a href="@Url.Action("AddSingleProduct", "Cart", new { id = item.MaSanPham })" class="btn-buy-card">Mua</a>
-                            }
-                            else
-                            {
-                                <a href="@Url.Action("Login", "User")" class="btn-buy-card">Mua</a>
-                            }
                         </div>
-                    </div>
-                }
-            </div>
+                    }
+                </div>
+            }
         </div>
     </div>
 </div>

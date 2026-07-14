@@ -126,6 +126,10 @@ namespace BookStoreOnline.Controllers
             var productInDb = db.SANPHAMs.Find(productId);
             if (productInDb == null)
             {
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = "Sản phẩm không tồn tại." });
+                }
                 return HttpNotFound("Product not found");
             }
 
@@ -141,6 +145,10 @@ namespace BookStoreOnline.Controllers
             {
                 if (quantity > maxQty)
                 {
+                    if (Request.IsAjaxRequest())
+                    {
+                        return Json(new { success = false, message = "Quá số lượng tồn trong kho." });
+                    }
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Quá số lượng tồn trong kho");
                 }
 
@@ -154,6 +162,10 @@ namespace BookStoreOnline.Controllers
             {
                 if (cartItem.Number + quantity > maxQty)
                 {
+                    if (Request.IsAjaxRequest())
+                    {
+                        return Json(new { success = false, message = "Quá số lượng tồn trong kho." });
+                    }
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Quá số lượng tồn trong kho.");
                 }
 
@@ -172,7 +184,18 @@ namespace BookStoreOnline.Controllers
                     customer.MaKH, productId, cartItem.Number, volumeId ?? 0);
             }
 
-            return RedirectToAction("GetCartInfo");
+            TempData["SuccessMessage"] = "Đã thêm sản phẩm vào giỏ hàng thành công!";
+
+            if (Request.IsAjaxRequest())
+            {
+                return Json(new { success = true, totalNumber = GetTotalNumber() });
+            }
+
+            if (Request.UrlReferrer != null)
+            {
+                return Redirect(Request.UrlReferrer.ToString());
+            }
+            return RedirectToAction("Index", "Home");
         }
 
         public ActionResult AddSingleProduct(int id)
@@ -234,11 +257,17 @@ namespace BookStoreOnline.Controllers
                     customer.MaKH, id, cartItem.Number);
             }
 
+            TempData["SuccessMessage"] = "Đã thêm sản phẩm vào giỏ hàng thành công!";
+
             if (Request.IsAjaxRequest())
             {
                 return Json(new { success = true, totalNumber = GetTotalNumber() }, JsonRequestBehavior.AllowGet);
             }
-            return RedirectToAction("GetCartInfo");
+            if (Request.UrlReferrer != null)
+            {
+                return Redirect(Request.UrlReferrer.ToString());
+            }
+            return RedirectToAction("Index", "Home");
         }
 
         public ActionResult Remove(int id, int? volumeId = null)
