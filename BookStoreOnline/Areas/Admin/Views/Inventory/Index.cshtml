@@ -1,0 +1,186 @@
+@model IEnumerable<BookStoreOnline.Models.SANPHAM>
+
+@{
+    ViewBag.Title = "Quản Lý Kho Hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark m-0" style="font-size: 20px;">
+        <i class="bi bi-boxes text-danger me-2"></i>Quản Lý Kho Hàng
+    </h2>
+    <form method="get" action="@Url.Action("Index", "Inventory")" class="d-flex gap-2">
+        <div class="position-relative">
+            <input type="text" name="searchString" class="form-control form-control-sm ps-5 border-1"
+                   placeholder="Tìm tên sách, tác giả..." value="@ViewBag.CurrentFilter" style="border-radius: 8px; width: 280px; height: 38px;">
+            <i class="bi bi-search position-absolute text-secondary" style="left: 15px; top: 9px;"></i>
+        </div>
+        <button type="submit" class="btn btn-dark btn-sm px-3" style="border-radius: 8px;">Tìm</button>
+        @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string))
+        {
+            <a href="@Url.Action("Index", "Inventory")" class="btn btn-outline-secondary btn-sm d-flex align-items-center" style="border-radius: 8px;">Xóa bộ lọc</a>
+        }
+    </form>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-3 text-success fw-bold" role="alert" style="border-radius: 8px; background-color: #f0fdf4;">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-3 text-danger fw-bold" role="alert" style="border-radius: 8px; background-color: #fef2f2;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size: 14px;">
+            <thead class="table-light">
+                <tr class="text-secondary fw-bold">
+                    <th style="padding: 16px; width: 90px;">Mã SP</th>
+                    <th>Tên Sách</th>
+                    <th>Tác Giả</th>
+                    <th>Số Lượng Kho</th>
+                    <th>Trạng Thái</th>
+                    <th class="text-center" style="width: 280px;">Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="padding: 16px;" class="fw-bold text-secondary">#@item.MaSanPham</td>
+                        <td class="fw-bold text-dark">@item.TenSanPham</td>
+                        <td>@item.TacGia</td>
+                        <td>
+                            <span class="badge @(item.SoLuong <= 5 ? "bg-danger" : "bg-success") px-3 py-2 fs-7 rounded-pill">
+                                @item.SoLuong cuốn
+                            </span>
+                        </td>
+                        <td>
+                            @if (item.SoLuong == 0)
+                            {
+                                <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i> Hết hàng</span>
+                            }
+                            else if (item.SoLuong <= 5)
+                            {
+                                <span class="text-warning fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i> Sắp hết</span>
+                            }
+                            else
+                            {
+                                <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Sẵn sàng</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-success fw-bold me-1 px-2.5 py-1.5" style="border-radius:6px;"
+                                    data-bs-toggle="modal" data-bs-target="#importModal"
+                                    data-id="@item.MaSanPham" data-name="@item.TenSanPham">
+                                <i class="bi bi-plus-circle me-1"></i> Nhập kho
+                            </button>
+
+                            <button class="btn btn-sm btn-outline-primary fw-bold me-1 px-2.5 py-1.5" style="border-radius:6px;"
+                                    data-bs-toggle="modal" data-bs-target="#editModal"
+                                    data-id="@item.MaSanPham" data-name="@item.TenSanPham" data-qty="@item.SoLuong">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+
+                            <form action="@Url.Action("ClearStock", "Inventory")" method="post" class="d-inline" onsubmit="return confirm('Bạn chắc chắn muốn đưa số lượng kho của sách này về 0?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger px-2.5 py-1.5" style="border-radius:6px;" title="Xóa số lượng tồn">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+            <form action="@Url.Action("ImportStock", "Inventory")" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="maSanPham" id="importId" />
+                <div class="modal-header border-bottom-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-box-seam text-success me-2"></i>Nhập Thêm Hàng Vào Kho</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4">
+                    <p class="text-secondary mb-3">Sách: <strong class="text-dark" id="importBookName"></strong></p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary" style="font-size:13px;">SỐ LƯỢNG SÁCH MỚI NHẬP VỀ</label>
+                        <input type="number" name="soLuongNhap" class="form-control" min="1" value="10" required style="border-radius: 8px;">
+                        <small class="text-muted">Hệ thống sẽ tự động cộng số lượng này vào số lượng hiện tại.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pb-4 px-4">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy</button>
+                    <button type="submit" class="btn btn-success fw-bold px-4" style="border-radius: 8px;">Xác nhận nhập</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+            <form action="@Url.Action("UpdateStock", "Inventory")" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="maSanPham" id="editId" />
+                <div class="modal-header border-bottom-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square text-primary me-2"></i>Điều Chỉnh Số Lượng Kho</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4">
+                    <p class="text-secondary mb-3">Sách: <strong class="text-dark" id="editBookName"></strong></p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary" style="font-size:13px;">SỐ LƯỢNG TỒN KHO THỰC TẾ MỚI</label>
+                        <input type="number" name="soLuongMoi" id="editQty" class="form-control" min="0" required style="border-radius: 8px;">
+                        <small class="text-muted">Số lượng này sẽ ghi đè trực tiếp lên giá trị cũ trong hệ thống.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pb-4 px-4">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-4" style="border-radius: 8px;">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Xử lý nạp dữ liệu cho Modal Nhập Kho
+        $('#importModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var name = button.data('name');
+
+            $('#importId').val(id);
+            $('#importBookName').text(name);
+        });
+
+        // Xử lý nạp dữ liệu cho Modal Chỉnh Sửa Số Lượng
+        $('#editModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var name = button.data('name');
+            var qty = button.data('qty');
+
+            $('#editId').val(id);
+            $('#editBookName').text(name);
+            $('#editQty').val(qty);
+        });
+    });
+</script>

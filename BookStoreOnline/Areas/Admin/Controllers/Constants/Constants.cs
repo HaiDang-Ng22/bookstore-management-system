@@ -36,15 +36,7 @@ namespace BookStoreOnline.Areas.Admin.Constants
             [Description("Đã nhận hàng")]
             Received = 3,
             [Description("Đã hủy")]
-            Canceled = 4,
-            [Description("Giao thất bại")]
-            DeliveryFailed = 5,
-            [Description("Hẹn giao lại")]
-            Rescheduled = 6,
-            [Description("Đang hoàn về kho")]
-            Returning = 7,
-            [Description("Đã hoàn về kho")]
-            Returned = 8
+            Canceled = 4
         }
         public enum StatusPayment
         {

@@ -4,8 +4,6 @@
     ViewBag.Title = "Quản Lý Đơn Hàng";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var price = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
-
-    // Lấy trạng thái bộ lọc hiện tại từ URL query string
     string currentStatus = Request.QueryString["status"] ?? "";
 }
 
@@ -123,7 +121,6 @@
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.6px;
             color: #64748b;
             padding: 12px 16px;
             border-bottom: 1px solid #e2e8f0;
@@ -216,7 +213,6 @@
             text-decoration: none;
         }
 
-    /* CSS Thanh phân trang custom */
     .pagination-container {
         display: flex;
         align-items: center;
@@ -236,184 +232,87 @@
         background: #f1f5f9;
         border-radius: 8px;
         text-decoration: none;
-        transition: all 0.2s;
     }
 
-        .page-link-custom:hover {
-            background: #e2e8f0;
-            color: #0f172a;
-            text-decoration: none;
-        }
-
         .page-link-custom.active {
-            background: linear-gradient(135deg, #e8392a, #ff6b5b);
+            background: #e8392a;
             color: #fff;
-            box-shadow: 0 4px 10px rgba(232,57,42,0.25);
-        }
-
-        .page-link-custom.disabled {
-            opacity: 0.5;
-            pointer-events: none;
         }
 </style>
 
-<div class="form-page-header">
-    <div class="form-page-title">Quản Lý <span>Đơn Hàng Tổng Hợp</span></div>
-</div>
+<div class="form-page-header"><div class="form-page-title">Quản Lý <span>Đơn Hàng</span></div></div>
+
+@if (TempData["Message"] != null)
+{<div class="alert alert-success">@TempData["Message"]</div>}
 
 <div class="section-card">
-    <div class="section-card-header">
-        <span class="section-card-title"><i class="bi bi-funnel-fill me-2" style="color:#e8392a"></i>Bộ Lọc Trạng Thái</span>
-    </div>
-
     <div class="status-filter-container">
-        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "", area = "Admin" })"
-           class="btn-filter @(string.IsNullOrEmpty(currentStatus) ? "active-all" : "")">
-            <i class="bi bi-list-task"></i> Tất Cả Đơn Hàng
-        </a>
-
-        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "NoInform", area = "Admin" })"
-           class="btn-filter @(currentStatus == "NoInform" ? "active-noinform" : "")">
-            <i class="bi bi-clock-history"></i> Chờ Xác Nhận
-        </a>
-
-        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "Informed", area = "Admin" })"
-           class="btn-filter @(currentStatus == "Informed" ? "active-informed" : "")">
-            <i class="bi bi-check2-circle"></i> Đã Xác Nhận
-        </a>
-
-        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "Shipping", area = "Admin" })"
-           class="btn-filter @(currentStatus == "Shipping" ? "active-shipping" : "")">
-            <i class="bi bi-truck"></i> Đang Giao Hàng
-        </a>
-
-        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "Received", area = "Admin" })"
-           class="btn-filter @(currentStatus == "Received" ? "active-received" : "")">
-            <i class="bi bi-box-seam"></i> Đã Nhận Hàng
-        </a>
-
-        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "Canceled", area = "Admin" })"
-           class="btn-filter @(currentStatus == "Canceled" ? "active-canceled" : "")">
-            <i class="bi bi-x-circle"></i> Đơn Hàng Đã Hủy
-        </a>
+        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "", area = "Admin" })" class="btn-filter @(string.IsNullOrEmpty(currentStatus) ? "active-all" : "")">Tất Cả</a>
+        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "NoInform", area = "Admin" })" class="btn-filter @(currentStatus == "NoInform" ? "active-noinform" : "")">Chờ Xác Nhận</a>
+        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "Informed", area = "Admin" })" class="btn-filter @(currentStatus == "Informed" ? "active-informed" : "")">Đã Xác Nhận</a>
+        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "Shipping", area = "Admin" })" class="btn-filter @(currentStatus == "Shipping" ? "active-shipping" : "")">Đang Giao</a>
+        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "Received", area = "Admin" })" class="btn-filter @(currentStatus == "Received" ? "active-received" : "")">Đã Nhận</a>
+        <a href="@Url.Action("Index", "OrdersAdmin", new { status = "Canceled", area = "Admin" })" class="btn-filter @(currentStatus == "Canceled" ? "active-canceled" : "")">Đã Hủy</a>
     </div>
 
-    <div class="table-responsive">
-        <table class="admin-table">
-            <thead>
+    <table class="admin-table">
+        <thead>
+            <tr><th>Mã ĐH</th><th>Khách Hàng</th><th>Địa Chỉ</th><th>Ngày Đặt</th><th>Tổng Tiền</th><th>Trạng Thái</th><th>Hành Động</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
                 <tr>
-                    <th style="width: 90px;">Mã ĐH</th>
-                    <th>Khách Hàng</th>
-                    <th>Địa Chỉ Nhận Hàng</th>
-                    <th style="width: 130px;">Ngày Đặt</th>
-                    <th style="width: 140px; text-align: right;">Tổng Tiền</th>
-                    <th style="width: 150px; text-align: center;">Trạng Thái</th>
-                    <th style="width: 140px; text-align: center;">Hành Động</th>
+                    <td><strong>#@item.MaDonHang</strong></td>
+                    <td>@item.KHACHHANG.Ten</td>
+                    <td>@item.DiaChi</td>
+                    <td>@(item.NgayDat?.ToString("dd/MM/yyyy"))</td>
+                    <td style="color:#e8392a; font-weight:700;">@String.Format(price, "{0:c0}", item.TongTien)</td>
+                    <td>
+                        @if (item.TrangThai == (int)Constants.StatusOrder.NoInform)
+                        {<span class="status-badge badge-noinform">Chờ Xác Nhận</span> }
+                        else if (item.TrangThai == (int)Constants.StatusOrder.Informed)
+                        { <span class="status-badge badge-informed">Đã Xác Nhận</span> }
+                        else if (item.TrangThai == (int)Constants.StatusOrder.Shipping)
+                        { <span class="status-badge badge-shipping">Đang Giao</span> }
+                        else if (item.TrangThai == (int)Constants.StatusOrder.Received)
+                        { <span class="status-badge badge-received">Đã Nhận</span> }
+                        else
+                        { <span class="status-badge badge-canceled">Đã Hủy</span>}
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="@Url.Action("Details", "OrdersAdmin", new { id = item.MaDonHang, area = "Admin" })" class="btn-table-action btn-table-detail">Xem</a>
+                            @if (item.TrangThai != (int)Constants.StatusOrder.Canceled && item.TrangThai != (int)Constants.StatusOrder.Received && item.TrangThai != (int)Constants.StatusOrder.Shipping)
+                            {
+                                <button type="button" class="btn-table-action btn-table-delete" style="background:#fff3cd; color:#d97706;" onclick="HuyDonHangNhanh(@item.MaDonHang)">Hủy</button>
+                            }
+                            <form action="@Url.Action("Delete", "OrdersAdmin", new { id = item.MaDonHang, area = "Admin", status = currentStatus })" method="post" style="display:inline;" onsubmit="return confirm('Xóa đơn hàng?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-table-action btn-table-delete">Xóa</button>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Any())
-                {
-                    <tr>
-                        <td colspan="7" style="text-align: center; color: #94a3b8; padding: 30px;">
-                            <i class="bi bi-inbox fs-4 d-block mb-2"></i> Không có đơn hàng nào thuộc trạng thái này.
-                        </td>
-                    </tr>
-                }
-                else
-                {
-                    foreach (var item in Model)
-                    {
-                        <tr>
-                            <td><strong>#@item.MaDonHang</strong></td>
-                            <td>@item.KHACHHANG.Ten</td>
-                            <td>@item.DiaChi</td>
-                            <td>@(item.NgayDat.HasValue ? item.NgayDat.Value.ToString("dd/MM/yyyy") : "N/A")</td>
-                            <td style="text-align: right; font-weight: 700; color: #e8392a;">
-                                @String.Format(price, "{0:c0}", item.TongTien)
-                            </td>
-                            <td style="text-align: center;">
-                                @if (item.TrangThai == (int)Constants.StatusOrder.NoInform)
-                                {
-                                    <span class="status-badge badge-noinform">Chờ Xác Nhận</span>
-                                }
-                                else if (item.TrangThai == (int)Constants.StatusOrder.Informed)
-                                {
-                                    <span class="status-badge badge-informed">Đã Xác Nhận</span>
-                                }
-                                else if (item.TrangThai == (int)Constants.StatusOrder.Shipping)
-                                {
-                                    <span class="status-badge badge-shipping">Đang Giao</span>
-                                }
-                                else if (item.TrangThai == (int)Constants.StatusOrder.Received)
-                                {
-                                    <span class="status-badge badge-received">Đã Nhận</span>
-                                }
-                                else if (item.TrangThai == (int)Constants.StatusOrder.Canceled)
-                                {
-                                    <span class="status-badge badge-canceled">Đã Hủy</span>
-                                }
-                            </td>
-                            <td style="text-align: center;">
-                                <div class="table-actions justify-content-center">
-                                    <a href="@Url.Action("Details", "OrdersAdmin", new { id = item.MaDonHang, area = "Admin" })" class="btn-table-action btn-table-detail">
-                                        <i class="bi bi-eye-fill"></i> Xem
-                                    </a>
-
-                                    <form action="@Url.Action("Delete", "OrdersAdmin", new { id = item.MaDonHang, area = "Admin", status = currentStatus })" method="post" style="display:inline;" onsubmit="return confirmDelete(event, '#@item.MaDonHang')">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn-table-action btn-table-delete">
-                                            <i class="bi bi-trash-fill"></i> Xóa
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
-    </div>
-
-    @* --- THANH PHÂN TRANG GIAO DIỆN SPACE-BETWEEN --- *@
-    @if (ViewBag.TotalPages > 1)
-    {
-        int curPage = ViewBag.CurrentPage ?? 1;
-        <div class="d-flex justify-content-between align-items-center p-3 border-top" style="background: #f8fafc;">
-            <span style="font-size: 13px; color: #64748b;">
-                Trang <strong>@curPage</strong> / @ViewBag.TotalPages (Tổng số: @ViewBag.TotalCount đơn hàng)
-            </span>
-            <div class="pagination-container d-flex gap-1" style="padding: 0; border: none;">
-
-                <a href="@Url.Action("Index", "OrdersAdmin", new { area = "Admin", status = currentStatus, page = curPage - 1 })"
-                   class="page-link-custom @(curPage == 1 ? "disabled" : "")">
-                    <i class="bi bi-chevron-left"></i> Trước
-                </a>
-
-                @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                {
-                    <a href="@Url.Action("Index", "OrdersAdmin", new { area = "Admin", status = currentStatus, page = i })"
-                       class="page-link-custom @(curPage == i ? "active" : "")">
-                        @i
-                    </a>
-                }
-
-                <a href="@Url.Action("Index", "OrdersAdmin", new { area = "Admin", status = currentStatus, page = curPage + 1 })"
-                   class="page-link-custom @(curPage == ViewBag.TotalPages ? "disabled" : "")">
-                    Sau <i class="bi bi-chevron-right"></i>
-                </a>
-
-            </div>
-        </div>
-    }
+            }
+        </tbody>
+    </table>
 </div>
 
+@using (Html.BeginForm("CancelOrder", "OrdersAdmin", new { area = "Admin" }, FormMethod.Post, new { id = "formHuyDonNhanh" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="idDonHangHuyNhanh" />
+    <input type="hidden" name="lyDoHuy" id="noiDungLyDoNhanh" />
+}
+
 <script>
-    function confirmDelete(event, orderId) {
-        event.preventDefault();
-        var result = confirm("Bạn có chắc chắn muốn xóa đơn hàng " + orderId + " không?\nHành động này sẽ xóa toàn bộ dữ liệu liên quan và không thể hoàn tác!");
-        if (result) {
-            event.target.submit();
+    function HuyDonHangNhanh(id) {
+        var lyDo = prompt("Nhập lý do hủy:");
+        if (lyDo !== null && lyDo.trim() !== "") {
+            document.getElementById("idDonHangHuyNhanh").value = id;
+            document.getElementById("noiDungLyDoNhanh").value = lyDo;
+            document.getElementById("formHuyDonNhanh").submit();
         }
     }
 </script>

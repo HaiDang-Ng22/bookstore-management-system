@@ -35,10 +35,8 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         }
 
         // GET: Admin/Products
-        // GET: Admin/Products
         public ActionResult Index(string searchString, int? page)
         {
-
             IQueryable<SANPHAM> sanPham = db.SANPHAMs.OrderByDescending(p => p.MaSanPham);
 
             if (!String.IsNullOrEmpty(searchString))
@@ -51,16 +49,13 @@ namespace BookStoreOnline.Areas.Admin.Controllers
             int totalItems = sanPham.Count();
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
-
             if (pageNumber < 1) pageNumber = 1;
             if (pageNumber > totalPages && totalPages > 0) pageNumber = totalPages;
-
 
             ViewBag.CurrentPage = pageNumber;
             ViewBag.TotalPages = totalPages;
             ViewBag.CurrentFilter = searchString; // Giữ lại từ khóa tìm kiếm khi chuyển trang
 
- 
             var pagedList = sanPham.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
 
             return View(pagedList);
@@ -80,10 +75,10 @@ namespace BookStoreOnline.Areas.Admin.Controllers
             }
 
             ViewBag.Categories = db.Database.SqlQuery<string>(
-                "SELECT l.TenLoai FROM SANPHAM_LOAI sl JOIN LOAI l ON sl.MaLoai = l.MaLoai WHERE sl.MaSanPham = @p0", 
+                "SELECT l.TenLoai FROM SANPHAM_LOAI sl JOIN LOAI l ON sl.MaLoai = l.MaLoai WHERE sl.MaSanPham = @p0",
                 id.Value).ToList();
             ViewBag.Volumes = db.Database.SqlQuery<VolumeDto>(
-                "SELECT MaTap, TenTap, SoLuong FROM TAP_SANPHAM WHERE MaSanPham = @p0", 
+                "SELECT MaTap, TenTap, SoLuong FROM TAP_SANPHAM WHERE MaSanPham = @p0",
                 id.Value).ToList();
 
             return View(sanPham);
@@ -100,7 +95,7 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         // POST: Admin/Products/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "MaSanPham,TenSanPham,Gia,MoTa,TacGia,Anh,MaLoai,SoLuong")] SANPHAM sanPham, HttpPostedFileBase imageBook, List<int> SelectedCategories, List<string> VolumeNames, List<int> VolumeQuantities)
+        public ActionResult Create([Bind(Include = "MaSanPham,TenSanPham,Gia,MoTa,TacGia,Anh,MaLoai,SoLuong,GiamGia")] SANPHAM sanPham, HttpPostedFileBase imageBook, List<int> SelectedCategories, List<string> VolumeNames, List<int> VolumeQuantities)
         {
             if (ModelState.IsValid)
             {
@@ -124,6 +119,12 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                     sanPham.SoLuong = VolumeQuantities.Sum();
                 }
 
+                // Nếu lúc tạo có nhập giảm giá sẵn, tính luôn giá đã giảm vào cột Gia
+                if (sanPham.GiamGia.HasValue && sanPham.GiamGia.Value > 0 && sanPham.Gia.HasValue)
+                {
+                    sanPham.Gia = sanPham.Gia.Value - (sanPham.Gia.Value * sanPham.GiamGia.Value / 100);
+                }
+
                 db.SANPHAMs.Add(sanPham);
                 db.SaveChanges();
 
@@ -143,7 +144,7 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                     {
                         if (!string.IsNullOrWhiteSpace(VolumeNames[i]))
                         {
-                            db.Database.ExecuteSqlCommand("INSERT INTO TAP_SANPHAM (MaSanPham, TenTap, SoLuong) VALUES (@p0, @p1, @p2)", 
+                            db.Database.ExecuteSqlCommand("INSERT INTO TAP_SANPHAM (MaSanPham, TenTap, SoLuong) VALUES (@p0, @p1, @p2)",
                                 sanPham.MaSanPham, VolumeNames[i], VolumeQuantities[i]);
                         }
                     }
@@ -184,7 +185,7 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         // POST: Admin/Products/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "MaSanPham,TenSanPham,Gia,MoTa,TacGia,Anh,MaLoai,SoLuong")] SANPHAM sanPham, HttpPostedFileBase imageBook, List<int> SelectedCategories, List<string> VolumeNames, List<int> VolumeQuantities, List<int> VolumeIds)
+        public ActionResult Edit([Bind(Include = "MaSanPham,TenSanPham,Gia,MoTa,TacGia,Anh,MaLoai,SoLuong,GiamGia")] SANPHAM sanPham, HttpPostedFileBase imageBook, List<int> SelectedCategories, List<string> VolumeNames, List<int> VolumeQuantities, List<int> VolumeIds)
         {
             if (ModelState.IsValid)
             {
@@ -213,14 +214,10 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                 }
 
                 // Cập nhật tập sách
-                // Lấy danh sách các MaTap hiện tại trong DB của sản phẩm này
                 var currentDbVolumeIds = db.Database.SqlQuery<int>("SELECT MaTap FROM TAP_SANPHAM WHERE MaSanPham = @p0", sanPham.MaSanPham).ToList();
-
-                // Xác định các MaTap cần xoá (có trong DB nhưng không có trong form gửi lên)
                 var submittedVolumeIds = VolumeIds != null ? VolumeIds.Where(id => id > 0).ToList() : new List<int>();
                 var volumeIdsToDelete = currentDbVolumeIds.Except(submittedVolumeIds).ToList();
 
-                // Thực hiện xoá các tập không còn trong form
                 if (volumeIdsToDelete.Any())
                 {
                     foreach (var delId in volumeIdsToDelete)
@@ -237,13 +234,11 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                         {
                             if (VolumeIds != null && i < VolumeIds.Count && VolumeIds[i] > 0)
                             {
-                                // Cập nhật tập hiện có
                                 db.Database.ExecuteSqlCommand("UPDATE TAP_SANPHAM SET TenTap=@p0, SoLuong=@p1 WHERE MaTap=@p2",
                                     VolumeNames[i], VolumeQuantities[i], VolumeIds[i]);
                             }
                             else
                             {
-                                // Thêm tập mới
                                 db.Database.ExecuteSqlCommand("INSERT INTO TAP_SANPHAM (MaSanPham, TenTap, SoLuong) VALUES (@p0, @p1, @p2)",
                                     sanPham.MaSanPham, VolumeNames[i], VolumeQuantities[i]);
                             }
@@ -293,7 +288,6 @@ namespace BookStoreOnline.Areas.Admin.Controllers
 
             if (sanPham != null)
             {
-                // Xóa ảnh trên Cloudinary (nếu có)
                 if (!string.IsNullOrEmpty(sanPham.Anh))
                 {
                     var publicId = Path.GetFileNameWithoutExtension(new Uri(sanPham.Anh).AbsolutePath);
@@ -301,7 +295,6 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                     cloudinary.Destroy(deletionParams);
                 }
 
-                // Xóa các tập và thể loại liên quan trước khi xóa sản phẩm
                 db.Database.ExecuteSqlCommand("DELETE FROM TAP_SANPHAM WHERE MaSanPham = @p0", sanPham.MaSanPham);
                 db.Database.ExecuteSqlCommand("DELETE FROM SANPHAM_LOAI WHERE MaSanPham = @p0", sanPham.MaSanPham);
 
@@ -311,8 +304,7 @@ namespace BookStoreOnline.Areas.Admin.Controllers
 
             return RedirectToAction("Index");
         }
-        // GET: Admin/Products/Clone/5
-        // GET: Admin/Products/Clone/5
+
         // GET: Admin/Products/Clone/5
         public ActionResult Clone(int? id)
         {
@@ -327,18 +319,18 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                 return HttpNotFound();
             }
 
-            // Tạo bản sao với đầy đủ thông tin
             SANPHAM clonedBook = new SANPHAM
             {
                 TenSanPham = "Bản sao của " + originalBook.TenSanPham,
-                TacGia = originalBook.TacGia, // Giữ nguyên tác giả
-                Gia = originalBook.Gia,       // Giữ nguyên giá
-                MoTa = originalBook.MoTa,     // Giữ nguyên mô tả
-                Anh = originalBook.Anh,       // Giữ nguyên ảnh
-                MaLoai = originalBook.MaLoai, // Giữ nguyên thể loại
-                SoLuong = originalBook.SoLuong, // Giữ nguyên số lượng
-                SoLuongBan = 0,               // Reset số lượng bán
-                MaSanPham = 0                 // ID mới sẽ tự sinh
+                TacGia = originalBook.TacGia,
+                Gia = originalBook.Gia,
+                MoTa = originalBook.MoTa,
+                Anh = originalBook.Anh,
+                MaLoai = originalBook.MaLoai,
+                SoLuong = originalBook.SoLuong,
+                GiamGia = originalBook.GiamGia, // Giữ nguyên tỉ lệ giảm giá khi sao chép
+                SoLuongBan = 0,
+                MaSanPham = 0
             };
 
             ViewBag.OriginalName = originalBook.TenSanPham;
@@ -351,7 +343,6 @@ namespace BookStoreOnline.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Xử lý upload ảnh mới nếu có
                 if (imageBook != null && imageBook.ContentLength > 0)
                 {
                     var uploadParams = new ImageUploadParams()
@@ -363,7 +354,6 @@ namespace BookStoreOnline.Areas.Admin.Controllers
                     var uploadResult = cloudinary.Upload(uploadParams);
                     model.Anh = uploadResult.SecureUrl.ToString();
                 }
-                // Nếu không có ảnh mới, giữ nguyên ảnh cũ (đã được bind từ form)
 
                 db.SANPHAMs.Add(model);
                 db.SaveChanges();
@@ -372,6 +362,60 @@ namespace BookStoreOnline.Areas.Admin.Controllers
 
             return View(model);
         }
+
+        // POST: Admin/Products/UpdateDiscount
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdateDiscount(int maSanPham, int phanTramGiam)
+        {
+            if (phanTramGiam < 0 || phanTramGiam > 100)
+            {
+                TempData["Error"] = "Phần trăm giảm giá phải nằm trong khoảng từ 0 đến 100%!";
+                return RedirectToAction("Index");
+            }
+
+            var sanPham = db.SANPHAMs.Find(maSanPham);
+            if (sanPham != null)
+            {
+                // 1. Phục hồi về Giá Gốc trước khi tính toán mức giảm mới
+                int phanTramCu = sanPham.GiamGia ?? 0;
+                decimal giaHienTai = sanPham.Gia ?? 0;
+                decimal giaGocBanDau = giaHienTai;
+
+                // Nếu sản phẩm đã từng giảm giá trước đó, tính ngược lại để tìm Giá Gốc
+                if (phanTramCu > 0 && phanTramCu < 100)
+                {
+                    giaGocBanDau = giaHienTai / (1 - ((decimal)phanTramCu / 100));
+                }
+
+                // 2. Trừ thẳng tiền vào trường Gia theo phần trăm mới
+                if (phanTramGiam > 0)
+                {
+                    sanPham.Gia = giaGocBanDau - (giaGocBanDau * phanTramGiam / 100);
+                    sanPham.GiamGia = phanTramGiam;
+
+                    TempData["Success"] = $"Đã giảm {phanTramGiam}%. Giá mới: {string.Format("{0:N0}", sanPham.Gia)} đ (Gốc: {string.Format("{0:N0}", giaGocBanDau)} đ)";
+                }
+                else
+                {
+                    // Nếu phanTramGiam == 0, hoàn tác về Giá Gốc ban đầu
+                    sanPham.Gia = giaGocBanDau;
+                    sanPham.GiamGia = 0;
+
+                    TempData["Success"] = $"Đã huỷ giảm giá. Giá khôi phục: {string.Format("{0:N0}", sanPham.Gia)} đ";
+                }
+
+                db.Entry(sanPham).State = EntityState.Modified;
+                db.SaveChanges();
+            }
+            else
+            {
+                TempData["Error"] = "Không tìm thấy sản phẩm.";
+            }
+
+            return RedirectToAction("Index");
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

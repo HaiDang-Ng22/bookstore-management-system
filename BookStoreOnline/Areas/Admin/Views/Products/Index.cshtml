@@ -232,6 +232,29 @@
             text-decoration: none;
         }
 
+    .btn-discount {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #ffedd5;
+        color: #c2410c;
+        border: none;
+        border-radius: 7px;
+        padding: 5px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+        .btn-discount:hover {
+            background: #fed7aa;
+            color: #9a3412;
+            text-decoration: none;
+        }
+
     .btn-del {
         display: inline-flex;
         align-items: center;
@@ -290,7 +313,6 @@
             display: block;
         }
 
-    /* Hệ thống CSS Phân trang chuẩn */
     .page-link-custom {
         display: inline-flex;
         align-items: center;
@@ -325,10 +347,26 @@
         }
 </style>
 
+@* Khối hiển thị thông báo trạng thái cập nhật *@
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm my-2 text-success fw-bold" role="alert" style="border-radius: 8px; background-color: #f0fdf4; padding: 12px 20px;">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm my-2 text-danger fw-bold" role="alert" style="border-radius: 8px; background-color: #fef2f2; padding: 12px 20px;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="page-header">
     <div class="page-title">Quản Lý <span>Sách</span></div>
     <div class="toolbar">
-        @using (Html.BeginForm("Index", "Products", FormMethod.Get))
+        @using (Html.BeginForm("Index", "Products", new { area = "Admin" }, FormMethod.Get))
         {
             <div class="search-wrap">
                 <i class="bi bi-search"></i>
@@ -336,7 +374,7 @@
             </div>
             <button type="submit" class="btn-search"><i class="bi bi-search"></i> Tìm</button>
         }
-        <a class="btn-add-new" href="@Url.Action("Create", "Products")">
+        <a class="btn-add-new" href="@Url.Action("Create", "Products", new { area = "Admin" })">
             <i class="bi bi-plus-lg"></i> Thêm Sách Mới
         </a>
     </div>
@@ -351,7 +389,7 @@
                     <th>Tên Sách</th>
                     <th>Giá</th>
                     <th style="width:80px">Số Lượng</th>
-                    <th style="width:200px; text-align:center;">Thao Tác</th>
+                    <th style="width:280px; text-align:center;">Thao Tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -375,17 +413,31 @@
                             <td>
                                 <div class="product-name">@Html.DisplayFor(modelItem => item.TenSanPham)</div>
                             </td>
-                            <td><span class="price-badge">@String.Format("{0:N0}đ", item.Gia)</span></td>
-                            <td><span class="qty-badge">@Html.DisplayFor(modelItem => item.SoLuong)</span></td>
+                            <td>
+                                <span class="price-badge">@String.Format("{0:N0}đ", item.Gia)</span>
+                                @if (item.GiamGia > 0)
+                                {
+                                    <span class="badge bg-danger ms-1" style="font-size: 10px;">-@item.GiamGia%</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="qty-badge">@Html.DisplayFor(modelItem => item.SoLuong)</span>
+                            </td>
                             <td>
                                 <div class="action-group" style="justify-content:center;">
-                                    <a href="@Url.Action("Edit", new { id = item.MaSanPham })" class="btn-edit">
+                                    <button type="button" class="btn-discount"
+                                            data-bs-toggle="modal" data-bs-target="#discountModal"
+                                            data-id="@item.MaSanPham" data-name="@item.TenSanPham" data-discount="@item.GiamGia">
+                                        <i class="bi bi-ticket-perforated-fill"></i> Khuyến Mãi
+                                    </button>
+
+                                    <a href="@Url.Action("Edit", "Products", new { area = "Admin", id = item.MaSanPham })" class="btn-edit">
                                         <i class="bi bi-pencil-fill"></i> Sửa
                                     </a>
-                                    <a href="@Url.Action("Details", new { id = item.MaSanPham })" class="btn-details">
+                                    <a href="@Url.Action("Details", "Products", new { area = "Admin", id = item.MaSanPham })" class="btn-details">
                                         <i class="bi bi-info-circle"></i> Chi Tiết
                                     </a>
-                                    <a href="@Url.Action("Delete", new { id = item.MaSanPham })" class="btn-del">
+                                    <a href="@Url.Action("Delete", "Products", new { area = "Admin", id = item.MaSanPham })" class="btn-del">
                                         <i class="bi bi-trash-fill"></i> Xóa
                                     </a>
                                 </div>
@@ -408,7 +460,6 @@
         </table>
     </div>
 
-    @* Khối Phân Trang Chuẩn Đồng Bộ 100% *@
     @if (ViewBag.TotalPages > 1)
     {
         string currentFilter = ViewBag.CurrentFilter ?? "";
@@ -439,3 +490,56 @@
         </div>
     }
 </div>
+
+<div class="modal fade" id="discountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+            @using (Html.BeginForm("UpdateDiscount", "Products", new { area = "Admin" }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="maSanPham" id="discountBookId" />
+
+                <div class="modal-header border-bottom-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold text-dark">
+                        <i class="bi bi-ticket-perforated text-warning me-2"></i>Cấu Hình Khuyến Mãi Sách
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body px-4">
+                    <p class="text-secondary mb-3">Sách áp dụng: <strong class="text-dark" id="discountBookName"></strong></p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary" style="font-size:13px;">PHẦN TRĂM GIẢM GIÁ (%)</label>
+                        <div class="input-group">
+                            <input type="number" name="phanTramGiam" id="discountValue" class="form-control" min="0" max="100" required style="border-radius: 8px 0 0 8px; padding: 10px 14px;">
+                            <span class="input-group-text bg-light text-secondary fw-bold" style="border-radius: 0 8px 8px 0;">%</span>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Nhập số nguyên từ 0 đến 100. Đặt về <strong class="text-danger">0</strong> để hủy áp dụng giảm giá.</small>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top-0 pb-4 px-4">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal" style="border-radius: 8px; padding: 8px 16px;">Hủy</button>
+                    <button type="submit" class="btn btn-warning text-white fw-bold px-4" style="border-radius: 8px; padding: 8px 24px;">Áp dụng</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#discountModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var name = button.data('name');
+            var discount = button.data('discount');
+
+            $('#discountBookId').val(id);
+            $('#discountBookName').text(name);
+            $('#discountValue').val(discount ? discount : 0);
+        });
+    });
+</script>

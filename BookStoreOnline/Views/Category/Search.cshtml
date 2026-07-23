@@ -348,8 +348,43 @@
                                 </div>
 
                                 <div class="price-row">
-                                    <span class="product-price">@String.Format(price, "{0:c0}", item.Gia)</span>
-                                    <span class="discount-badge">-@(new Random(item.MaSanPham).Next(10, 25))%</span>
+                                    @{
+                                        int discount = item.GiamGia ?? 0;
+                                        decimal currentPrice = item.Gia ?? 0m;
+                                        decimal originalPrice = currentPrice;
+
+                                        if (discount > 0 && discount < 100)
+                                        {
+                                            originalPrice = Math.Round(currentPrice * 100m / (100m - discount), 0);
+                                        }
+                                    }
+
+                                    <p class="product-price" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+
+                                        <span style="color:#e8392a;font-size:17px;font-weight:700;">
+                                            @String.Format(price, "{0:c0}", currentPrice)
+                                        </span>
+
+                                        @if (discount > 0)
+                                        {
+                                            <span style="color:#9ca3af;
+                     font-size:13px;
+                     text-decoration:line-through;">
+                                                @String.Format(price, "{0:c0}", originalPrice)
+                                            </span>
+
+                                            <span style="background:#ffeae9;
+                     color:#e8392a;
+                     font-size:11px;
+                     font-weight:700;
+                     padding:2px 6px;
+                     border-radius:4px;
+                     border:1px solid rgba(232,57,42,.2);">
+                                                -@discount%
+                                            </span>
+                                        }
+
+                                    </p>
                                 </div>
 
                                 <div class="stars-row">

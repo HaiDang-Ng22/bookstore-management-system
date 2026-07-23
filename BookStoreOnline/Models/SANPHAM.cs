@@ -30,6 +30,7 @@ namespace BookStoreOnline.Models
         public Nullable<int> MaLoai { get; set; }
         public int SoLuongBan { get; set; }
         public int SoLuong { get; set; }
+        public int? GiamGia { get; set; }
         public Nullable<int> MaNVTao { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

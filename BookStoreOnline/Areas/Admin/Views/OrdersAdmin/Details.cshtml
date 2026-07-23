@@ -7,73 +7,225 @@
 }
 
 <style>
-    .form-page-header { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
-    .form-page-header .back-btn {
-        width:36px; height:36px; border-radius:10px; background:#f1f5f9;
-        display:flex; align-items:center; justify-content:center;
-        text-decoration:none; color:#475569; transition:all 0.2s; font-size:16px;
+    .form-page-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
     }
-    .form-page-header .back-btn:hover { background:#e2e8f0; color:#0f172a; }
-    .form-page-title { font-size:20px; font-weight:800; color:#0f172a; }
-    .form-page-title span { color:#e8392a; }
-    .detail-grid { display:grid; grid-template-columns:1fr 380px; gap:24px; align-items:start; }
+
+        .form-page-header .back-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #475569;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+            .form-page-header .back-btn:hover {
+                background: #e2e8f0;
+                color: #0f172a;
+            }
+
+    .form-page-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+        .form-page-title span {
+            color: #e8392a;
+        }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 24px;
+        align-items: start;
+    }
+
     .section-card {
-        background:#fff; border-radius:16px;
-        border:1px solid #f1f5f9;
-        box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden;
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        overflow: hidden;
     }
-    .section-card-header { padding:18px 24px; border-bottom:1px solid #f1f5f9; }
-    .section-card-title { font-size:15px; font-weight:700; color:#0f172a; }
-    .admin-table { width:100%; border-collapse:collapse; }
-    .admin-table thead th {
-        background:#f8fafc; font-size:11px; font-weight:700;
-        text-transform:uppercase; letter-spacing:0.6px;
-        color:#64748b; padding:12px 16px;
-        border-bottom:1px solid #e2e8f0; text-align:left;
+
+    .section-card-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid #f1f5f9;
     }
-    .admin-table tbody tr { border-bottom:1px solid #f1f5f9; }
-    .admin-table tbody tr:hover { background:#f8fafc; }
-    .admin-table tbody tr:last-child { border-bottom:none; }
-    .admin-table tbody td { padding:14px 16px; font-size:13px; color:#334155; vertical-align:middle; }
-    .product-thumb { width:52px; height:68px; object-fit:cover; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+
+    .section-card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .admin-table thead th {
+            background: #f8fafc;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #64748b;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .admin-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+            .admin-table tbody tr:hover {
+                background: #f8fafc;
+            }
+
+        .admin-table tbody td {
+            padding: 14px 16px;
+            font-size: 13px;
+            color: #334155;
+            vertical-align: middle;
+        }
+
+    .product-thumb {
+        width: 52px;
+        height: 68px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
     .product-thumb-placeholder {
-        width:52px; height:68px; background:#f1f5f9; border-radius:8px;
-        display:flex; align-items:center; justify-content:center; color:#94a3b8;
+        width: 52px;
+        height: 68px;
+        background: #f1f5f9;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
     }
-    .info-panel { padding:24px; }
-    .info-row { display:flex; align-items:flex-start; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9; }
-    .info-row:last-child { border-bottom:none; }
-    .info-label { font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.4px; }
-    .info-value { font-size:14px; font-weight:600; color:#0f172a; text-align:right; max-width:55%; }
+
+    .info-panel {
+        padding: 24px;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .info-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .info-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0f172a;
+        text-align: right;
+        max-width: 55%;
+    }
+
     .total-box {
-        background:linear-gradient(135deg,#fef2f2,#fff1f0);
-        border:1px solid #fecaca; border-radius:12px; padding:16px 20px;
-        margin-bottom:20px; text-align:center;
+        background: linear-gradient(135deg,#fef2f2,#fff1f0);
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        text-align: center;
     }
-    .total-box .label { font-size:12px; font-weight:700; text-transform:uppercase; color:#991b1b; letter-spacing:0.5px; margin-bottom:4px; }
-    .total-box .amount { font-size:26px; font-weight:800; color:#e8392a; }
-    .action-buttons { display:flex; flex-direction:column; gap:10px; }
+
+        .total-box .amount {
+            font-size: 26px;
+            font-weight: 800;
+            color: #e8392a;
+        }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
     .btn-action {
-        display:flex; align-items:center; justify-content:center; gap:8px;
-        padding:11px; border:none; border-radius:10px; font-size:14px; font-weight:700;
-        cursor:pointer; text-decoration:none; transition:all 0.2s; width:100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+        text-decoration: none;
     }
-    .btn-confirm { background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff; box-shadow:0 4px 12px rgba(34,197,94,0.3); }
-    .btn-confirm:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(34,197,94,0.4); color:#fff; text-decoration:none; }
-    .btn-ship { background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; box-shadow:0 4px 12px rgba(59,130,246,0.3); }
-    .btn-ship:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(59,130,246,0.4); color:#fff; text-decoration:none; }
-    .btn-success-ship { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; box-shadow:0 4px 12px rgba(139,92,246,0.3); }
-    .btn-success-ship:hover { transform:translateY(-1px); color:#fff; text-decoration:none; }
-    .btn-cancel { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; box-shadow:0 4px 12px rgba(239,68,68,0.3); }
-    .btn-cancel:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(239,68,68,0.4); color:#fff; text-decoration:none; }
+
+    .btn-confirm {
+        background: linear-gradient(135deg,#22c55e,#16a34a);
+        color: #fff;
+    }
+
+    .btn-ship {
+        background: linear-gradient(135deg,#3b82f6,#2563eb);
+        color: #fff;
+    }
+
+    .btn-success-ship {
+        background: linear-gradient(135deg,#8b5cf6,#7c3aed);
+        color: #fff;
+    }
+
+    .btn-cancel {
+        background: linear-gradient(135deg,#ef4444,#dc2626);
+        color: #fff;
+    }
+
     .btn-back {
-        display:inline-flex; align-items:center; gap:6px;
-        background:#f1f5f9; color:#475569; border:none; border-radius:10px;
-        padding:10px 20px; font-size:13px; font-weight:600;
-        text-decoration:none; transition:all 0.2s; margin-top:12px; width:100%; justify-content:center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        background: #f1f5f9;
+        color: #475569;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-top: 12px;
+        width: 100%;
     }
-    .btn-back:hover { background:#e2e8f0; color:#0f172a; text-decoration:none; }
-    @@media (max-width:1024px) { .detail-grid { grid-template-columns:1fr; } }
+
+    @@media (max-width:1024px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
 <div class="form-page-header">
@@ -83,128 +235,79 @@
 
 <div class="detail-grid">
     <div class="section-card">
-        <div class="section-card-header">
-            <span class="section-card-title"><i class="bi bi-bag-fill me-2" style="color:#e8392a"></i>Sản Phẩm Trong Đơn Hàng</span>
-        </div>
-        <div class="table-responsive">
-            <table class="admin-table">
-                <thead>
+        <div class="section-card-header"><span class="section-card-title"><i class="bi bi-bag-fill me-2" style="color:#e8392a"></i>Sản Phẩm</span></div>
+        <table class="admin-table">
+            <thead><tr><th>Ảnh</th><th>Tên Sản Phẩm</th><th style="text-align:center;">SL</th><th style="text-align:right;">Đơn Giá</th></tr></thead>
+            <tbody>
+                @foreach (var item in ViewBag.Detail)
+                {
                     <tr>
-                        <th style="width:70px">Ảnh</th>
-                        <th>Tên Sản Phẩm</th>
-                        <th style="width:100px; text-align:center;">Số Lượng</th>
-                        <th style="width:140px; text-align:right;">Đơn Giá</th>
+                        <td>
+                            @{ string anh = item.SANPHAM.Anh ?? ""; string imgSrc = anh.StartsWith("http") || anh.StartsWith("/") ? anh : "/Images/" + anh; }
+                            @if (!string.IsNullOrEmpty(item.SANPHAM.Anh))
+                            {<img src="@imgSrc" class="product-thumb" /> }
+                            else
+                            { <div class="product-thumb-placeholder"><i class="bi bi-image"></i></div>}
+                        </td>
+                        <td><strong>@item.SANPHAM.TenSanPham</strong></td>
+                        <td style="text-align:center;">@item.SoLuong</td>
+                        <td style="text-align:right; color:#e8392a; font-weight:700;">@String.Format(price, "{0:c0}", item.SANPHAM.Gia)</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in ViewBag.Detail)
-                    {
-                        <tr>
-                            <td>
-                                @{
-                                    string anh = item.SANPHAM.Anh ?? "";
-                                    string imgSrc = anh.StartsWith("http") || anh.StartsWith("/") ? anh : "/Images/" + anh;
-                                }
-                                @if (!string.IsNullOrEmpty(item.SANPHAM.Anh))
-                                {
-                                    <img src="@imgSrc" alt="@item.SANPHAM.TenSanPham" class="product-thumb" onerror="this.style.display='none'" />
-                                }
-                                else
-                                {
-                                    <div class="product-thumb-placeholder"><i class="bi bi-image"></i></div>
-                                }
-                            </td>
-                            <td><strong>@item.SANPHAM.TenSanPham</strong></td>
-                            <td style="text-align:center;">
-                                <span style="background:#f1f5f9; border-radius:6px; padding:3px 12px; font-weight:700;">@item.SoLuong</span>
-                            </td>
-                            <td style="text-align:right; font-weight:700; color:#e8392a;">
-                                @String.Format(price, "{0:c0}", item.SANPHAM.Gia)
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                }
+            </tbody>
+        </table>
     </div>
 
     <div>
         <div class="section-card" style="margin-bottom:20px;">
-            <div class="section-card-header">
-                <span class="section-card-title"><i class="bi bi-info-circle-fill me-2" style="color:#e8392a"></i>Thông Tin Đơn Hàng</span>
-            </div>
+            <div class="section-card-header"><span class="section-card-title">Thông Tin</span></div>
             <div class="info-panel">
-                <div class="total-box">
-                    <div class="label">Tổng Tiền Đơn Hàng</div>
-                    <div class="amount">@String.Format(price, "{0:c0}", ViewBag.Total)</div>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Khách hàng</span>
-                    <span class="info-value">@Model.KHACHHANG.Ten</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Địa chỉ</span>
-                    <span class="info-value">@Model.DiaChi</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Ngày đặt</span>
-                    <span class="info-value">@(Model.NgayDat.HasValue ? Model.NgayDat.Value.ToString("dd/MM/yyyy") : "N/A")</span>
-                </div>
+                <div class="total-box"><div class="amount">@String.Format(price, "{0:c0}", ViewBag.Total)</div></div>
+                <div class="info-row"><span class="info-label">Khách hàng</span><span class="info-value">@Model.KHACHHANG.Ten</span></div>
+                <div class="info-row"><span class="info-label">Địa chỉ</span><span class="info-value">@Model.DiaChi</span></div>
             </div>
         </div>
 
         <div class="section-card">
-            <div class="section-card-header">
-                <span class="section-card-title"><i class="bi bi-gear-fill me-2" style="color:#e8392a"></i>Hành Động</span>
-            </div>
+            <div class="section-card-header"><span class="section-card-title">Hành Động</span></div>
             <div class="info-panel">
                 <div class="action-buttons">
                     @if (Model.TrangThai == (int)Constants.StatusOrder.NoInform)
-                    {
-                        <a href="@Url.Action("ConfirmOrder", "OrdersAdmin", new { id = Model.MaDonHang, area = "Admin" })" class="btn-action btn-confirm">
-                            <i class="bi bi-check-circle-fill"></i> Xác Nhận Đơn Hàng
-                        </a>
-                    }
+                    {<a href="@Url.Action("ConfirmOrder", "OrdersAdmin", new { id = Model.MaDonHang, area = "Admin" })" class="btn-action btn-confirm">Xác Nhận</a>}
+
                     @if (Model.TrangThai == (int)Constants.StatusOrder.Informed)
                     {
                         using (Html.BeginForm("Shipping", "OrdersAdmin", new { area = "Admin", id = Model.MaDonHang }, FormMethod.Get))
                         {
-                            <div style="margin-bottom:10px;">
-                                <label class="info-label d-block mb-2">Chọn Shipper giao hàng</label>
-                                @Html.DropDownList("shipperId", ViewBag.Shippers as SelectList, "-- Chọn shipper --", new { @class = "form-select", required = "required" })
-                            </div>
-                            <button type="submit" class="btn-action btn-ship">
-                                <i class="bi bi-truck"></i> Chuyển Cho Shipper
-                            </button>
+                            @Html.DropDownList("shipperId", ViewBag.Shippers as SelectList, "-- Chọn shipper --", new { @class = "form-select", required = "required" })
+                            <button type="submit" class="btn-action btn-ship mt-2">Giao hàng</button>
                         }
                     }
-                    @if (Model.MaNVXuLy.HasValue && Model.NHANVIEN != null)
-                    {
-                        <div class="info-row" style="padding:0 0 12px 0; border:none;">
-                            <span class="info-label">Shipper phụ trách</span>
-                            <span class="info-value">@Model.NHANVIEN.Ten</span>
-                        </div>
-                    }
-                    @if (Model.TrangThai == (int)Constants.StatusOrder.Shipping)
-                    {
-                        <a href="@Url.Action("ShippingSuccess", "OrdersAdmin", new { id = Model.MaDonHang, area = "Admin" })" class="btn-action btn-success-ship">
-                            <i class="bi bi-bag-check-fill"></i> Xác Nhận Giao Thành Công
-                        </a>
-                    }
-                    @if (Model.TrangThai != (int)Constants.StatusOrder.Canceled
-                            && Model.TrangThai != (int)Constants.StatusOrder.Received
-                            && Model.TrangThai != (int)Constants.StatusOrder.Shipping)
-                    {
-                        <a href="@Url.Action("CancelOrder", "OrdersAdmin", new { id = Model.MaDonHang, area = "Admin" })" class="btn-action btn-cancel">
-                            <i class="bi bi-x-circle-fill"></i> Hủy Đơn Hàng
-                        </a>
-                    }
 
-                    <a href="@Url.Action("Index", "OrdersAdmin", new { area = "Admin" })" class="btn-back">
-                        ← Quay Lại Danh Sách
-                    </a>
+                    @if (Model.TrangThai != (int)Constants.StatusOrder.Canceled && Model.TrangThai != (int)Constants.StatusOrder.Received && Model.TrangThai != (int)Constants.StatusOrder.Shipping)
+                    {
+                        <button type="button" class="btn-action btn-cancel" onclick="HuyDonHangDetail(@Model.MaDonHang)">Hủy Đơn Hàng</button>
+                        using (Html.BeginForm("CancelOrder", "OrdersAdmin", new { area = "Admin" }, FormMethod.Post, new { id = "formHuyDonDetail" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.MaDonHang" />
+                            <input type="hidden" name="lyDoHuy" id="inputLyDoHuyDetail" />
+                        }
+                    }
+                    <a href="@Url.Action("Index", "OrdersAdmin", new { area = "Admin" })" class="btn-back">Quay Lại</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function HuyDonHangDetail(id) {
+        var lyDo = prompt("Vui lòng nhập lý do hủy đơn hàng này:");
+        if (lyDo !== null) {
+            if (lyDo.trim() === "") { alert("Vui lòng nhập lý do!"); return; }
+            document.getElementById("inputLyDoHuyDetail").value = lyDo;
+            document.getElementById("formHuyDonDetail").submit();
+        }
+    }
+</script>

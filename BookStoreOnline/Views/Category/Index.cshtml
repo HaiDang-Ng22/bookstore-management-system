@@ -177,7 +177,7 @@
                                 <h5 class="product-title">
                                     <a href="@Url.Action("Index", "ProductDetail", new { id = item.MaSanPham })">Sách - @item.TenSanPham</a>
                                 </h5>
-                                
+
                                 <div class="stars-row">
                                     <i class="fas fa-star star-icon on"></i>
                                     <i class="fas fa-star star-icon on"></i>
@@ -187,11 +187,42 @@
                                     <span class="rating-count">(@item.DANHGIAs.Count.ToString())</span>
                                 </div>
 
-                                <p class="product-price">
-                                    @String.Format(price, "{0:c0}", item.Gia)
-                                    <span style="background-color: #ffeae9; color: #e8392a; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(232, 57, 42, 0.2); margin-left: 6px; display: inline-block; vertical-align: middle;">
-                                        -@(new Random(item.MaSanPham).Next(10, 35))%
+                                @{
+                                    int discount = item.GiamGia ?? 0;
+                                    decimal currentPrice = item.Gia ?? 0m;
+                                    decimal originalPrice = currentPrice;
+
+                                    if (discount > 0 && discount < 100)
+                                    {
+                                        originalPrice = Math.Round(currentPrice * 100m / (100m - discount), 0);
+                                    }
+                                }
+
+                                <p class="product-price" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+
+                                    <span style="color:#e8392a;font-size:17px;font-weight:700;">
+                                        @String.Format(price, "{0:c0}", currentPrice)
                                     </span>
+
+                                    @if (discount > 0)
+                                    {
+                                        <span style="color:#9ca3af;
+                     font-size:13px;
+                     text-decoration:line-through;">
+                                            @String.Format(price, "{0:c0}", originalPrice)
+                                        </span>
+
+                                        <span style="background:#ffeae9;
+                     color:#e8392a;
+                     font-size:11px;
+                     font-weight:700;
+                     padding:2px 6px;
+                     border-radius:4px;
+                     border:1px solid rgba(232,57,42,.2);">
+                                            -@discount%
+                                        </span>
+                                    }
+
                                 </p>
 
                                 <div class="sold-bar-wrap">

@@ -133,6 +133,13 @@
             border-left: 4px solid transparent;
             border-radius: 0 8px 8px 0;
             margin-right: 10px;
+            cursor: pointer;
+            background: none;
+            border-top: none;
+            border-right: none;
+            border-bottom: none;
+            width: 100%;
+            text-align: left;
         }
 
             /* Sửa lỗi hiển thị màu Icon (Không bị biến thành màu trắng) */
@@ -213,6 +220,13 @@
         .container-fluid {
             padding: 30px;
         }
+
+        .logout-btn-dropdown {
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
     </style>
 </head>
 <body id="page-top">
@@ -253,6 +267,12 @@
                         <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Products" ? "active" : "")" href="/Admin/Products">
                             <i class="bi bi-book mr-2"></i>
                             <span>Danh Sách Sách</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "Inventory" ? "active" : "")" href="/Admin/Inventory">
+                            <i class="bi bi-boxes mr-2"></i>
+                            <span>Quản Lý Kho</span>
                         </a>
                     </li>
 
@@ -307,20 +327,17 @@
                             <span>Quản Lý Đánh Giá</span>
                         </a>
                     </li>
-                    <li>
-                        <a class="app-menu__item @(Request.RequestContext.RouteData.Values["controller"].ToString() == "AdminChat" ? "active" : "")" href="/Admin/AdminChat">
-                            <i class="bi bi-chat-dots-fill mr-2"></i>
-                            <span>Chat Với Khách Hàng</span>
-                        </a>
-                    </li>
 
                     <div class="sidebar-divider"></div>
 
                     <li>
-                        <a class="app-menu__item text-danger" href="/User/LogOut">
-                            <i class="bi bi-box-arrow-right mr-2"></i>
-                            <span>Đăng Xuất</span>
-                        </a>
+                        <form action="/User/LogOut" method="post" id="logoutFormSidebar" class="m-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="app-menu__item text-danger">
+                                <i class="bi bi-box-arrow-right mr-2"></i>
+                                <span>Đăng Xuất</span>
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </div>
@@ -343,10 +360,13 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="dropdownMenuButton1" style="border-radius:10px; margin-top:10px;">
                                     <li>
-                                        <a class="dropdown-item text-danger font-weight-bold" href="/User/LogOut">
-                                            <i class="bi bi-box-arrow-right mr-2"></i>
-                                            Đăng xuất
-                                        </a>
+                                        <form action="/User/LogOut" method="post" id="logoutFormTopbar" class="m-0">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item text-danger font-weight-bold logout-btn-dropdown">
+                                                <i class="bi bi-box-arrow-right mr-2"></i>
+                                                Đăng xuất
+                                            </button>
+                                        </form>
                                     </li>
                                 </ul>
                             </div>
@@ -364,7 +384,5 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.6.0/umd/popper.min.js" integrity="sha512-BmM0/BQlqh02wuK5Gz9yrbe7VyIVwOzD1o40yi1IsTjriX/NGF37NyXHfmFzIlMmoSIBXgqDiG1VNU6kB5dBbA==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
-
-    @RenderSection("scripts", required: false)
 </body>
 </html>
